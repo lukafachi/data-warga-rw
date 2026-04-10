@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1a5f3f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Data Warga RW">
+<meta name="description" content="Aplikasi Input Data Warga RW - Format LaCl 2026">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Data Warga RW</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overflow: hidden; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #1a1a1a; }
+
+  #app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; max-width: 520px; margin: 0 auto; background: #fff; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+
+  /* HEADER */
+  .header { background: #1a5f3f; color: #fff; padding: 14px 16px 12px; flex-shrink: 0; padding-top: max(14px, env(safe-area-inset-top)); }
+  .header h1 { font-size: 16px; font-weight: 600; }
+  .header p { font-size: 12px; opacity: 0.8; margin-top: 2px; }
+
+  /* TAB BAR */
+  .tab-bar { display: flex; background: #fff; border-bottom: 1px solid #e5e5e5; flex-shrink: 0; overflow-x: auto; scrollbar-width: none; }
+  .tab-bar::-webkit-scrollbar { display: none; }
+  .tab { padding: 11px 16px; font-size: 13px; white-space: nowrap; cursor: pointer; color: #666; border-bottom: 2px solid transparent; flex-shrink: 0; font-weight: 500; }
+  .tab.active { color: #1a5f3f; border-bottom-color: #1a5f3f; }
+
+  /* SCROLLABLE CONTENT */
+  .page-content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* FORM SECTIONS */
+  .section { padding: 14px 16px; border-bottom: 6px solid #f5f5f5; }
+  .section-title { font-size: 11px; font-weight: 700; color: #1a5f3f; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px; }
+  .field { margin-bottom: 11px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label { display: block; font-size: 13px; color: #555; margin-bottom: 5px; font-weight: 500; }
+  .field input, .field select, .field textarea {
+    width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px;
+    font-size: 14px; background: #fff; color: #1a1a1a; outline: none;
+    -webkit-appearance: none; appearance: none;
+  }
+  .field input:focus, .field select:focus { border-color: #1a5f3f; box-shadow: 0 0 0 3px rgba(26,95,63,0.1); }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+
+  /* RADIO & CHECKBOX */
+  .radio-group, .checkbox-group { display: flex; flex-wrap: wrap; gap: 8px; }
+  .rb-item, .cb-item {
+    display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer;
+    background: #f8f8f8; padding: 7px 12px; border-radius: 20px; border: 1px solid #ddd;
+    user-select: none; font-weight: 500;
+  }
+  .rb-item input, .cb-item input { width: 15px; height: 15px; accent-color: #1a5f3f; flex-shrink: 0; }
+  .rb-item.selected, .cb-item.selected { background: #e8f5ee; border-color: #1a5f3f; color: #1a5f3f; }
+
+  /* BOTTOM ACTION BAR */
+  .action-bar {
+    padding: 12px 16px; display: flex; gap: 10px; flex-shrink: 0;
+    background: #fff; border-top: 1px solid #e5e5e5;
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
+  .btn { flex: 1; padding: 12px; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; border: none; }
+  .btn-add { background: #1a5f3f; color: #fff; }
+  .btn-add:active { background: #145030; }
+  .btn-clear { background: #f0f0f0; color: #555; }
+  .btn-clear:active { background: #e0e0e0; }
+
+  /* LIST VIEW */
+  .list-top { padding: 14px 16px 10px; }
+  .list-header { display: flex; justify-content: space-between; align-items: center; }
+  .list-header h2 { font-size: 16px; font-weight: 600; }
+  .count-badge { background: #e8f5ee; color: #1a5f3f; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+  .search-box { margin-top: 10px; position: relative; }
+  .search-box input { padding-left: 36px; background: #f5f5f5; border-color: #f5f5f5; }
+  .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #999; font-size: 15px; }
+  .warga-list-inner { padding: 0 16px 12px; }
+
+  /* WARGA CARD */
+  .warga-card { background: #fff; border-radius: 12px; padding: 13px; margin-bottom: 10px; border: 1px solid #e8e8e8; position: relative; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+  .warga-card .w-no { font-size: 11px; color: #999; margin-bottom: 3px; }
+  .warga-card .w-name { font-size: 15px; font-weight: 600; color: #1a1a1a; padding-right: 32px; }
+  .warga-card .w-nik { font-size: 12px; color: #666; margin-top: 3px; }
+  .warga-card .w-meta { font-size: 12px; color: #888; margin-top: 2px; }
+  .warga-card .w-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+  .w-tag { font-size: 11px; padding: 3px 9px; border-radius: 20px; background: #e8f5ee; color: #1a6b44; font-weight: 500; }
+  .w-tag.red { background: #fff0e8; color: #c0440a; }
+  .w-tag.blue { background: #e8f0ff; color: #1a3fa0; }
+  .del-btn { position: absolute; top: 12px; right: 12px; background: #f5f5f5; border: none; color: #999; cursor: pointer; width: 28px; height: 28px; border-radius: 50%; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+  .del-btn:active { background: #ffe5e5; color: #c00; }
+
+  /* EMPTY STATE */
+  .empty-state { text-align: center; padding: 50px 20px; color: #aaa; }
+  .empty-state .ei { font-size: 48px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; line-height: 1.6; }
+
+  /* EXPORT BTN */
+  .export-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; background: #1a5f3f; color: #fff; border: none; padding: 12px; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .export-btn:active { background: #145030; }
+
+  /* SETTINGS */
+  .settings-content { padding: 0 0 20px; }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(10px);
+    background: #1a1a1a; color: #fff; padding: 11px 20px; border-radius: 24px;
+    font-size: 13px; opacity: 0; transition: all 0.25s; pointer-events: none; z-index: 9999;
+    white-space: nowrap; max-width: 80vw; text-align: center;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.success { background: #1a5f3f; }
+  .toast.error { background: #c0321a; }
+
+  /* INSTALL BANNER */
+  .install-banner { background: #fff3cd; border-bottom: 1px solid #ffc107; padding: 10px 14px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .install-banner p { font-size: 12px; color: #856404; flex: 1; line-height: 1.4; }
+  .install-banner button { background: #1a5f3f; color: #fff; border: none; padding: 7px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .install-banner .close-btn { background: none; color: #999; padding: 4px; border-radius: 50%; font-size: 16px; width: 24px; height: 24px; }
+
+  /* OFFLINE INDICATOR */
+  .offline-bar { background: #c0321a; color: #fff; text-align: center; font-size: 12px; padding: 5px; flex-shrink: 0; display: none; }
+  .offline-bar.show { display: block; }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div class="offline-bar" id="offline-bar">⚠ Tidak ada koneksi internet — data tetap tersimpan</div>
+
+  <div class="header">
+    <h1>📋 Data Warga RW</h1>
+    <p id="header-sub">Format LaCl RW 2026</p>
+  </div>
+
+  <div class="install-banner" id="install-banner" style="display:none">
+    <p>Install aplikasi ini ke homescreen untuk akses offline!</p>
+    <button onclick="installApp()">Install</button>
+    <button class="close-btn" onclick="dismissInstall()">✕</button>
+  </div>
+
+  <div class="tab-bar">
+    <div class="tab active" onclick="showPage('form')">✏️ Input</div>
+    <div class="tab" onclick="showPage('list')">📋 Daftar</div>
+    <div class="tab" onclick="showPage('settings')">⚙️ Pengaturan</div>
+  </div>
+
+  <div class="page-content">
+
+    <!-- PAGE: FORM -->
+    <div id="page-form" class="page active">
+
+      <div class="section">
+        <div class="section-title">Informasi Administratif</div>
+        <div class="row3">
+          <div class="field"><label>No.</label><input type="number" id="f-no" placeholder="1" inputmode="numeric"></div>
+          <div class="field"><label>RT</label><input type="text" id="f-rt" placeholder="01" inputmode="numeric" maxlength="3"></div>
+          <div class="field"><label>RW</label><input type="text" id="f-rw" placeholder="--" readonly style="background:#f5f5f5;color:#888"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>No. KK</label><input type="text" id="f-nokk" placeholder="327301..." inputmode="numeric" maxlength="16"></div>
+          <div class="field"><label>NIK *</label><input type="text" id="f-nik" placeholder="327301..." inputmode="numeric" maxlength="16"></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Status Kependudukan</div>
+        <div class="radio-group" id="rg-status">
+          <label class="rb-item"><input type="radio" name="status" value="Permanen"> Permanen</label>
+          <label class="rb-item"><input type="radio" name="status" value="Non Permanen"> Non Permanen</label>
+          <label class="rb-item"><input type="radio" name="status" value="WNA"> WNA</label>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Data Pribadi</div>
+        <div class="field"><label>Nama Lengkap *</label><input type="text" id="f-nama" placeholder="Nama sesuai KTP" autocomplete="name"></div>
+        <div class="field">
+          <label>Jenis Kelamin</label>
+          <div class="radio-group" id="rg-jk">
+            <label class="rb-item"><input type="radio" name="jk" value="Laki-Laki"> Laki-Laki</label>
+            <label class="rb-item"><input type="radio" name="jk" value="Perempuan"> Perempuan</label>
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>Tempat Lahir</label><input type="text" id="f-tempat" placeholder="Kota"></div>
+          <div class="field"><label>Tanggal Lahir</label><input type="date" id="f-tgl"></div>
+        </div>
+        <div class="field"><label>Alamat</label><input type="text" id="f-alamat" placeholder="Jl. / Gg. No. ..."></div>
+        <div class="field">
+          <label>Pendidikan Terakhir</label>
+          <select id="f-pendidikan">
+            <option value="">-- Pilih --</option>
+            <option>Tidak/Belum Sekolah</option>
+            <option>SD/Sederajat</option>
+            <option>SMP/Sederajat</option>
+            <option>SMA/Sederajat</option>
+            <option>D1/D2/D3</option>
+            <option>S1/D4</option>
+            <option>S2</option>
+            <option>S3</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Status Pekerjaan</div>
+        <div class="radio-group" id="rg-kerja">
+          <label class="rb-item"><input type="radio" name="kerja" value="Bekerja"> Bekerja</label>
+          <label class="rb-item"><input type="radio" name="kerja" value="Tidak Bekerja"> Tidak Bekerja</label>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Penerima Bansos</div>
+        <div class="radio-group" id="rg-bansos">
+          <label class="rb-item"><input type="radio" name="bansos" value="Ya"> Ya</label>
+          <label class="rb-item"><input type="radio" name="bansos" value="Tidak"> Tidak</label>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Jenis Bansos</div>
+        <div class="checkbox-group">
+          <label class="cb-item"><input type="checkbox" class="jenis-bansos" value="Tunai"> Tunai</label>
+          <label class="cb-item"><input type="checkbox" class="jenis-bansos" value="Non Tunai"> Non Tunai</label>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Kepemilikan Asuransi Kesehatan</div>
+        <div class="checkbox-group">
+          <label class="cb-item"><input type="checkbox" class="asuransi" value="BPJS"> BPJS</label>
+          <label class="cb-item"><input type="checkbox" class="asuransi" value="Lainnya"> Lainnya</label>
+          <label class="cb-item"><input type="checkbox" class="asuransi" value="Tidak Punya"> Tidak Punya</label>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Kontak</div>
+        <div class="field"><label>Nomor Kontak</label><input type="tel" id="f-kontak" placeholder="08xx-xxxx-xxxx" inputmode="tel"></div>
+      </div>
+
+      <div style="height: 80px;"></div>
+    </div>
+    <!-- END FORM -->
+
+    <!-- PAGE: LIST -->
+    <div id="page-list" class="page">
+      <div class="list-top">
+        <div class="list-header">
+          <h2>Daftar Warga</h2>
+          <span class="count-badge" id="count-badge">0 orang</span>
+        </div>
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="search-input" placeholder="Cari nama atau NIK..." oninput="renderList()">
+        </div>
+      </div>
+      <div class="warga-list-inner" id="warga-list">
+        <div class="empty-state">
+          <div class="ei">📋</div>
+          <p>Belum ada data warga.<br>Silakan input data terlebih dahulu.</p>
+        </div>
+      </div>
+      <div style="height: 80px;"></div>
+    </div>
+    <!-- END LIST -->
+
+    <!-- PAGE: SETTINGS -->
+    <div id="page-settings" class="page">
+      <div class="settings-content">
+        <div class="section">
+          <div class="section-title">Identitas RW</div>
+          <div class="field"><label>Nama Kelurahan</label><input type="text" id="s-kelurahan" placeholder="Nama kelurahan..."></div>
+          <div class="row2">
+            <div class="field"><label>Nomor RW</label><input type="text" id="s-rw" placeholder="01" maxlength="3" inputmode="numeric"></div>
+            <div class="field"><label>Tahun</label><input type="text" id="s-tahun" placeholder="2026" inputmode="numeric"></div>
+          </div>
+          <div class="field"><label>Kecamatan</label><input type="text" id="s-kecamatan" placeholder="Nama kecamatan..."></div>
+          <div class="field"><label>Kota/Kabupaten</label><input type="text" id="s-kota" placeholder="Nama kota..."></div>
+        </div>
+        <div class="section">
+          <div class="section-title">Tanda Tangan Dokumen</div>
+          <div class="field"><label>Nama Ketua RW</label><input type="text" id="s-ketua-rw" placeholder="Nama lengkap ketua RW"></div>
+          <div class="field"><label>Nama Pengumpul Data / Ketua RT</label><input type="text" id="s-ketua-rt" placeholder="Nama ketua RT / pengumpul data"></div>
+        </div>
+        <div class="section">
+          <div class="section-title">Data Tersimpan</div>
+          <p style="font-size:13px;color:#666;margin-bottom:12px;">Total data: <strong id="stat-total">0</strong> warga</p>
+          <button onclick="if(confirm('Hapus SEMUA data warga? Tindakan ini tidak bisa dibatalkan.')){wargaData=[];saveData();renderList();showToast('Semua data dihapus','error');}" style="background:#fff0f0;color:#c0321a;border:1px solid #fcc;padding:10px 16px;border-radius:8px;font-size:14px;font-weight:600;width:100%;cursor:pointer;">🗑 Hapus Semua Data Warga</button>
+        </div>
+        <div style="height:20px;"></div>
+      </div>
+    </div>
+    <!-- END SETTINGS -->
+
+  </div><!-- end page-content -->
+
+  <!-- ACTION BAR -->
+  <div class="action-bar" id="action-bar-form">
+    <button class="btn btn-clear" onclick="clearForm()">Bersihkan</button>
+    <button class="btn btn-add" onclick="tambahWarga()">+ Simpan Data</button>
+  </div>
+  <div class="action-bar" id="action-bar-list" style="display:none">
+    <button class="export-btn" onclick="exportExcel()">⬇ Export ke Excel (.xlsx)</button>
+  </div>
+  <div class="action-bar" id="action-bar-settings" style="display:none">
+    <button class="btn btn-add" onclick="saveSettings()">✓ Simpan Pengaturan</button>
+  </div>
+
+</div><!-- end app -->
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+// ─── STATE ────────────────────────────────────────────────
+let wargaData = [];
+let settings = { kelurahan:'', rw:'', tahun:'2026', kecamatan:'', kota:'', ketuaRW:'', ketuaRT:'' };
+let deferredInstallPrompt = null;
+
+// ─── INIT ─────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  loadData();
+  loadSettings();
+  applySettings();
+  updateCounter();
+  autoNo();
+  setupRadioHighlight();
+  registerSW();
+});
+
+window.addEventListener('online', () => document.getElementById('offline-bar').classList.remove('show'));
+window.addEventListener('offline', () => document.getElementById('offline-bar').classList.add('show'));
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  if (!localStorage.getItem('installDismissed')) {
+    document.getElementById('install-banner').style.display = 'flex';
+  }
+});
+
+function installApp() {
+  if (deferredInstallPrompt) {
+    deferredInstallPrompt.prompt();
+    deferredInstallPrompt.userChoice.then(() => {
+      document.getElementById('install-banner').style.display = 'none';
+    });
+  }
+}
+function dismissInstall() {
+  document.getElementById('install-banner').style.display = 'none';
+  localStorage.setItem('installDismissed', '1');
+}
+
+// ─── SERVICE WORKER ───────────────────────────────────────
+function registerSW() {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+}
+
+// ─── STORAGE ──────────────────────────────────────────────
+function saveData() {
+  localStorage.setItem('wargaData', JSON.stringify(wargaData));
+  document.getElementById('stat-total').textContent = wargaData.length;
+}
+function loadData() {
+  const d = localStorage.getItem('wargaData');
+  wargaData = d ? JSON.parse(d) : [];
+}
+function saveSettings() {
+  settings.kelurahan = document.getElementById('s-kelurahan').value.trim();
+  settings.rw = document.getElementById('s-rw').value.trim();
+  settings.tahun = document.getElementById('s-tahun').value.trim() || '2026';
+  settings.kecamatan = document.getElementById('s-kecamatan').value.trim();
+  settings.kota = document.getElementById('s-kota').value.trim();
+  settings.ketuaRW = document.getElementById('s-ketua-rw').value.trim();
+  settings.ketuaRT = document.getElementById('s-ketua-rt').value.trim();
+  localStorage.setItem('appSettings', JSON.stringify(settings));
+  applySettings();
+  showToast('Pengaturan disimpan ✓', 'success');
+}
+function loadSettings() {
+  const s = localStorage.getItem('appSettings');
+  if (s) settings = JSON.parse(s);
+}
+function applySettings() {
+  document.getElementById('header-sub').textContent =
+    `Kel. ${settings.kelurahan||'...'} — RW ${settings.rw||'...'} ${settings.tahun}`;
+  document.getElementById('f-rw').value = settings.rw || '';
+  document.getElementById('s-kelurahan').value = settings.kelurahan;
+  document.getElementById('s-rw').value = settings.rw;
+  document.getElementById('s-tahun').value = settings.tahun;
+  document.getElementById('s-kecamatan').value = settings.kecamatan||'';
+  document.getElementById('s-kota').value = settings.kota||'';
+  document.getElementById('s-ketua-rw').value = settings.ketuaRW;
+  document.getElementById('s-ketua-rt').value = settings.ketuaRT;
+  document.getElementById('stat-total').textContent = wargaData.length;
+}
+
+// ─── NAVIGATION ───────────────────────────────────────────
+function showPage(p) {
+  document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+  document.getElementById('action-bar-form').style.display = 'none';
+  document.getElementById('action-bar-list').style.display = 'none';
+  document.getElementById('action-bar-settings').style.display = 'none';
+  document.getElementById('page-' + p).classList.add('active');
+  const idx = ['form','list','settings'].indexOf(p);
+  document.querySelectorAll('.tab')[idx].classList.add('active');
+  if (p === 'list') { renderList(); document.getElementById('action-bar-list').style.display = 'flex'; }
+  else if (p === 'form') { document.getElementById('action-bar-form').style.display = 'flex'; }
+  else { document.getElementById('action-bar-settings').style.display = 'flex'; }
+  document.querySelector('.page-content').scrollTop = 0;
+}
+
+// ─── RADIO HIGHLIGHT ──────────────────────────────────────
+function setupRadioHighlight() {
+  document.querySelectorAll('.rb-item input[type=radio]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      const group = radio.closest('.radio-group');
+      group.querySelectorAll('.rb-item').forEach(item => item.classList.remove('selected'));
+      radio.closest('.rb-item').classList.add('selected');
+    });
+  });
+  document.querySelectorAll('.cb-item input[type=checkbox]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      cb.closest('.cb-item').classList.toggle('selected', cb.checked);
+    });
+  });
+}
+
+// ─── FORM HELPERS ─────────────────────────────────────────
+function getRadio(name) {
+  const el = document.querySelector(`input[name="${name}"]:checked`);
+  return el ? el.value : '';
+}
+function getChecks(cls) {
+  return Array.from(document.querySelectorAll('.' + cls + ':checked')).map(x => x.value);
+}
+function autoNo() {
+  document.getElementById('f-no').value = wargaData.length + 1;
+}
+function updateCounter() {
+  document.getElementById('count-badge').textContent = wargaData.length + ' orang';
+}
+
+// ─── TAMBAH WARGA ─────────────────────────────────────────
+function tambahWarga() {
+  const nama = document.getElementById('f-nama').value.trim();
+  const nik = document.getElementById('f-nik').value.trim();
+  if (!nama) { showToast('⚠ Nama lengkap wajib diisi', 'error'); hilangkan('f-nama'); return; }
+  if (!nik) { showToast('⚠ NIK wajib diisi', 'error'); hilangkan('f-nik'); return; }
+
+  const checks = getChecks('jenis-bansos');
+  const asuransi = getChecks('asuransi');
+
+  const data = {
+    id: Date.now(),
+    no: parseInt(document.getElementById('f-no').value) || wargaData.length + 1,
+    kelurahan: settings.kelurahan,
+    rt: document.getElementById('f-rt').value,
+    rw: settings.rw,
+    nokk: document.getElementById('f-nokk').value,
+    nik: nik,
+    status: getRadio('status'),
+    namaLengkap: nama,
+    jk: getRadio('jk'),
+    tempatLahir: document.getElementById('f-tempat').value,
+    tanggalLahir: document.getElementById('f-tgl').value,
+    alamat: document.getElementById('f-alamat').value,
+    pendidikan: document.getElementById('f-pendidikan').value,
+    pekerjaan: getRadio('kerja'),
+    bansos: getRadio('bansos'),
+    jenisBansos: checks,
+    asuransi: asuransi,
+    kontak: document.getElementById('f-kontak').value,
+  };
+
+  wargaData.push(data);
+  saveData();
+  updateCounter();
+  showToast('✓ Data ' + nama + ' disimpan', 'success');
+  clearForm();
+}
+
+function hilangkan(id) {
+  const el = document.getElementById(id);
+  el.style.borderColor = '#e53935';
+  el.focus();
+  setTimeout(() => el.style.borderColor = '', 2000);
+}
+
+function clearForm() {
+  ['f-nokk','f-nik','f-nama','f-tempat','f-tgl','f-alamat','f-kontak'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('f-rt').value = '';
+  document.getElementById('f-pendidikan').value = '';
+  document.querySelectorAll('input[type="radio"]').forEach(r => {
+    r.checked = false;
+    r.closest('.rb-item').classList.remove('selected');
+  });
+  document.querySelectorAll('.jenis-bansos, .asuransi').forEach(c => {
+    c.checked = false;
+    c.closest('.cb-item').classList.remove('selected');
+  });
+  autoNo();
+  document.querySelector('.page-content').scrollTop = 0;
+}
+
+// ─── RENDER LIST ──────────────────────────────────────────
+function renderList() {
+  const q = (document.getElementById('search-input').value || '').toLowerCase();
+  const container = document.getElementById('warga-list');
+  updateCounter();
+  const filtered = q
+    ? wargaData.filter(w => w.namaLengkap.toLowerCase().includes(q) || w.nik.includes(q))
+    : wargaData;
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="ei">' + (q ? '🔍' : '📋') + '</div><p>' +
+      (q ? 'Tidak ada hasil untuk "' + q + '"' : 'Belum ada data warga.<br>Silakan input data terlebih dahulu.') + '</p></div>';
+    return;
+  }
+
+  container.innerHTML = filtered.map((w, i) => {
+    const tags = [];
+    if (w.jk) tags.push(`<span class="w-tag">${w.jk}</span>`);
+    if (w.status) tags.push(`<span class="w-tag">${w.status}</span>`);
+    if (w.pekerjaan) tags.push(`<span class="w-tag ${w.pekerjaan==='Bekerja'?'blue':'red'}">${w.pekerjaan}</span>`);
+    if (w.bansos === 'Ya') tags.push(`<span class="w-tag red">Bansos</span>`);
+    if (w.asuransi && w.asuransi.includes('BPJS')) tags.push(`<span class="w-tag">BPJS</span>`);
+    const tglStr = w.tanggalLahir ? formatTgl(w.tanggalLahir) : '';
+    return `<div class="warga-card">
+      <button class="del-btn" onclick="hapusWarga(${w.id})">✕</button>
+      <div class="w-no">No. ${w.no} · RT ${w.rt||'-'} / RW ${w.rw||'-'}</div>
+      <div class="w-name">${w.namaLengkap}</div>
+      <div class="w-nik">NIK: ${w.nik}</div>
+      ${(w.tempatLahir||tglStr) ? `<div class="w-meta">${[w.tempatLahir, tglStr].filter(Boolean).join(', ')}</div>` : ''}
+      ${w.alamat ? `<div class="w-meta">📍 ${w.alamat}</div>` : ''}
+      <div class="w-tags">${tags.join('')}</div>
+    </div>`;
+  }).join('');
+}
+
+function formatTgl(d) {
+  if (!d) return '';
+  const [y,m,day] = d.split('-');
+  const bln = ['','Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  return `${parseInt(day)} ${bln[parseInt(m)]} ${y}`;
+}
+
+function hapusWarga(id) {
+  if (!confirm('Hapus data ini?')) return;
+  wargaData = wargaData.filter(w => w.id !== id);
+  saveData();
+  renderList();
+  showToast('Data dihapus');
+}
+
+// ─── EXPORT EXCEL ─────────────────────────────────────────
+function exportExcel() {
+  if (wargaData.length === 0) { showToast('⚠ Belum ada data untuk diekspor', 'error'); return; }
+
+  const kel = settings.kelurahan || '___________';
+  const rw = settings.rw || '___';
+  const thn = settings.tahun || '2026';
+  const kec = settings.kecamatan || '___________';
+  const kota = settings.kota || '___________';
+  const ketuaRW = settings.ketuaRW || '___________';
+  const ketuaRT = settings.ketuaRT || '___________';
+
+  const H1 = ['No','Kelurahan','RT','RW','No. KK','NIK',
+    'Status','','',
+    'Nama Lengkap','Jenis Kelamin','',
+    'Tempat Lahir','Tanggal Lahir','Alamat','Pendidikan Terakhir',
+    'Status Pekerjaan','',
+    'Penerima Bansos','',
+    'Jenis Bansos','',
+    'Kepemilikan Asuransi Kesehatan','','',
+    'Nomor Kontak'];
+  const H2 = ['','','','','','',
+    'Permanen','Non Permanen','WNA',
+    '','Laki-Laki','Perempuan',
+    '','','','',
+    'Bekerja','Tidak Bekerja',
+    'Ya','Tidak',
+    'Tunai','Non Tunai',
+    'BPJS','Lainnya','Tidak Punya',
+    ''];
+
+  const aoa = [
+    [`FORMAT DATA WARGA - KELURAHAN ${kel.toUpperCase()} RW ${rw} TAHUN ${thn}`],
+    [`Kecamatan: ${kec}`, '', `Kota/Kab: ${kota}`],
+    [],
+    H1, H2
+  ];
+
+  wargaData.forEach((w, i) => {
+    aoa.push([
+      i + 1, w.kelurahan || kel, w.rt, w.rw || rw, w.nokk, w.nik,
+      w.status === 'Permanen' ? '✓' : '',
+      w.status === 'Non Permanen' ? '✓' : '',
+      w.status === 'WNA' ? '✓' : '',
+      w.namaLengkap,
+      w.jk === 'Laki-Laki' ? '✓' : '',
+      w.jk === 'Perempuan' ? '✓' : '',
+      w.tempatLahir,
+      w.tanggalLahir ? formatTgl(w.tanggalLahir) : '',
+      w.alamat,
+      w.pendidikan,
+      w.pekerjaan === 'Bekerja' ? '✓' : '',
+      w.pekerjaan === 'Tidak Bekerja' ? '✓' : '',
+      w.bansos === 'Ya' ? '✓' : '',
+      w.bansos === 'Tidak' ? '✓' : '',
+      (w.jenisBansos||[]).includes('Tunai') ? '✓' : '',
+      (w.jenisBansos||[]).includes('Non Tunai') ? '✓' : '',
+      (w.asuransi||[]).includes('BPJS') ? '✓' : '',
+      (w.asuransi||[]).includes('Lainnya') ? '✓' : '',
+      (w.asuransi||[]).includes('Tidak Punya') ? '✓' : '',
+      w.kontak
+    ]);
+  });
+
+  aoa.push([], [], []);
+  const sigRow = new Array(26).fill('');
+  sigRow[7]  = `Mengetahui,`; sigRow[22] = `Pengumpul Data,`;
+  aoa.push(sigRow);
+  const namRow = new Array(26).fill('');
+  namRow[7]  = `Ketua RW ${rw}`; namRow[22] = `Ketua RT / Pengumpul`;
+  aoa.push(namRow);
+  aoa.push(new Array(26).fill(''));
+  aoa.push(new Array(26).fill(''));
+  aoa.push(new Array(26).fill(''));
+  const ttdRow = new Array(26).fill('');
+  ttdRow[7]  = `( ${ketuaRW} )`; ttdRow[22] = `( ${ketuaRT} )`;
+  aoa.push(ttdRow);
+
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols'] = [
+    {wch:4},{wch:16},{wch:4},{wch:4},{wch:17},{wch:18},
+    {wch:9},{wch:12},{wch:5},
+    {wch:24},
+    {wch:10},{wch:10},
+    {wch:14},{wch:13},{wch:24},{wch:17},
+    {wch:8},{wch:13},
+    {wch:5},{wch:6},
+    {wch:7},{wch:10},
+    {wch:6},{wch:9},{wch:12},
+    {wch:16}
+  ];
+  ws['!merges'] = [
+    {s:{r:0,c:0},e:{r:0,c:25}},
+    {s:{r:3,c:6},e:{r:3,c:8}},
+    {s:{r:3,c:10},e:{r:3,c:11}},
+    {s:{r:3,c:16},e:{r:3,c:17}},
+    {s:{r:3,c:18},e:{r:3,c:19}},
+    {s:{r:3,c:20},e:{r:3,c:21}},
+    {s:{r:3,c:22},e:{r:3,c:24}},
+  ];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Data_Warga_Master');
+  XLSX.writeFile(wb, `Data_Warga_RW${rw}_${kel}_${thn}.xlsx`);
+  showToast('✓ File Excel berhasil diunduh', 'success');
+}
+
+// ─── TOAST ────────────────────────────────────────────────
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (type ? ' ' + type : '');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+</script>
+</body>
+</html>
