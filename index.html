@@ -227,6 +227,15 @@
             <option>S2</option><option>S3</option>
           </select>
         </div>
+        <div class="field">
+          <label>Status Pernikahan</label>
+          <div class="radio-group" id="rg-nikah">
+            <label class="rb-item"><input type="radio" name="nikah" value="Menikah" onchange="updateOpsiNikah()"> Menikah</label>
+            <label class="rb-item"><input type="radio" name="nikah" value="Belum Menikah" onchange="updateOpsiNikah()"> Belum Menikah</label>
+            <label class="rb-item" id="rb-janda" style="display:none"><input type="radio" name="nikah" value="Janda" onchange="updateOpsiNikah()"> Janda</label>
+            <label class="rb-item" id="rb-duda" style="display:none"><input type="radio" name="nikah" value="Duda" onchange="updateOpsiNikah()"> Duda</label>
+          </div>
+        </div>
       </div>
 
       <div class="section">
@@ -412,10 +421,10 @@ function onDateChange() {
 function hitungUsia(tglStr) {
   if (!tglStr) return null;
   const lahir = new Date(tglStr);
-  const today = new Date();
-  let age = today.getFullYear() - lahir.getFullYear();
-  const bulanDiff = today.getMonth() - lahir.getMonth();
-  if (bulanDiff < 0 || (bulanDiff === 0 && today.getDate() < lahir.getDate())) age--;
+  const ref   = new Date(2026, 11, 31); // 31 Des 2026 sebagai acuan
+  let age = ref.getFullYear() - lahir.getFullYear();
+  const bulanDiff = ref.getMonth() - lahir.getMonth();
+  if (bulanDiff < 0 || (bulanDiff === 0 && ref.getDate() < lahir.getDate())) age--;
   return age;
 }
 
@@ -458,6 +467,38 @@ function setupInteractions() {
   document.querySelectorAll('.cb-item input[type=checkbox]').forEach(c => {
     c.addEventListener('change', () => c.closest('.cb-item').classList.toggle('selected', c.checked));
   });
+  // Saat jenis kelamin berubah, update opsi nikah
+  document.querySelectorAll('input[name="jk"]').forEach(r => {
+    r.addEventListener('change', () => updateOpsiNikah());
+  });
+}
+
+function updateOpsiNikah() {
+  const jk = document.querySelector('input[name="jk"]:checked');
+  const rbJanda = document.getElementById('rb-janda');
+  const rbDuda  = document.getElementById('rb-duda');
+  const curNikah = document.querySelector('input[name="nikah"]:checked');
+
+  // Sembunyikan dulu keduanya
+  rbJanda.style.display = 'none';
+  rbDuda.style.display  = 'none';
+
+  if (jk) {
+    if (jk.value === 'Perempuan') {
+      rbJanda.style.display = '';
+    } else if (jk.value === 'Laki-Laki') {
+      rbDuda.style.display = '';
+    }
+  }
+
+  // Jika opsi yang sedang dipilih tidak lagi terlihat, reset pilihan nikah
+  if (curNikah && (curNikah.value === 'Janda' || curNikah.value === 'Duda')) {
+    const parentVisible = curNikah.closest('.rb-item').style.display !== 'none';
+    if (!parentVisible) {
+      curNikah.checked = false;
+      curNikah.closest('.rb-item').classList.remove('selected');
+    }
+  }
 }
 
 // ─── STORAGE ──────────────────────────────────────────────────────────────────
@@ -546,6 +587,7 @@ function tambahWarga() {
     usia: usia,
     isLansia: isLansia,
     kondisiLansia: isLansia ? getChecks('kondisi-lansia') : [],
+    statusNikah: getRadio('nikah'),
     tempatLahir: document.getElementById('f-tempat').value,
     alamat: document.getElementById('f-alamat').value,
     pendidikan: document.getElementById('f-pendidikan').value,
@@ -577,6 +619,9 @@ function clearForm() {
   document.getElementById('f-tgl-y').value='';
   tglLahir='';
   document.querySelectorAll('input[type="radio"]').forEach(r=>{r.checked=false;r.closest('.rb-item').classList.remove('selected');});
+  // Reset opsi janda/duda
+  document.getElementById('rb-janda').style.display='none';
+  document.getElementById('rb-duda').style.display='none';
   document.querySelectorAll('.jenis-bansos,.asuransi,.kondisi-lansia').forEach(c=>{c.checked=false;c.closest('.cb-item').classList.remove('selected');});
   document.getElementById('sec-bansos').classList.remove('show');
   document.getElementById('sec-kondisi-lansia').classList.remove('show');
@@ -660,35 +705,90 @@ function exportExcel() {
   const wb = XLSX.utils.book_new();
 
   // ── SHEET 1: Data_Warga_Master ─────────────────────────────────────────────
-  const H1=['No','Kelurahan','RT','RW','No. KK','NIK','Status','','','Nama Lengkap','Jenis Kelamin','','Tempat Lahir','Tanggal Lahir','Alamat','Pendidikan Terakhir','Status Pekerjaan','','Penerima Bansos','','Jenis Bansos','','Kepemilikan Asuransi Kesehatan','','','Nomor Kontak'];
-  const H2=['','','','','','','Permanen','Non Permanen','WNA','','Laki-Laki','Perempuan','','','','','Bekerja','Tidak Bekerja','Ya','Tidak','Tunai','Non Tunai','BPJS','Lainnya','Tidak Punya',''];
+  // Kolom usia dihitung berdasarkan 31 Des 2026
+  // Urutan kolom: No(0) Kel(1) RT(2) RW(3) KK(4) NIK(5) Status(6-8) Nama(9) JK(10-11) Tempat(12) Tgl(13) Usia(14) Alamat(15) Pendidikan(16) Nikah(17-20) Kerja(21-22) Bansos(23-24) JenisBansos(25-26) Asuransi(27-29) Kontak(30)
+  const H1=['No','Kelurahan','RT','RW','No. KK','NIK','Status','','','Nama Lengkap','Jenis Kelamin','','Tempat Lahir','Tanggal Lahir','Usia','Alamat','Pendidikan Terakhir','Status Pernikahan','','','','Status Pekerjaan','','Penerima Bansos','','Jenis Bansos','','Kepemilikan Asuransi Kesehatan','','','Nomor Kontak'];
+  const H2=['','','','','','','Permanen','Non Permanen','WNA','','Laki-Laki','Perempuan','','','(Thn)','','','Menikah','Belum Menikah','Janda','Duda','Bekerja','Tidak Bekerja','Ya','Tidak','Tunai','Non Tunai','BPJS','Lainnya','Tidak Punya',''];
 
   const aoa1=[
     [`FORMAT DATA WARGA - KELURAHAN ${kel.toUpperCase()} RW ${rw} TAHUN ${thn}`],
     [`Kecamatan: ${kec}`, '', `Kota/Kab: ${kota}`],
     [], H1, H2
   ];
-  wargaData.forEach((w,i)=>aoa1.push([
-    i+1, w.kelurahan||kel, w.rt, w.rw||rw, w.nokk, w.nik,
-    w.status==='Permanen'?'✓':'', w.status==='Non Permanen'?'✓':'', w.status==='WNA'?'✓':'',
-    w.namaLengkap, w.jk==='Laki-Laki'?'✓':'', w.jk==='Perempuan'?'✓':'',
-    w.tempatLahir, w.tanggalLahir?fmtTgl(w.tanggalLahir):'', w.alamat, w.pendidikan,
-    w.pekerjaan==='Bekerja'?'✓':'', w.pekerjaan==='Tidak Bekerja'?'✓':'',
-    w.bansos==='Ya'?'✓':'', w.bansos==='Tidak'?'✓':'',
-    (w.jenisBansos||[]).includes('Tunai')?'✓':'', (w.jenisBansos||[]).includes('Non Tunai')?'✓':'',
-    (w.asuransi||[]).includes('BPJS')?'✓':'', (w.asuransi||[]).includes('Lainnya')?'✓':'',
-    (w.asuransi||[]).includes('Tidak Punya')?'✓':'', w.kontak
-  ]));
+  wargaData.forEach((w,i)=>{
+    const usiaExport = hitungUsia(w.tanggalLahir);
+    aoa1.push([
+      i+1, w.kelurahan||kel, w.rt, w.rw||rw, w.nokk, w.nik,
+      w.status==='Permanen'?'✓':'', w.status==='Non Permanen'?'✓':'', w.status==='WNA'?'✓':'',
+      w.namaLengkap, w.jk==='Laki-Laki'?'✓':'', w.jk==='Perempuan'?'✓':'',
+      w.tempatLahir, w.tanggalLahir?fmtTgl(w.tanggalLahir):'',
+      usiaExport !== null ? usiaExport : '',
+      w.alamat, w.pendidikan,
+      w.statusNikah==='Menikah'?'✓':'', w.statusNikah==='Belum Menikah'?'✓':'',
+      w.statusNikah==='Janda'?'✓':'', w.statusNikah==='Duda'?'✓':'',
+      w.pekerjaan==='Bekerja'?'✓':'', w.pekerjaan==='Tidak Bekerja'?'✓':'',
+      w.bansos==='Ya'?'✓':'', w.bansos==='Tidak'?'✓':'',
+      (w.jenisBansos||[]).includes('Tunai')?'✓':'', (w.jenisBansos||[]).includes('Non Tunai')?'✓':'',
+      (w.asuransi||[]).includes('BPJS')?'✓':'', (w.asuransi||[]).includes('Lainnya')?'✓':'',
+      (w.asuransi||[]).includes('Tidak Punya')?'✓':'', w.kontak
+    ]);
+  });
+
+  // ── Tabel Rekapitulasi Usia ──────────────────────────────────────────────────
+  // Hitung jumlah warga per usia (0 s/d usia tertua), usia null dilewati
+  const usiaMap = {};
+  wargaData.forEach(w => {
+    const u = hitungUsia(w.tanggalLahir);
+    if (u !== null && u >= 0) usiaMap[u] = (usiaMap[u] || 0) + 1;
+  });
+  const usiaList = Object.keys(usiaMap).map(Number);
+  const usiaTertua = usiaList.length > 0 ? Math.max(...usiaList) : 0;
+
+  aoa1.push([]); // 1 baris kosong setelah data terakhir
+  // Header tabel rekap
+  const rekH = new Array(31).fill('');
+  rekH[0]='Rekapitulasi Jumlah Warga per Usia (Tahun 2026)';
+  aoa1.push(rekH);
+  const rekH2 = new Array(31).fill('');
+  rekH2[0]='Usia (Thn)'; rekH2[1]='Jumlah Warga';
+  aoa1.push(rekH2);
+  for (let u=0; u<=usiaTertua; u++) {
+    const row = new Array(31).fill('');
+    row[0] = u;
+    row[1] = usiaMap[u] || 0;
+    aoa1.push(row);
+  }
+  // Baris total
+  const totRow = new Array(31).fill('');
+  totRow[0]='TOTAL'; totRow[1]=wargaData.filter(w=>hitungUsia(w.tanggalLahir)!==null).length;
+  aoa1.push(totRow);
 
   aoa1.push([],[],[]);
-  const s1=new Array(26).fill(''); s1[7]='Mengetahui,'; s1[22]='Pengumpul Data,'; aoa1.push(s1);
-  const s2=new Array(26).fill(''); s2[7]=`Ketua RW ${rw}`; s2[22]='Ketua RT / Pengumpul'; aoa1.push(s2);
-  for(let i=0;i<3;i++) aoa1.push(new Array(26).fill(''));
-  const s3=new Array(26).fill(''); s3[7]=`( ${ketuaRW} )`; s3[22]=`( ${ketuaRT} )`; aoa1.push(s3);
+  const s1=new Array(31).fill(''); s1[7]='Mengetahui,'; s1[25]='Pengumpul Data,'; aoa1.push(s1);
+  const s2=new Array(31).fill(''); s2[7]=`Ketua RW ${rw}`; s2[25]='Ketua RT / Pengumpul'; aoa1.push(s2);
+  for(let i=0;i<3;i++) aoa1.push(new Array(31).fill(''));
+  const s3=new Array(31).fill(''); s3[7]=`( ${ketuaRW} )`; s3[25]=`( ${ketuaRT} )`; aoa1.push(s3);
 
   const ws1=XLSX.utils.aoa_to_sheet(aoa1);
-  ws1['!cols']=[{wch:4},{wch:16},{wch:4},{wch:4},{wch:17},{wch:18},{wch:9},{wch:12},{wch:5},{wch:24},{wch:10},{wch:10},{wch:14},{wch:13},{wch:24},{wch:17},{wch:8},{wch:13},{wch:5},{wch:6},{wch:7},{wch:10},{wch:6},{wch:9},{wch:12},{wch:16}];
-  ws1['!merges']=[{s:{r:0,c:0},e:{r:0,c:25}},{s:{r:3,c:6},e:{r:3,c:8}},{s:{r:3,c:10},e:{r:3,c:11}},{s:{r:3,c:16},e:{r:3,c:17}},{s:{r:3,c:18},e:{r:3,c:19}},{s:{r:3,c:20},e:{r:3,c:21}},{s:{r:3,c:22},e:{r:3,c:24}}];
+  // 31 kolom: No Kel RT RW KK NIK Perm NonPerm WNA Nama LL Pr Tempat Tgl Usia Alamat Pend Nik BlmNik Janda Duda Kerja TdkKerja Ya Tidak Tunai NonTunai BPJS Lain TdkPny Kontak
+  ws1['!cols']=[{wch:4},{wch:16},{wch:4},{wch:4},{wch:17},{wch:18},{wch:9},{wch:12},{wch:5},{wch:24},{wch:10},{wch:10},{wch:14},{wch:13},{wch:6},{wch:24},{wch:17},{wch:9},{wch:13},{wch:7},{wch:6},{wch:8},{wch:13},{wch:5},{wch:6},{wch:7},{wch:10},{wch:6},{wch:9},{wch:12},{wch:16}];
+
+  const dataStartRow = 5;
+  const rekStart = dataStartRow + wargaData.length + 1;
+  const rekTitleRow = rekStart;
+
+  const merges=[
+    {s:{r:0,c:0},e:{r:0,c:30}},
+    {s:{r:3,c:6},e:{r:3,c:8}},   // Status
+    {s:{r:3,c:10},e:{r:3,c:11}}, // Jenis Kelamin
+    {s:{r:3,c:17},e:{r:3,c:20}}, // Status Pernikahan
+    {s:{r:3,c:21},e:{r:3,c:22}}, // Status Pekerjaan
+    {s:{r:3,c:23},e:{r:3,c:24}}, // Penerima Bansos
+    {s:{r:3,c:25},e:{r:3,c:26}}, // Jenis Bansos
+    {s:{r:3,c:27},e:{r:3,c:29}}, // Asuransi
+    {s:{r:rekTitleRow,c:0},e:{r:rekTitleRow,c:3}},
+  ];
+  ws1['!merges'] = merges;
   XLSX.utils.book_append_sheet(wb, ws1, 'Data_Warga_Master');
 
   // ── SHEET 2: Data_Lansia ───────────────────────────────────────────────────
