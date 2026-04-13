@@ -97,7 +97,7 @@
   .warga-card { background: #fff; border-radius: 12px; padding: 13px; margin-bottom: 10px; border: 1px solid #e8e8e8; position: relative; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
   .warga-card.lansia { border-color: #ffcc80; background: #fffdf9; }
   .warga-card .w-no { font-size: 11px; color: #999; margin-bottom: 3px; }
-  .warga-card .w-name { font-size: 15px; font-weight: 600; color: #1a1a1a; padding-right: 32px; }
+  .warga-card .w-name { font-size: 15px; font-weight: 600; color: #1a1a1a; padding-right: 70px; }
   .warga-card .w-nik { font-size: 12px; color: #666; margin-top: 3px; }
   .warga-card .w-meta { font-size: 12px; color: #888; margin-top: 2px; }
   .warga-card .w-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
@@ -127,6 +127,59 @@
   .filter-btn { padding: 6px 14px; border-radius: 20px; border: 1px solid #ddd; background: #f8f8f8; font-size: 12px; font-weight: 500; cursor: pointer; white-space: nowrap; color: #555; flex-shrink: 0; }
   .filter-btn.active { background: #e8f5ee; border-color: #1a5f3f; color: #1a5f3f; }
   .filter-btn.active.orange { background: #fff3e0; border-color: #fb8c00; color: #e65100; }
+  .count-badge.blue { background: #e8f0ff; color: #1a3fa0; }
+  .count-badge.pink { background: #fce4ec; color: #ad1457; }
+  .sort-row { display: flex; align-items: center; gap: 6px; margin-top: 8px; overflow-x: auto; scrollbar-width: none; }
+  .sort-row::-webkit-scrollbar { display: none; }
+  .sort-label { font-size: 11px; color: #999; font-weight: 500; white-space: nowrap; flex-shrink: 0; }
+  .sort-btn { padding: 5px 12px; border-radius: 20px; border: 1px solid #ddd; background: #f8f8f8; font-size: 12px; font-weight: 500; cursor: pointer; white-space: nowrap; color: #555; flex-shrink: 0; }
+  .sort-btn.active { background: #e8f5ee; border-color: #1a5f3f; color: #1a5f3f; }
+  .filter-picker-row { margin-top: 8px; }
+  .picker-group { display: flex; align-items: flex-start; gap: 8px; }
+  .picker-group .sort-label { margin-top: 7px; flex-shrink: 0; }
+  .picker-chips { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; }
+  .chip { padding: 5px 12px; border-radius: 20px; border: 1px solid #ddd; background: #f8f8f8; font-size: 12px; font-weight: 500; cursor: pointer; color: #555; white-space: nowrap; }
+  .chip.active { background: #e8f5ee; border-color: #1a5f3f; color: #1a5f3f; font-weight: 600; }
+  .usia-range-row { display: flex; align-items: center; gap: 6px; flex: 1; }
+  .usia-range-row input { width: 60px; padding: 5px 8px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; background: #fff; color: #1a1a1a; outline: none; -webkit-appearance: none; text-align: center; }
+  .usia-range-row input:focus { border-color: #1a5f3f; box-shadow: 0 0 0 2px rgba(26,95,63,0.1); }
+  .range-sep { color: #aaa; font-size: 14px; }
+  .chip-clear { background: #f0f0f0; border: none; border-radius: 20px; padding: 5px 10px; font-size: 12px; color: #999; cursor: pointer; }
+  .chip-clear:active { background: #ffe5e5; color: #c00; }
+
+  /* MODAL EDIT */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: flex-end; justify-content: center; }
+  .modal-overlay.open { display: flex; animation: slideUp 0.25s ease; }
+  @keyframes slideUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
+  .modal-box { background: #fff; border-radius: 20px 20px 0 0; width: 100%; max-width: 520px; max-height: 92vh; display: flex; flex-direction: column; }
+  .modal-header { padding: 16px 16px 12px; border-bottom: 1px solid #eee; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+  .modal-header h3 { font-size: 16px; font-weight: 600; color: #1a1a1a; }
+  .modal-close { background: #f0f0f0; border: none; width: 30px; height: 30px; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #555; }
+  .modal-body { overflow-y: auto; -webkit-overflow-scrolling: touch; flex: 1; padding-bottom: 8px; }
+  .modal-footer { padding: 12px 16px; border-top: 1px solid #eee; display: flex; gap: 10px; flex-shrink: 0; padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+  .edit-btn { position: absolute; top: 12px; right: 44px; background: #e8f5ee; border: none; color: #1a5f3f; cursor: pointer; width: 28px; height: 28px; border-radius: 50%; font-size: 13px; display: flex; align-items: center; justify-content: center; }
+  .edit-btn:active { background: #b2dfcc; }
+  /* Dalam modal, section sama seperti form */
+  .modal-body .section { padding: 12px 16px; border-bottom: 4px solid #f5f5f5; }
+  .modal-body .section-title { font-size: 11px; font-weight: 700; color: #1a5f3f; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 10px; }
+  .modal-body .field { margin-bottom: 10px; }
+  .modal-body .field:last-child { margin-bottom: 0; }
+  .modal-body .field label { display: block; font-size: 13px; color: #555; margin-bottom: 4px; font-weight: 500; }
+  .modal-body .field input, .modal-body .field select { width: 100%; padding: 9px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; background: #fff; color: #1a1a1a; outline: none; -webkit-appearance: none; }
+  .modal-body .field input:focus, .modal-body .field select:focus { border-color: #1a5f3f; box-shadow: 0 0 0 3px rgba(26,95,63,0.1); }
+  .modal-body .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .modal-body .radio-group, .modal-body .checkbox-group { display: flex; flex-wrap: wrap; gap: 7px; }
+  .modal-body .rb-item, .modal-body .cb-item { display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; background: #f8f8f8; padding: 7px 12px; border-radius: 20px; border: 1px solid #ddd; user-select: none; font-weight: 500; transition: background 0.15s, border-color 0.15s; }
+  .modal-body .rb-item input, .modal-body .cb-item input { width: 15px; height: 15px; accent-color: #1a5f3f; flex-shrink: 0; }
+  .modal-body .rb-item.selected, .modal-body .cb-item.selected { background: #e8f5ee; border-color: #1a5f3f; color: #1a5f3f; }
+  .modal-body .date-row { display: grid; grid-template-columns: 1fr 2fr 2fr; gap: 8px; }
+  .modal-body .date-row select { padding: 9px 8px; font-size: 13px; }
+  .modal-body .conditional-section { display: none; }
+  .modal-body .conditional-section.show { display: block; }
+  .modal-body .sub-section { margin-top: 12px; padding-top: 12px; border-top: 1px dashed #ddd; }
+  .modal-body .sub-section-title { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .modal-lansia-banner { display: none; background: #fff3e0; border: 1px solid #fb8c00; border-radius: 8px; padding: 9px 12px; margin-top: 10px; font-size: 12px; color: #e65100; font-weight: 600; }
+  .modal-lansia-banner.show { display: block; }
 </style>
 </head>
 <body>
@@ -302,6 +355,8 @@
           <h2>Daftar Warga</h2>
           <div class="count-badges">
             <span class="count-badge" id="count-all">0 total</span>
+            <span class="count-badge blue" id="count-pria" style="display:none">0 pria</span>
+            <span class="count-badge pink" id="count-wanita" style="display:none">0 wanita</span>
             <span class="count-badge orange" id="count-lansia" style="display:none">0 lansia</span>
           </div>
         </div>
@@ -313,6 +368,23 @@
           <button class="filter-btn active" id="fb-all" onclick="setFilter('all')">Semua</button>
           <button class="filter-btn" id="fb-lansia" onclick="setFilter('lansia')">👴 Lansia</button>
           <button class="filter-btn" id="fb-nonlansia" onclick="setFilter('nonlansia')">Bukan Lansia</button>
+        </div>
+        <div class="filter-picker-row">
+          <div class="picker-group">
+            <span class="sort-label">Filter RT:</span>
+            <div class="picker-chips" id="rt-chips">
+              <button class="chip active" id="chip-rt-all" onclick="setRtFilter('all')">Semua</button>
+            </div>
+          </div>
+          <div class="picker-group" style="margin-top:8px">
+            <span class="sort-label">Filter Umur:</span>
+            <div class="usia-range-row">
+              <input type="number" id="usia-min" placeholder="Min" min="0" max="150" inputmode="numeric" oninput="renderList()">
+              <span class="range-sep">–</span>
+              <input type="number" id="usia-max" placeholder="Max" min="0" max="150" inputmode="numeric" oninput="renderList()">
+              <button class="chip-clear" onclick="clearUsiaFilter()">✕</button>
+            </div>
+          </div>
         </div>
       </div>
       <div class="warga-list-inner" id="warga-list">
@@ -360,8 +432,142 @@
   </div>
 </div>
 
+<!-- MODAL EDIT -->
+<div class="modal-overlay" id="modal-edit">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>✏️ Edit Data Warga</h3>
+      <button class="modal-close" onclick="tutupModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body">
+
+      <div class="section">
+        <div class="section-title">Informasi Administratif</div>
+        <div class="row2">
+          <div class="field"><label>RT</label><input type="text" id="e-rt" inputmode="numeric" maxlength="3"></div>
+          <div class="field"><label>RW</label><input type="text" id="e-rw" inputmode="numeric" maxlength="3"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label>No. KK</label><input type="text" id="e-nokk" inputmode="numeric" maxlength="16"></div>
+          <div class="field"><label>NIK</label><input type="text" id="e-nik" inputmode="numeric" maxlength="16"></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Status Kependudukan</div>
+        <div class="radio-group" id="erg-status">
+          <label class="rb-item"><input type="radio" name="e-status" value="Permanen"> Permanen</label>
+          <label class="rb-item"><input type="radio" name="e-status" value="Non Permanen"> Non Permanen</label>
+          <label class="rb-item"><input type="radio" name="e-status" value="WNA"> WNA</label>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Data Pribadi</div>
+        <div class="field"><label>Nama Lengkap</label><input type="text" id="e-nama"></div>
+        <div class="field">
+          <label>Jenis Kelamin</label>
+          <div class="radio-group" id="erg-jk">
+            <label class="rb-item"><input type="radio" name="e-jk" value="Laki-Laki" onchange="eUpdateNikah()"> Laki-Laki</label>
+            <label class="rb-item"><input type="radio" name="e-jk" value="Perempuan" onchange="eUpdateNikah()"> Perempuan</label>
+          </div>
+        </div>
+        <div class="field">
+          <label>Tanggal Lahir</label>
+          <div class="date-row">
+            <select id="e-tgl-d" onchange="eOnDateChange()"><option value="">Tgl</option></select>
+            <select id="e-tgl-m" onchange="eOnDateChange()">
+              <option value="">Bulan</option>
+              <option value="01">Januari</option><option value="02">Februari</option>
+              <option value="03">Maret</option><option value="04">April</option>
+              <option value="05">Mei</option><option value="06">Juni</option>
+              <option value="07">Juli</option><option value="08">Agustus</option>
+              <option value="09">September</option><option value="10">Oktober</option>
+              <option value="11">November</option><option value="12">Desember</option>
+            </select>
+            <select id="e-tgl-y" onchange="eOnDateChange()"><option value="">Tahun</option></select>
+          </div>
+          <div class="modal-lansia-banner" id="e-lansia-banner">👴 Lansia — Usia <span id="e-lansia-usia">0</span> Tahun</div>
+        </div>
+        <div class="field"><label>Tempat Lahir</label><input type="text" id="e-tempat"></div>
+        <div class="field"><label>Alamat</label><input type="text" id="e-alamat"></div>
+        <div class="field">
+          <label>Pendidikan Terakhir</label>
+          <select id="e-pendidikan">
+            <option value="">-- Pilih --</option>
+            <option>Tidak/Belum Sekolah</option><option>SD/Sederajat</option>
+            <option>SMP/Sederajat</option><option>SMA/Sederajat</option>
+            <option>D1/D2/D3</option><option>S1/D4</option><option>S2</option><option>S3</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Status Pernikahan</label>
+          <div class="radio-group" id="erg-nikah">
+            <label class="rb-item"><input type="radio" name="e-nikah" value="Menikah" onchange="eUpdateNikah()"> Menikah</label>
+            <label class="rb-item"><input type="radio" name="e-nikah" value="Belum Menikah" onchange="eUpdateNikah()"> Belum Menikah</label>
+            <label class="rb-item" id="e-rb-janda" style="display:none"><input type="radio" name="e-nikah" value="Janda" onchange="eUpdateNikah()"> Janda</label>
+            <label class="rb-item" id="e-rb-duda" style="display:none"><input type="radio" name="e-nikah" value="Duda" onchange="eUpdateNikah()"> Duda</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Status Pekerjaan</div>
+        <div class="radio-group" id="erg-kerja">
+          <label class="rb-item"><input type="radio" name="e-kerja" value="Bekerja"> Bekerja</label>
+          <label class="rb-item"><input type="radio" name="e-kerja" value="Tidak Bekerja"> Tidak Bekerja</label>
+        </div>
+      </div>
+
+      <div class="section" id="e-sec-kondisi-wrap" style="display:none">
+        <div class="section-title" style="color:#e65100">🧓 Kondisi Lansia</div>
+        <div class="checkbox-group">
+          <label class="cb-item" style="background:#fff3e0;border-color:#ffcc80"><input type="checkbox" class="e-kondisi-lansia" value="Miskin dan Terlantar"> Miskin dan Terlantar</label>
+          <label class="cb-item" style="background:#fff3e0;border-color:#ffcc80"><input type="checkbox" class="e-kondisi-lansia" value="Tidak Ada Pendamping"> Tidak Ada Pendamping</label>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Penerima Bansos</div>
+        <div class="radio-group" id="erg-bansos">
+          <label class="rb-item"><input type="radio" name="e-bansos" value="Ya" onchange="eToggleBansos(true)"> Ya</label>
+          <label class="rb-item"><input type="radio" name="e-bansos" value="Tidak" onchange="eToggleBansos(false)"> Tidak</label>
+        </div>
+        <div class="conditional-section" id="e-sec-bansos">
+          <div class="sub-section">
+            <div class="sub-section-title">Jenis Bansos</div>
+            <div class="checkbox-group">
+              <label class="cb-item"><input type="checkbox" class="e-jenis-bansos" value="Tunai"> Tunai</label>
+              <label class="cb-item"><input type="checkbox" class="e-jenis-bansos" value="Non Tunai"> Non Tunai</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Kepemilikan Asuransi Kesehatan</div>
+        <div class="checkbox-group">
+          <label class="cb-item"><input type="checkbox" class="e-asuransi" value="BPJS"> BPJS</label>
+          <label class="cb-item"><input type="checkbox" class="e-asuransi" value="Lainnya"> Lainnya</label>
+          <label class="cb-item"><input type="checkbox" class="e-asuransi" value="Tidak Punya"> Tidak Punya</label>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Kontak</div>
+        <div class="field"><label>Nomor Kontak</label><input type="tel" id="e-kontak" inputmode="tel"></div>
+      </div>
+
+    </div><!-- end modal-body -->
+    <div class="modal-footer">
+      <button class="btn btn-clear" onclick="tutupModal()">Batal</button>
+      <button class="btn btn-add" onclick="simpanEdit()">✓ Simpan Perubahan</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 <script>
 // ─── STATE ────────────────────────────────────────────────────────────────────
 let wargaData = [];
@@ -369,6 +575,8 @@ let settings  = { kelurahan:'', rw:'', tahun:'2026', kecamatan:'', kota:'', ketu
 let deferredInstallPrompt = null;
 let tglLahir  = '';
 let currentFilter = 'all';
+let currentSort   = 'default';
+let filterRT      = 'all'; // 'all' atau nomor RT spesifik
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 window.addEventListener('load', () => {
@@ -630,7 +838,7 @@ function clearForm() {
   document.querySelector('.page-content').scrollTop=0;
 }
 
-// ─── FILTER ───────────────────────────────────────────────────────────────────
+// ─── FILTER & SORT ────────────────────────────────────────────────────────────
 function setFilter(f) {
   currentFilter = f;
   document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
@@ -640,19 +848,128 @@ function setFilter(f) {
   renderList();
 }
 
+function setSort(s) {
+  currentSort = s;
+  document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sb-'+s).classList.add('active');
+  renderList();
+}
+
+function setRtFilter(rt) {
+  filterRT = rt;
+  document.querySelectorAll('#rt-chips .chip').forEach(b=>b.classList.remove('active'));
+  const btn = document.getElementById('chip-rt-' + rt);
+  if (btn) btn.classList.add('active');
+  renderList();
+}
+
+function clearUsiaFilter() {
+  document.getElementById('usia-min').value = '';
+  document.getElementById('usia-max').value = '';
+  renderList();
+}
+
+function updateRtChips() {
+  // Ambil daftar RT unik dari data
+  const rtList = [...new Set(wargaData.map(w=>w.rt||'').filter(Boolean))]
+    .sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+  const container = document.getElementById('rt-chips');
+  if (!container) return;
+
+  // Simpan tombol "Semua" lalu hapus sisanya
+  const allBtn = document.getElementById('chip-rt-all');
+  container.innerHTML = '';
+  container.appendChild(allBtn);
+
+  rtList.forEach(rt => {
+    const btn = document.createElement('button');
+    btn.className = 'chip' + (filterRT===rt?' active':'');
+    btn.id = 'chip-rt-' + rt;
+    btn.textContent = 'RT ' + rt;
+    btn.onclick = () => setRtFilter(rt);
+    container.appendChild(btn);
+  });
+
+  // Pastikan "Semua" aktif jika filterRT=all
+  allBtn.className = 'chip' + (filterRT==='all'?' active':'');
+}
+
 // ─── RENDER LIST ──────────────────────────────────────────────────────────────
 function renderList() {
+  updateRtChips();
   const q = (document.getElementById('search-input').value||'').toLowerCase();
   let filtered = wargaData;
+
+  // Filter kategori
   if (currentFilter==='lansia')    filtered = filtered.filter(w=>w.isLansia);
   if (currentFilter==='nonlansia') filtered = filtered.filter(w=>!w.isLansia);
+
+  // Filter RT
+  if (filterRT !== 'all') filtered = filtered.filter(w=>(w.rt||'')===filterRT);
+
+  // Filter rentang usia
+  const usiaMinEl = document.getElementById('usia-min');
+  const usiaMaxEl = document.getElementById('usia-max');
+  const usiaMin = usiaMinEl && usiaMinEl.value !== '' ? parseInt(usiaMinEl.value) : null;
+  const usiaMax = usiaMaxEl && usiaMaxEl.value !== '' ? parseInt(usiaMaxEl.value) : null;
+  if (usiaMin !== null || usiaMax !== null) {
+    filtered = filtered.filter(w => {
+      const u = hitungUsia(w.tanggalLahir);
+      if (u === null) return false;
+      if (usiaMin !== null && u < usiaMin) return false;
+      if (usiaMax !== null && u > usiaMax) return false;
+      return true;
+    });
+  }
+
+  // Filter pencarian
   if (q) filtered = filtered.filter(w=>w.namaLengkap.toLowerCase().includes(q)||w.nik.includes(q));
 
-  const jumlahLansia = wargaData.filter(w=>w.isLansia).length;
-  document.getElementById('count-all').textContent    = wargaData.length + ' total';
+  // Sorting
+  if (currentSort==='usia-asc') {
+    filtered = [...filtered].sort((a,b)=>{
+      const ua=hitungUsia(a.tanggalLahir)??-1, ub=hitungUsia(b.tanggalLahir)??-1;
+      return ua-ub;
+    });
+  } else if (currentSort==='usia-desc') {
+    filtered = [...filtered].sort((a,b)=>{
+      const ua=hitungUsia(a.tanggalLahir)??-1, ub=hitungUsia(b.tanggalLahir)??-1;
+      return ub-ua;
+    });
+  } else if (currentSort==='rt-asc') {
+    filtered = [...filtered].sort((a,b)=>(a.rt||'').localeCompare(b.rt||'',undefined,{numeric:true}));
+  } else if (currentSort==='rt-desc') {
+    filtered = [...filtered].sort((a,b)=>(b.rt||'').localeCompare(a.rt||'',undefined,{numeric:true}));
+  }
+
+  // Update badge berdasarkan data setelah semua filter aktif (kecuali sort & search)
+  // Hitung dari 'filtered' sebelum sort/search agar badge mencerminkan filter aktif
+  let forBadge = wargaData;
+  if (currentFilter==='lansia')    forBadge = forBadge.filter(w=>w.isLansia);
+  if (currentFilter==='nonlansia') forBadge = forBadge.filter(w=>!w.isLansia);
+  if (filterRT !== 'all')          forBadge = forBadge.filter(w=>(w.rt||'')===filterRT);
+  const usiaMinBadge = document.getElementById('usia-min')?.value;
+  const usiaMaxBadge = document.getElementById('usia-max')?.value;
+  if (usiaMinBadge !== '' && usiaMinBadge != null) forBadge = forBadge.filter(w=>{ const u=hitungUsia(w.tanggalLahir); return u!==null && u>=parseInt(usiaMinBadge); });
+  if (usiaMaxBadge !== '' && usiaMaxBadge != null) forBadge = forBadge.filter(w=>{ const u=hitungUsia(w.tanggalLahir); return u!==null && u<=parseInt(usiaMaxBadge); });
+
+  const jumlahPria   = forBadge.filter(w=>w.jk==='Laki-Laki').length;
+  const jumlahWanita = forBadge.filter(w=>w.jk==='Perempuan').length;
+  const jumlahLansia = forBadge.filter(w=>w.isLansia).length;
+
+  document.getElementById('count-all').textContent = forBadge.length + ' total';
+
+  const cp = document.getElementById('count-pria');
+  cp.textContent = jumlahPria + ' pria';
+  cp.style.display = 'inline-flex';
+
+  const cw = document.getElementById('count-wanita');
+  cw.textContent = jumlahWanita + ' wanita';
+  cw.style.display = 'inline-flex';
+
   const cl = document.getElementById('count-lansia');
   cl.textContent = jumlahLansia + ' lansia';
-  cl.style.display = jumlahLansia > 0 ? 'inline-flex' : 'none';
+  cl.style.display = 'inline-flex';
 
   const container = document.getElementById('warga-list');
   if (!filtered.length) {
@@ -671,6 +988,7 @@ function renderList() {
     if((w.kondisiLansia||[]).includes('Tidak Ada Pendamping')) tags.push(`<span class="w-tag red">Tdk Ada Pendamping</span>`);
     return `<div class="warga-card${w.isLansia?' lansia':''}">
       <button class="del-btn" onclick="hapusWarga(${w.id})">✕</button>
+      <button class="edit-btn" onclick="bukaEdit(${w.id})">✏</button>
       <div class="w-no">No. ${w.no} · RT ${w.rt||'-'} / RW ${w.rw||'-'}</div>
       <div class="w-name">${w.namaLengkap}</div>
       <div class="w-nik">NIK: ${w.nik}</div>
@@ -695,34 +1013,222 @@ function hapusWarga(id) {
   showToast('Data dihapus');
 }
 
-// ─── EXPORT EXCEL ─────────────────────────────────────────────────────────────
-function exportExcel() {
-  if (!wargaData.length) { showToast('⚠ Belum ada data','error'); return; }
+// ─── EDIT WARGA ───────────────────────────────────────────────────────────────
+let editId = null;
+let eTglLahir = '';
 
-  const kel=settings.kelurahan||'___________', rw=settings.rw||'___', thn=settings.tahun||'2026';
-  const kec=settings.kecamatan||'___________', kota=settings.kota||'___________';
-  const ketuaRW=settings.ketuaRW||'___________', ketuaRT=settings.ketuaRT||'___________';
-  const wb = XLSX.utils.book_new();
+function eBuildDates() {
+  const dSel = document.getElementById('e-tgl-d');
+  if (dSel.options.length > 1) return; // sudah dibangun
+  for (let i=1;i<=31;i++) { const o=document.createElement('option'); o.value=String(i).padStart(2,'0'); o.textContent=i; dSel.appendChild(o); }
+  const ySel = document.getElementById('e-tgl-y');
+  const now = new Date().getFullYear();
+  for (let y=now;y>=1920;y--) { const o=document.createElement('option'); o.value=y; o.textContent=y; ySel.appendChild(o); }
+}
 
-  // ── SHEET 1: Data_Warga_Master ─────────────────────────────────────────────
-  // Kolom usia dihitung berdasarkan 31 Des 2026
-  // Urutan kolom: No(0) Kel(1) RT(2) RW(3) KK(4) NIK(5) Status(6-8) Nama(9) JK(10-11) Tempat(12) Tgl(13) Usia(14) Alamat(15) Pendidikan(16) Nikah(17-20) Kerja(21-22) Bansos(23-24) JenisBansos(25-26) Asuransi(27-29) Kontak(30)
+function eSetupInteractions() {
+  document.querySelectorAll('#modal-edit .rb-item input[type=radio]').forEach(r=>{
+    r.addEventListener('change',()=>{
+      r.closest('.radio-group').querySelectorAll('.rb-item').forEach(i=>i.classList.remove('selected'));
+      r.closest('.rb-item').classList.add('selected');
+    });
+  });
+  document.querySelectorAll('#modal-edit .cb-item input[type=checkbox]').forEach(cb=>{
+    cb.addEventListener('change',()=>cb.closest('.cb-item').classList.toggle('selected',cb.checked));
+  });
+}
+
+function eOnDateChange() {
+  const d=document.getElementById('e-tgl-d').value;
+  const m=document.getElementById('e-tgl-m').value;
+  const y=document.getElementById('e-tgl-y').value;
+  eTglLahir = (d&&m&&y) ? `${y}-${m}-${d}` : '';
+  eCheckLansia();
+}
+
+function eCheckLansia() {
+  const usia = hitungUsia(eTglLahir);
+  const isLansia = usia !== null && usia >= 60;
+  document.getElementById('e-lansia-banner').classList.toggle('show', isLansia);
+  if (isLansia) document.getElementById('e-lansia-usia').textContent = usia;
+  document.getElementById('e-sec-kondisi-wrap').style.display = isLansia ? 'block' : 'none';
+  if (!isLansia) {
+    document.querySelectorAll('.e-kondisi-lansia').forEach(c=>{c.checked=false;c.closest('.cb-item').classList.remove('selected');});
+  }
+}
+
+function eUpdateNikah() {
+  const jk = document.querySelector('input[name="e-jk"]:checked');
+  const rbJ = document.getElementById('e-rb-janda');
+  const rbD = document.getElementById('e-rb-duda');
+  rbJ.style.display='none'; rbD.style.display='none';
+  if (jk) {
+    if (jk.value==='Perempuan') rbJ.style.display='';
+    if (jk.value==='Laki-Laki') rbD.style.display='';
+  }
+  // reset janda/duda jika jk berubah dan tidak relevan
+  const curNikah = document.querySelector('input[name="e-nikah"]:checked');
+  if (curNikah && (curNikah.value==='Janda'||curNikah.value==='Duda')) {
+    if (curNikah.closest('.rb-item').style.display==='none') {
+      curNikah.checked=false; curNikah.closest('.rb-item').classList.remove('selected');
+    }
+  }
+}
+
+function eToggleBansos(show) {
+  const sec=document.getElementById('e-sec-bansos');
+  if(show) { sec.classList.add('show'); }
+  else {
+    sec.classList.remove('show');
+    document.querySelectorAll('.e-jenis-bansos').forEach(c=>{c.checked=false;c.closest('.cb-item').classList.remove('selected');});
+  }
+}
+
+function eSetRadio(name, value) {
+  document.querySelectorAll(`input[name="${name}"]`).forEach(r=>{
+    r.checked = (r.value===value);
+    r.closest('.rb-item').classList.toggle('selected', r.checked);
+  });
+}
+
+function eSetChecks(cls, values) {
+  document.querySelectorAll('.'+cls).forEach(c=>{
+    c.checked = values.includes(c.value);
+    c.closest('.cb-item').classList.toggle('selected', c.checked);
+  });
+}
+
+function bukaEdit(id) {
+  const w = wargaData.find(x=>x.id===id);
+  if (!w) return;
+  editId = id;
+  eBuildDates();
+  eSetupInteractions();
+
+  // Isi semua field
+  document.getElementById('e-rt').value       = w.rt||'';
+  document.getElementById('e-rw').value       = w.rw||'';
+  document.getElementById('e-nokk').value     = w.nokk||'';
+  document.getElementById('e-nik').value      = w.nik||'';
+  document.getElementById('e-nama').value     = w.namaLengkap||'';
+  document.getElementById('e-tempat').value   = w.tempatLahir||'';
+  document.getElementById('e-alamat').value   = w.alamat||'';
+  document.getElementById('e-pendidikan').value = w.pendidikan||'';
+  document.getElementById('e-kontak').value   = w.kontak||'';
+
+  // Tanggal lahir
+  eTglLahir = w.tanggalLahir||'';
+  if (eTglLahir) {
+    const [y,m,d] = eTglLahir.split('-');
+    document.getElementById('e-tgl-d').value = d;
+    document.getElementById('e-tgl-m').value = m;
+    document.getElementById('e-tgl-y').value = y;
+  } else {
+    document.getElementById('e-tgl-d').value='';
+    document.getElementById('e-tgl-m').value='';
+    document.getElementById('e-tgl-y').value='';
+  }
+
+  eSetRadio('e-status', w.status||'');
+  eSetRadio('e-jk',     w.jk||'');
+  eSetRadio('e-kerja',  w.pekerjaan||'');
+  eSetRadio('e-bansos', w.bansos||'');
+  eSetChecks('e-jenis-bansos', w.jenisBansos||[]);
+  eSetChecks('e-asuransi', w.asuransi||[]);
+  eSetChecks('e-kondisi-lansia', w.kondisiLansia||[]);
+
+  // Update nikah opsi & set value
+  eUpdateNikah();
+  eSetRadio('e-nikah', w.statusNikah||'');
+  // Pastikan janda/duda terlihat dulu sebelum set
+  const jkVal = w.jk||'';
+  if (jkVal==='Perempuan') document.getElementById('e-rb-janda').style.display='';
+  if (jkVal==='Laki-Laki') document.getElementById('e-rb-duda').style.display='';
+
+  // Bansos section
+  if (w.bansos==='Ya') document.getElementById('e-sec-bansos').classList.add('show');
+  else document.getElementById('e-sec-bansos').classList.remove('show');
+
+  // Lansia check
+  eCheckLansia();
+
+  // Buka modal
+  document.getElementById('modal-edit').classList.add('open');
+  document.getElementById('modal-body').scrollTop=0;
+}
+
+function tutupModal() {
+  document.getElementById('modal-edit').classList.remove('open');
+  editId = null;
+}
+
+function eGetRadio(name) {
+  const el=document.querySelector(`input[name="${name}"]:checked`);
+  return el?el.value:'';
+}
+function eGetChecks(cls) {
+  return Array.from(document.querySelectorAll('.'+cls+':checked')).map(x=>x.value);
+}
+
+function simpanEdit() {
+  const nama = document.getElementById('e-nama').value.trim();
+  const nik  = document.getElementById('e-nik').value.trim();
+  if (!nama) { showToast('⚠ Nama lengkap wajib diisi','error'); return; }
+  if (!nik)  { showToast('⚠ NIK wajib diisi','error'); return; }
+
+  const usia    = hitungUsia(eTglLahir);
+  const isLansia = usia!==null && usia>=60;
+
+  const idx = wargaData.findIndex(x=>x.id===editId);
+  if (idx===-1) return;
+
+  // Pertahankan id & no, update semua field lainnya
+  wargaData[idx] = {
+    ...wargaData[idx],
+    rt: document.getElementById('e-rt').value,
+    rw: document.getElementById('e-rw').value,
+    nokk: document.getElementById('e-nokk').value,
+    nik, namaLengkap: nama,
+    status: eGetRadio('e-status'),
+    jk: eGetRadio('e-jk'),
+    tanggalLahir: eTglLahir,
+    usia, isLansia,
+    kondisiLansia: isLansia ? eGetChecks('e-kondisi-lansia') : [],
+    statusNikah: eGetRadio('e-nikah'),
+    tempatLahir: document.getElementById('e-tempat').value,
+    alamat: document.getElementById('e-alamat').value,
+    pendidikan: document.getElementById('e-pendidikan').value,
+    pekerjaan: eGetRadio('e-kerja'),
+    bansos: eGetRadio('e-bansos'),
+    jenisBansos: eGetChecks('e-jenis-bansos'),
+    asuransi: eGetChecks('e-asuransi'),
+    kontak: document.getElementById('e-kontak').value,
+  };
+
+  saveData(); renderList(); tutupModal();
+  showToast('✓ Data ' + nama + ' diperbarui', 'success');
+}
+
+// ─── HELPER: buat worksheet data warga (dipakai RW master & per RT) ──────────
+function buatSheetWarga(dataArr, judul, kel, rw, thn, kec, kota, ketuaRW, ketuaRT) {
+  const NC = 31;
   const H1=['No','Kelurahan','RT','RW','No. KK','NIK','Status','','','Nama Lengkap','Jenis Kelamin','','Tempat Lahir','Tanggal Lahir','Usia','Alamat','Pendidikan Terakhir','Status Pernikahan','','','','Status Pekerjaan','','Penerima Bansos','','Jenis Bansos','','Kepemilikan Asuransi Kesehatan','','','Nomor Kontak'];
   const H2=['','','','','','','Permanen','Non Permanen','WNA','','Laki-Laki','Perempuan','','','(Thn)','','','Menikah','Belum Menikah','Janda','Duda','Bekerja','Tidak Bekerja','Ya','Tidak','Tunai','Non Tunai','BPJS','Lainnya','Tidak Punya',''];
 
-  const aoa1=[
-    [`FORMAT DATA WARGA - KELURAHAN ${kel.toUpperCase()} RW ${rw} TAHUN ${thn}`],
+  const aoa=[
+    [judul],
     [`Kecamatan: ${kec}`, '', `Kota/Kab: ${kota}`],
     [], H1, H2
   ];
-  wargaData.forEach((w,i)=>{
-    const usiaExport = hitungUsia(w.tanggalLahir);
-    aoa1.push([
+
+  dataArr.forEach((w,i)=>{
+    const u = hitungUsia(w.tanggalLahir);
+    aoa.push([
       i+1, w.kelurahan||kel, w.rt, w.rw||rw, w.nokk, w.nik,
       w.status==='Permanen'?'✓':'', w.status==='Non Permanen'?'✓':'', w.status==='WNA'?'✓':'',
       w.namaLengkap, w.jk==='Laki-Laki'?'✓':'', w.jk==='Perempuan'?'✓':'',
       w.tempatLahir, w.tanggalLahir?fmtTgl(w.tanggalLahir):'',
-      usiaExport !== null ? usiaExport : '',
+      u !== null ? u : '',
       w.alamat, w.pendidikan,
       w.statusNikah==='Menikah'?'✓':'', w.statusNikah==='Belum Menikah'?'✓':'',
       w.statusNikah==='Janda'?'✓':'', w.statusNikah==='Duda'?'✓':'',
@@ -734,108 +1240,292 @@ function exportExcel() {
     ]);
   });
 
-  // ── Tabel Rekapitulasi Usia ──────────────────────────────────────────────────
-  // Hitung jumlah warga per usia (0 s/d usia tertua), usia null dilewati
-  const usiaMap = {};
-  wargaData.forEach(w => {
-    const u = hitungUsia(w.tanggalLahir);
-    if (u !== null && u >= 0) usiaMap[u] = (usiaMap[u] || 0) + 1;
+  // ── Rekapitulasi usia ─────────────────────────────────────────────────────
+  const uLL={}, uLK={}, uAll={};
+  dataArr.forEach(w=>{
+    const u=hitungUsia(w.tanggalLahir);
+    if(u===null||u<0) return;
+    uAll[u]=(uAll[u]||0)+1;
+    if(w.jk==='Laki-Laki') uLL[u]=(uLL[u]||0)+1;
+    if(w.jk==='Perempuan') uLK[u]=(uLK[u]||0)+1;
   });
-  const usiaList = Object.keys(usiaMap).map(Number);
-  const usiaTertua = usiaList.length > 0 ? Math.max(...usiaList) : 0;
+  const usiaTertua = Object.keys(uAll).length>0 ? Math.max(...Object.keys(uAll).map(Number)) : 0;
+  const totLL  = dataArr.filter(w=>w.jk==='Laki-Laki' && hitungUsia(w.tanggalLahir)!==null).length;
+  const totLK  = dataArr.filter(w=>w.jk==='Perempuan' && hitungUsia(w.tanggalLahir)!==null).length;
+  const totAll = dataArr.filter(w=>hitungUsia(w.tanggalLahir)!==null).length;
 
-  aoa1.push([]); // 1 baris kosong setelah data terakhir
-  // Header tabel rekap
-  const rekH = new Array(31).fill('');
-  rekH[0]='Rekapitulasi Jumlah Warga per Usia (Tahun 2026)';
-  aoa1.push(rekH);
-  const rekH2 = new Array(31).fill('');
-  rekH2[0]='Usia (Thn)'; rekH2[1]='Jumlah Warga';
-  aoa1.push(rekH2);
-  for (let u=0; u<=usiaTertua; u++) {
-    const row = new Array(31).fill('');
-    row[0] = u;
-    row[1] = usiaMap[u] || 0;
-    aoa1.push(row);
+  aoa.push([]);
+  const rH=new Array(NC).fill(''); rH[0]='Rekapitulasi Jumlah Warga per Usia (Tahun 2026)'; aoa.push(rH);
+  const rH2=new Array(NC).fill(''); rH2[0]='Usia (Thn)'; rH2[1]='Laki-Laki'; rH2[2]='Perempuan'; rH2[3]='Jumlah'; aoa.push(rH2);
+  for(let u=0;u<=usiaTertua;u++){
+    const row=new Array(NC).fill('');
+    row[0]=u; row[1]=uLL[u]||0; row[2]=uLK[u]||0; row[3]=uAll[u]||0;
+    aoa.push(row);
   }
-  // Baris total
-  const totRow = new Array(31).fill('');
-  totRow[0]='TOTAL'; totRow[1]=wargaData.filter(w=>hitungUsia(w.tanggalLahir)!==null).length;
-  aoa1.push(totRow);
+  const tRow=new Array(NC).fill(''); tRow[0]='TOTAL'; tRow[1]=totLL; tRow[2]=totLK; tRow[3]=totAll; aoa.push(tRow);
 
-  aoa1.push([],[],[]);
-  const s1=new Array(31).fill(''); s1[7]='Mengetahui,'; s1[25]='Pengumpul Data,'; aoa1.push(s1);
-  const s2=new Array(31).fill(''); s2[7]=`Ketua RW ${rw}`; s2[25]='Ketua RT / Pengumpul'; aoa1.push(s2);
-  for(let i=0;i<3;i++) aoa1.push(new Array(31).fill(''));
-  const s3=new Array(31).fill(''); s3[7]=`( ${ketuaRW} )`; s3[25]=`( ${ketuaRT} )`; aoa1.push(s3);
+  aoa.push([],[],[]);
+  const sg1=new Array(NC).fill(''); sg1[7]='Mengetahui,'; sg1[25]='Pengumpul Data,'; aoa.push(sg1);
+  const sg2=new Array(NC).fill(''); sg2[7]=`Ketua RW ${rw}`; sg2[25]='Ketua RT / Pengumpul'; aoa.push(sg2);
+  for(let i=0;i<3;i++) aoa.push(new Array(NC).fill(''));
+  const sg3=new Array(NC).fill(''); sg3[7]=`( ${ketuaRW} )`; sg3[25]=`( ${ketuaRT} )`; aoa.push(sg3);
 
-  const ws1=XLSX.utils.aoa_to_sheet(aoa1);
-  // 31 kolom: No Kel RT RW KK NIK Perm NonPerm WNA Nama LL Pr Tempat Tgl Usia Alamat Pend Nik BlmNik Janda Duda Kerja TdkKerja Ya Tidak Tunai NonTunai BPJS Lain TdkPny Kontak
-  ws1['!cols']=[{wch:4},{wch:16},{wch:4},{wch:4},{wch:17},{wch:18},{wch:9},{wch:12},{wch:5},{wch:24},{wch:10},{wch:10},{wch:14},{wch:13},{wch:6},{wch:24},{wch:17},{wch:9},{wch:13},{wch:7},{wch:6},{wch:8},{wch:13},{wch:5},{wch:6},{wch:7},{wch:10},{wch:6},{wch:9},{wch:12},{wch:16}];
+  const ws=XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols']=[{wch:4},{wch:16},{wch:4},{wch:4},{wch:17},{wch:18},{wch:9},{wch:12},{wch:5},{wch:24},{wch:10},{wch:10},{wch:14},{wch:13},{wch:6},{wch:24},{wch:17},{wch:9},{wch:13},{wch:7},{wch:6},{wch:8},{wch:13},{wch:5},{wch:6},{wch:7},{wch:10},{wch:6},{wch:9},{wch:12},{wch:16}];
 
-  const dataStartRow = 5;
-  const rekStart = dataStartRow + wargaData.length + 1;
-  const rekTitleRow = rekStart;
-
-  const merges=[
+  const rekTitleRow = 5 + dataArr.length + 1;
+  ws['!merges']=[
     {s:{r:0,c:0},e:{r:0,c:30}},
-    {s:{r:3,c:6},e:{r:3,c:8}},   // Status
-    {s:{r:3,c:10},e:{r:3,c:11}}, // Jenis Kelamin
-    {s:{r:3,c:17},e:{r:3,c:20}}, // Status Pernikahan
-    {s:{r:3,c:21},e:{r:3,c:22}}, // Status Pekerjaan
-    {s:{r:3,c:23},e:{r:3,c:24}}, // Penerima Bansos
-    {s:{r:3,c:25},e:{r:3,c:26}}, // Jenis Bansos
-    {s:{r:3,c:27},e:{r:3,c:29}}, // Asuransi
-    {s:{r:rekTitleRow,c:0},e:{r:rekTitleRow,c:3}},
+    {s:{r:3,c:6},e:{r:3,c:8}},
+    {s:{r:3,c:10},e:{r:3,c:11}},
+    {s:{r:3,c:17},e:{r:3,c:20}},
+    {s:{r:3,c:21},e:{r:3,c:22}},
+    {s:{r:3,c:23},e:{r:3,c:24}},
+    {s:{r:3,c:25},e:{r:3,c:26}},
+    {s:{r:3,c:27},e:{r:3,c:29}},
+    {s:{r:rekTitleRow,c:0},e:{r:rekTitleRow,c:3}}, // merge judul rekap A-D saja
   ];
-  ws1['!merges'] = merges;
-  XLSX.utils.book_append_sheet(wb, ws1, 'Data_Warga_Master');
 
-  // ── SHEET 2: Data_Lansia ───────────────────────────────────────────────────
+  // ── Styling: header hijau muda + garis tabel ──────────────────────────────
+  const NCOLS = NC;
+  const totalRows = aoa.length;
+
+  // Helper encode cell address
+  function enc(r,c){ return XLSX.utils.encode_cell({r,c}); }
+
+  // Border style tipis semua sisi
+  const thinBorder = {
+    top:    {style:'thin', color:{rgb:'AAAAAA'}},
+    bottom: {style:'thin', color:{rgb:'AAAAAA'}},
+    left:   {style:'thin', color:{rgb:'AAAAAA'}},
+    right:  {style:'thin', color:{rgb:'AAAAAA'}}
+  };
+  const medBorder = {
+    top:    {style:'medium', color:{rgb:'2E7D32'}},
+    bottom: {style:'medium', color:{rgb:'2E7D32'}},
+    left:   {style:'medium', color:{rgb:'2E7D32'}},
+    right:  {style:'medium', color:{rgb:'2E7D32'}}
+  };
+
+  // Style header H1 (baris 3) — hijau muda, bold, center, border medium
+  const styleH1 = {
+    fill: {patternType:'solid', fgColor:{rgb:'C8E6C9'}}, // hijau muda
+    font: {bold:true, sz:10, color:{rgb:'1B5E20'}},
+    alignment: {horizontal:'center', vertical:'center', wrapText:true},
+    border: medBorder
+  };
+  // Style header H2 (baris 4) — hijau lebih muda
+  const styleH2 = {
+    fill: {patternType:'solid', fgColor:{rgb:'E8F5E9'}},
+    font: {bold:true, sz:10, color:{rgb:'2E7D32'}},
+    alignment: {horizontal:'center', vertical:'center', wrapText:true},
+    border: medBorder
+  };
+  // Style data rows — border tipis, center untuk kolom centang
+  const styleData = {
+    border: thinBorder,
+    alignment: {vertical:'center'}
+  };
+  const styleDataCenter = {
+    border: thinBorder,
+    alignment: {horizontal:'center', vertical:'center'}
+  };
+  // Style baris judul (row 0) — bold, hijau tua, font putih
+  const styleJudul = {
+    fill: {patternType:'solid', fgColor:{rgb:'2E7D32'}},
+    font: {bold:true, sz:12, color:{rgb:'FFFFFF'}},
+    alignment: {horizontal:'center', vertical:'center'}
+  };
+  // Style rekap header
+  const styleRekH = {
+    fill: {patternType:'solid', fgColor:{rgb:'C8E6C9'}},
+    font: {bold:true, sz:10, color:{rgb:'1B5E20'}},
+    alignment: {horizontal:'center', vertical:'center'},
+    border: medBorder
+  };
+  // Style rekap data
+  const styleRekData = {
+    border: thinBorder,
+    alignment: {horizontal:'center', vertical:'center'}
+  };
+  // Style TOTAL row — bold
+  const styleTotal = {
+    fill: {patternType:'solid', fgColor:{rgb:'E8F5E9'}},
+    font: {bold:true, sz:10, color:{rgb:'1B5E20'}},
+    alignment: {horizontal:'center', vertical:'center'},
+    border: medBorder
+  };
+
+  // Kolom yang isinya centang (center) vs teks (left)
+  const centerCols = new Set([6,7,8,10,11,17,18,19,20,21,22,23,24,25,26,27,28,29,14]);
+
+  // Terapkan style baris per baris
+  // Rekap usia hanya pakai 4 kolom (0-3), styling hanya sampai situ
+  const REKAP_COLS = 4; // Usia | Laki-Laki | Perempuan | Jumlah
+
+  for (let r=0; r<totalRows; r++) {
+    if (r===0) {
+      // Baris judul — full width
+      for (let col=0; col<NCOLS; col++) {
+        const addr=enc(r,col);
+        if(!ws[addr]) ws[addr]={t:'z',v:''};
+        ws[addr].s = styleJudul;
+      }
+    } else if (r===3) {
+      // H1 header — full width
+      for (let col=0; col<NCOLS; col++) {
+        const addr=enc(r,col);
+        if(!ws[addr]) ws[addr]={t:'z',v:''};
+        ws[addr].s = styleH1;
+      }
+    } else if (r===4) {
+      // H2 header — full width
+      for (let col=0; col<NCOLS; col++) {
+        const addr=enc(r,col);
+        if(!ws[addr]) ws[addr]={t:'z',v:''};
+        ws[addr].s = styleH2;
+      }
+    } else if (r >= 5 && r < 5 + dataArr.length) {
+      // Baris data warga — full width
+      for (let col=0; col<NCOLS; col++) {
+        const addr=enc(r,col);
+        if(!ws[addr]) ws[addr]={t:'z',v:''};
+        ws[addr].s = centerCols.has(col) ? styleDataCenter : styleData;
+      }
+    } else if (r === rekTitleRow) {
+      // Judul rekap — hanya kolom 0-3 saja
+      for (let col=0; col<REKAP_COLS; col++) {
+        const addr=enc(r,col);
+        if(!ws[addr]) ws[addr]={t:'z',v:''};
+        ws[addr].s = {
+          fill:{patternType:'solid', fgColor:{rgb:'1B5E20'}},
+          font:{bold:true, sz:11, color:{rgb:'FFFFFF'}},
+          alignment:{horizontal:'left', vertical:'center'},
+          border: medBorder
+        };
+      }
+    } else if (r === rekTitleRow + 1) {
+      // Header rekap kolom — hanya kolom 0-3
+      for (let col=0; col<REKAP_COLS; col++) {
+        const addr=enc(r,col);
+        if(!ws[addr]) ws[addr]={t:'z',v:''};
+        ws[addr].s = styleRekH;
+      }
+    } else if (r > rekTitleRow + 1 && r <= rekTitleRow + 1 + usiaTertua + 1) {
+      // Data rekap per usia — hanya kolom 0-3
+      for (let col=0; col<REKAP_COLS; col++) {
+        const addr=enc(r,col);
+        if(!ws[addr]) ws[addr]={t:'z',v:''};
+        ws[addr].s = styleRekData;
+      }
+    } else if (r === rekTitleRow + 2 + usiaTertua + 1) {
+      // Baris TOTAL rekap — hanya kolom 0-3
+      for (let col=0; col<REKAP_COLS; col++) {
+        const addr=enc(r,col);
+        if(!ws[addr]) ws[addr]={t:'z',v:''};
+        ws[addr].s = styleTotal;
+      }
+    }
+  }
+
+  // Row heights: H1 & H2 lebih tinggi karena wrap text
+  ws['!rows'] = [];
+  for (let r=0; r<totalRows; r++) {
+    if (r===0) ws['!rows'][r] = {hpt:22};
+    else if (r===3 || r===4) ws['!rows'][r] = {hpt:32};
+    else ws['!rows'][r] = {hpt:18};
+  }
+
+  return ws;
+}
+
+// ─── EXPORT EXCEL ─────────────────────────────────────────────────────────────
+function exportExcel() {
+  if (!wargaData.length) { showToast('⚠ Belum ada data','error'); return; }
+
+  const kel=settings.kelurahan||'___________', rw=settings.rw||'___', thn=settings.tahun||'2026';
+  const kec=settings.kecamatan||'___________', kota=settings.kota||'___________';
+  const ketuaRW=settings.ketuaRW||'___________', ketuaRT=settings.ketuaRT||'___________';
+  const wb = XLSX.utils.book_new();
+
+  // ── SHEET 1: Data_Warga_Master (semua RT) ─────────────────────────────────
+  const wsMaster = buatSheetWarga(
+    wargaData,
+    `FORMAT DATA WARGA - KELURAHAN ${kel.toUpperCase()} RW ${rw} TAHUN ${thn}`,
+    kel, rw, thn, kec, kota, ketuaRW, ketuaRT
+  );
+  XLSX.utils.book_append_sheet(wb, wsMaster, 'Data_Warga_Master');
+
+  // ── SHEET per RT ──────────────────────────────────────────────────────────
+  // Kumpulkan daftar RT unik, urutkan
+  const rtList = [...new Set(wargaData.map(w=>w.rt||'').filter(Boolean))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+  rtList.forEach(rtNo => {
+    const dataRT = wargaData.filter(w=>(w.rt||'')=== rtNo);
+    if (!dataRT.length) return;
+    const wsRT = buatSheetWarga(
+      dataRT,
+      `FORMAT DATA WARGA - KELURAHAN ${kel.toUpperCase()} RT ${rtNo} / RW ${rw} TAHUN ${thn}`,
+      kel, rw, thn, kec, kota, ketuaRW, ketuaRT
+    );
+    // Nama sheet maks 31 karakter di Excel
+    const sheetName = `Data_RT_${rtNo.padStart(2,'0')}`;
+    XLSX.utils.book_append_sheet(wb, wsRT, sheetName);
+  });
+
+  // ── SHEET Data_Lansia ─────────────────────────────────────────────────────
   const lansiaData = wargaData.filter(w=>w.isLansia);
   if (lansiaData.length > 0) {
     const LH1=['No','Kelurahan','RT','RW','NIK','Nama','Jenis Kelamin','','Kondisi','','Usia'];
     const LH2=['','','','','','','Laki-Laki','Perempuan','Miskin dan Terlantar','Tidak Ada Pendamping',''];
-
     const aoa2=[
       [`DATA LANSIA - KELURAHAN ${kel.toUpperCase()} RW ${rw} TAHUN ${thn}`],
       [`Kecamatan: ${kec}`, '', `Kota/Kab: ${kota}`],
       [], LH1, LH2
     ];
-
     lansiaData.forEach((w,i)=>aoa2.push([
-      i+1,
-      w.kelurahan||kel,
-      w.rt,
-      w.rw||rw,
-      w.nik,
-      w.namaLengkap,
-      w.jk==='Laki-Laki'?'✓':'',
-      w.jk==='Perempuan'?'✓':'',
+      i+1, w.kelurahan||kel, w.rt, w.rw||rw, w.nik, w.namaLengkap,
+      w.jk==='Laki-Laki'?'✓':'', w.jk==='Perempuan'?'✓':'',
       (w.kondisiLansia||[]).includes('Miskin dan Terlantar')?'✓':'',
       (w.kondisiLansia||[]).includes('Tidak Ada Pendamping')?'✓':'',
       w.usia
     ]));
-
     aoa2.push([],[],[]);
     const l1=new Array(11).fill(''); l1[2]='Mengetahui,'; l1[8]='Pengumpul Data,'; aoa2.push(l1);
     const l2=new Array(11).fill(''); l2[2]=`Ketua RW ${rw}`; l2[8]='Ketua RT / Pengumpul'; aoa2.push(l2);
     for(let i=0;i<3;i++) aoa2.push(new Array(11).fill(''));
     const l3=new Array(11).fill(''); l3[2]=`( ${ketuaRW} )`; l3[8]=`( ${ketuaRT} )`; aoa2.push(l3);
-
     const ws2=XLSX.utils.aoa_to_sheet(aoa2);
     ws2['!cols']=[{wch:4},{wch:16},{wch:4},{wch:4},{wch:18},{wch:24},{wch:10},{wch:10},{wch:20},{wch:20},{wch:6}];
-    ws2['!merges']=[
-      {s:{r:0,c:0},e:{r:0,c:10}},
-      {s:{r:3,c:6},e:{r:3,c:7}},
-      {s:{r:3,c:8},e:{r:3,c:9}},
-    ];
+    ws2['!merges']=[{s:{r:0,c:0},e:{r:0,c:10}},{s:{r:3,c:6},e:{r:3,c:7}},{s:{r:3,c:8},e:{r:3,c:9}}];
+
+    // Styling Data_Lansia
+    const NC2=11, ROWS2=aoa2.length;
+    function enc2(r,c){return XLSX.utils.encode_cell({r,c});}
+    const tb={top:{style:'thin',color:{rgb:'AAAAAA'}},bottom:{style:'thin',color:{rgb:'AAAAAA'}},left:{style:'thin',color:{rgb:'AAAAAA'}},right:{style:'thin',color:{rgb:'AAAAAA'}}};
+    const mb={top:{style:'medium',color:{rgb:'2E7D32'}},bottom:{style:'medium',color:{rgb:'2E7D32'}},left:{style:'medium',color:{rgb:'2E7D32'}},right:{style:'medium',color:{rgb:'2E7D32'}}};
+    for(let r=0;r<ROWS2;r++){
+      for(let co=0;co<NC2;co++){
+        const a=enc2(r,co);
+        if(!ws2[a]) ws2[a]={t:'z',v:''};
+        if(r===0) ws2[a].s={fill:{patternType:'solid',fgColor:{rgb:'2E7D32'}},font:{bold:true,sz:12,color:{rgb:'FFFFFF'}},alignment:{horizontal:'center',vertical:'center'}};
+        else if(r===3) ws2[a].s={fill:{patternType:'solid',fgColor:{rgb:'C8E6C9'}},font:{bold:true,sz:10,color:{rgb:'1B5E20'}},alignment:{horizontal:'center',vertical:'center',wrapText:true},border:mb};
+        else if(r===4) ws2[a].s={fill:{patternType:'solid',fgColor:{rgb:'E8F5E9'}},font:{bold:true,sz:10,color:{rgb:'2E7D32'}},alignment:{horizontal:'center',vertical:'center',wrapText:true},border:mb};
+        else if(r>=5 && r<5+lansiaData.length) ws2[a].s={border:tb,alignment:{horizontal:[6,7,8,9].includes(co)?'center':'left',vertical:'center'}};
+      }
+    }
+    ws2['!rows']=[];
+    for(let r=0;r<ROWS2;r++){
+      if(r===0) ws2['!rows'][r]={hpt:22};
+      else if(r===3||r===4) ws2['!rows'][r]={hpt:32};
+      else ws2['!rows'][r]={hpt:18};
+    }
     XLSX.utils.book_append_sheet(wb, ws2, 'Data_Lansia');
   }
 
   XLSX.writeFile(wb, `Data_Warga_RW${rw}_${kel}_${thn}.xlsx`);
-  const lansiaInfo = lansiaData.length > 0 ? ` + ${lansiaData.length} lansia` : '';
-  showToast(`✓ Excel diunduh (${wargaData.length} warga${lansiaInfo})`, 'success');
+  const rtInfo   = rtList.length > 0 ? ` | ${rtList.length} sheet RT` : '';
+  const lansiaInfo = lansiaData.length > 0 ? ` | ${lansiaData.length} lansia` : '';
+  showToast(`✓ Excel diunduh (${wargaData.length} warga${rtInfo}${lansiaInfo})`, 'success');
 }
 
 // ─── TOAST ────────────────────────────────────────────────────────────────────
