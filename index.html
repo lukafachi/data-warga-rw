@@ -127,6 +127,42 @@
   .filter-btn { padding: 6px 14px; border-radius: 20px; border: 1px solid #ddd; background: #f8f8f8; font-size: 12px; font-weight: 500; cursor: pointer; white-space: nowrap; color: #555; flex-shrink: 0; }
   .filter-btn.active { background: #e8f5ee; border-color: #1a5f3f; color: #1a5f3f; }
   .filter-btn.active.orange { background: #fff3e0; border-color: #fb8c00; color: #e65100; }
+
+  /* INFO PAGE */
+  .info-hero { background: #1a5f3f; color:#fff; padding: 20px 16px 18px; text-align:center; }
+  .info-hero-title { font-size:17px; font-weight:700; }
+  .info-hero-sub { font-size:12px; opacity:0.8; margin-top:4px; }
+  .info-section { padding: 16px 16px 6px; border-bottom: 6px solid #f5f5f5; }
+  .info-section-title { font-size:11px; font-weight:700; color:#1a5f3f; text-transform:uppercase; letter-spacing:0.6px; margin-bottom:12px; }
+  .info-grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:10px; }
+  .info-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+  .info-card { border-radius:12px; padding:14px 12px; text-align:center; }
+  .info-card-val { font-size:28px; font-weight:700; line-height:1; }
+  .info-card-lbl { font-size:12px; font-weight:600; margin-top:5px; }
+  .info-card-sub { font-size:11px; opacity:0.7; margin-top:2px; }
+  .info-card.total    { background:#e8f5ee; } .info-card.total .info-card-val { color:#1a5f3f; } .info-card.total .info-card-lbl { color:#2e7d32; }
+  .info-card.pria     { background:#e3f2fd; } .info-card.pria .info-card-val { color:#1565c0; } .info-card.pria .info-card-lbl { color:#1976d2; }
+  .info-card.wanita   { background:#fce4ec; } .info-card.wanita .info-card-val { color:#ad1457; } .info-card.wanita .info-card-lbl { color:#c2185b; }
+  .info-card.produktif{ background:#ede7f6; } .info-card.produktif .info-card-val { color:#4a148c; } .info-card.produktif .info-card-lbl { color:#6a1b9a; }
+  .info-card.lansia   { background:#fff3e0; } .info-card.lansia .info-card-val { color:#e65100; } .info-card.lansia .info-card-lbl { color:#ef6c00; }
+  .info-card.anak     { background:#e1f5fe; } .info-card.anak .info-card-val { color:#01579b; } .info-card.anak .info-card-lbl { color:#0277bd; }
+  .info-card.nonprod  { background:#f3e5f5; } .info-card.nonprod .info-card-val { color:#6a1b9a; } .info-card.nonprod .info-card-lbl { color:#7b1fa2; }
+  .info-card.kerja    { background:#e8f5ee; } .info-card.kerja .info-card-val { color:#1a5f3f; } .info-card.kerja .info-card-lbl { color:#2e7d32; }
+  .info-card.tidakkerja { background:#fff0e8; } .info-card.tidakkerja .info-card-val { color:#c0440a; } .info-card.tidakkerja .info-card-lbl { color:#bf360c; }
+  .info-card.bansos   { background:#fff8e1; } .info-card.bansos .info-card-val { color:#f57f17; } .info-card.bansos .info-card-lbl { color:#f9a825; }
+  .info-card.bpjs     { background:#e8f5ee; } .info-card.bpjs .info-card-val { color:#1a5f3f; } .info-card.bpjs .info-card-lbl { color:#2e7d32; }
+  .info-progress-wrap { background:#f0f0f0; border-radius:20px; height:10px; overflow:hidden; margin: 6px 0 4px; }
+  .info-progress-bar  { height:100%; background:#1a5f3f; border-radius:20px; transition:width 0.5s ease; }
+  .info-progress-label { font-size:12px; color:#888; text-align:right; }
+  .inf-rt-list { display:flex; flex-direction:column; gap:8px; }
+  .inf-rt-row { background:#f8f8f8; border-radius:10px; padding:12px 14px; display:flex; align-items:center; justify-content:space-between; border:1px solid #eee; }
+  .inf-rt-name { font-size:14px; font-weight:600; color:#1a1a1a; }
+  .inf-rt-stats { display:flex; gap:10px; }
+  .inf-rt-stat { font-size:12px; text-align:center; }
+  .inf-rt-stat-val { font-weight:700; font-size:15px; display:block; }
+  .inf-rt-stat-val.blue { color:#1565c0; }
+  .inf-rt-stat-val.pink { color:#ad1457; }
+  .inf-rt-stat-val.green { color:#1a5f3f; }
   .count-badge.blue { background: #e8f0ff; color: #1a3fa0; }
   .count-badge.pink { background: #fce4ec; color: #ad1457; }
   .count-badge.purple { background: #ede7f6; color: #6a1b9a; }
@@ -199,6 +235,7 @@
   <div class="tab-bar">
     <div class="tab active" onclick="showPage('form')">✏️ Input</div>
     <div class="tab" onclick="showPage('list')">📋 Daftar</div>
+    <div class="tab" onclick="showPage('info')">📊 Info</div>
     <div class="tab" onclick="showPage('settings')">⚙️ Pengaturan</div>
   </div>
 
@@ -397,6 +434,105 @@
       <div style="height:80px"></div>
     </div>
 
+    <!-- ══════════════ INFO PAGE ══════════════ -->
+    <div id="page-info" class="page">
+      <div class="info-hero">
+        <div class="info-hero-title" id="info-rw-label">Data Warga RW</div>
+        <div class="info-hero-sub" id="info-kel-label">—</div>
+      </div>
+
+      <!-- Total Warga -->
+      <div class="info-section">
+        <div class="info-section-title">Total Warga</div>
+        <div class="info-grid3">
+          <div class="info-card total">
+            <div class="info-card-val" id="inf-total">0</div>
+            <div class="info-card-lbl">Total</div>
+          </div>
+          <div class="info-card pria">
+            <div class="info-card-val" id="inf-pria">0</div>
+            <div class="info-card-lbl">Laki-Laki</div>
+          </div>
+          <div class="info-card wanita">
+            <div class="info-card-val" id="inf-wanita">0</div>
+            <div class="info-card-lbl">Perempuan</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kelompok Usia -->
+      <div class="info-section">
+        <div class="info-section-title">Kelompok Usia</div>
+        <div class="info-grid2">
+          <div class="info-card produktif">
+            <div class="info-card-val" id="inf-produktif">0</div>
+            <div class="info-card-lbl">Usia Produktif</div>
+            <div class="info-card-sub">18 – 65 tahun</div>
+          </div>
+          <div class="info-card lansia">
+            <div class="info-card-val" id="inf-lansia">0</div>
+            <div class="info-card-lbl">Lansia</div>
+            <div class="info-card-sub">≥ 60 tahun</div>
+          </div>
+          <div class="info-card anak">
+            <div class="info-card-val" id="inf-anak">0</div>
+            <div class="info-card-lbl">Anak-Anak</div>
+            <div class="info-card-sub">0 – 17 tahun</div>
+          </div>
+          <div class="info-card nonprod">
+            <div class="info-card-val" id="inf-nonprod">0</div>
+            <div class="info-card-lbl">Non-Produktif</div>
+            <div class="info-card-sub">di luar 18–65</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pekerjaan -->
+      <div class="info-section">
+        <div class="info-section-title">Status Pekerjaan</div>
+        <div class="info-grid2">
+          <div class="info-card kerja">
+            <div class="info-card-val" id="inf-kerja">0</div>
+            <div class="info-card-lbl">Bekerja</div>
+          </div>
+          <div class="info-card tidakkerja">
+            <div class="info-card-val" id="inf-tidakkerja">0</div>
+            <div class="info-card-lbl">Tidak Bekerja</div>
+          </div>
+        </div>
+        <!-- Progress bar bekerja -->
+        <div class="info-progress-wrap">
+          <div class="info-progress-bar" id="inf-kerja-bar" style="width:0%"></div>
+        </div>
+        <div class="info-progress-label"><span id="inf-kerja-pct">0%</span> warga bekerja</div>
+      </div>
+
+      <!-- Bansos & Asuransi -->
+      <div class="info-section">
+        <div class="info-section-title">Bansos & Asuransi</div>
+        <div class="info-grid2">
+          <div class="info-card bansos">
+            <div class="info-card-val" id="inf-bansos">0</div>
+            <div class="info-card-lbl">Penerima Bansos</div>
+          </div>
+          <div class="info-card bpjs">
+            <div class="info-card-val" id="inf-bpjs">0</div>
+            <div class="info-card-lbl">Punya BPJS</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Per RT -->
+      <div class="info-section">
+        <div class="info-section-title">Data per RT</div>
+        <div id="inf-rt-list" class="inf-rt-list">
+          <div style="font-size:13px;color:#aaa;text-align:center;padding:20px">Belum ada data</div>
+        </div>
+      </div>
+
+      <div style="height:20px"></div>
+    </div>
+
     <!-- ══════════════ SETTINGS PAGE ══════════════ -->
     <div id="page-settings" class="page">
       <div class="section">
@@ -431,6 +567,7 @@
   <div class="action-bar" id="action-bar-list" style="display:none">
     <button class="export-btn" onclick="exportExcel()">⬇ Export ke Excel (.xlsx)</button>
   </div>
+  <div class="action-bar" id="action-bar-info" style="display:none; border:none; padding:0; height:0"></div>
   <div class="action-bar" id="action-bar-settings" style="display:none">
     <button class="btn btn-add" onclick="saveSettings()">✓ Simpan Pengaturan</button>
   </div>
@@ -758,11 +895,16 @@ function applySettings() {
 function showPage(p) {
   document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-  ['form','list','settings'].forEach(n=>document.getElementById('action-bar-'+n).style.display='none');
+  ['form','list','info','settings'].forEach(n=>{
+    const ab=document.getElementById('action-bar-'+n);
+    if(ab) ab.style.display='none';
+  });
   document.getElementById('page-'+p).classList.add('active');
-  document.querySelectorAll('.tab')[['form','list','settings'].indexOf(p)].classList.add('active');
-  document.getElementById('action-bar-'+p).style.display='flex';
+  document.querySelectorAll('.tab')[['form','list','info','settings'].indexOf(p)].classList.add('active');
+  const ab=document.getElementById('action-bar-'+p);
+  if(ab) ab.style.display='flex';
   if (p==='list') renderList();
+  if (p==='info') renderInfo();
   document.querySelector('.page-content').scrollTop=0;
 }
 
@@ -1614,6 +1756,68 @@ function exportExcel() {
   const rtInfo   = rtList.length > 0 ? ` | ${rtList.length} sheet RT` : '';
   const lansiaInfo = lansiaData.length > 0 ? ` | ${lansiaData.length} lansia` : '';
   showToast(`✓ Excel diunduh (${wargaData.length} warga${rtInfo}${lansiaInfo})`, 'success');
+}
+
+// ─── INFO PAGE ────────────────────────────────────────────────────────────────
+function renderInfo() {
+  const total    = wargaData.length;
+  const pria     = wargaData.filter(w=>w.jk==='Laki-Laki').length;
+  const wanita   = wargaData.filter(w=>w.jk==='Perempuan').length;
+  const produktif= wargaData.filter(w=>{ const u=hitungUsia(w.tanggalLahir); return u!==null&&u>=18&&u<=65; }).length;
+  const lansia   = wargaData.filter(w=>w.isLansia).length;
+  const anak     = wargaData.filter(w=>{ const u=hitungUsia(w.tanggalLahir); return u!==null&&u>=0&&u<=17; }).length;
+  const nonprod  = wargaData.filter(w=>{ const u=hitungUsia(w.tanggalLahir); return u!==null&&(u<18||u>65); }).length;
+  const kerja    = wargaData.filter(w=>w.pekerjaan==='Bekerja').length;
+  const tdk      = wargaData.filter(w=>w.pekerjaan==='Tidak Bekerja').length;
+  const bansos   = wargaData.filter(w=>w.bansos==='Ya').length;
+  const bpjs     = wargaData.filter(w=>(w.asuransi||[]).includes('BPJS')).length;
+  const pct      = total>0 ? Math.round(kerja/total*100) : 0;
+
+  document.getElementById('inf-total').textContent     = total;
+  document.getElementById('inf-pria').textContent      = pria;
+  document.getElementById('inf-wanita').textContent    = wanita;
+  document.getElementById('inf-produktif').textContent = produktif;
+  document.getElementById('inf-lansia').textContent    = lansia;
+  document.getElementById('inf-anak').textContent      = anak;
+  document.getElementById('inf-nonprod').textContent   = nonprod;
+  document.getElementById('inf-kerja').textContent     = kerja;
+  document.getElementById('inf-tidakkerja').textContent= tdk;
+  document.getElementById('inf-bansos').textContent    = bansos;
+  document.getElementById('inf-bpjs').textContent      = bpjs;
+  document.getElementById('inf-kerja-bar').style.width = pct+'%';
+  document.getElementById('inf-kerja-pct').textContent = pct+'%';
+
+  // Label header
+  document.getElementById('info-rw-label').textContent =
+    `RW ${settings.rw||'...'} — ${settings.tahun||'2026'}`;
+  document.getElementById('info-kel-label').textContent =
+    `Kel. ${settings.kelurahan||'...'}, Kec. ${settings.kecamatan||'...'}, ${settings.kota||'...'}`;
+
+  // Tabel per RT
+  const rtList = [...new Set(wargaData.map(w=>w.rt||'').filter(Boolean))]
+    .sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+  const rtContainer = document.getElementById('inf-rt-list');
+  if (!rtList.length) {
+    rtContainer.innerHTML='<div style="font-size:13px;color:#aaa;text-align:center;padding:20px">Belum ada data RT</div>';
+    return;
+  }
+  rtContainer.innerHTML = rtList.map(rt=>{
+    const d = wargaData.filter(w=>(w.rt||'')===rt);
+    const ll = d.filter(w=>w.jk==='Laki-Laki').length;
+    const pr = d.filter(w=>w.jk==='Perempuan').length;
+    const prod = d.filter(w=>{ const u=hitungUsia(w.tanggalLahir); return u!==null&&u>=18&&u<=65; }).length;
+    return `<div class="inf-rt-row">
+      <div>
+        <div class="inf-rt-name">RT ${rt}</div>
+        <div style="font-size:11px;color:#999;margin-top:2px">${d.length} warga &nbsp;·&nbsp; ${prod} produktif</div>
+      </div>
+      <div class="inf-rt-stats">
+        <div class="inf-rt-stat"><span class="inf-rt-stat-val blue">${ll}</span>L</div>
+        <div class="inf-rt-stat"><span class="inf-rt-stat-val pink">${pr}</span>P</div>
+        <div class="inf-rt-stat"><span class="inf-rt-stat-val green">${d.length}</span>Total</div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 // ─── TOAST ────────────────────────────────────────────────────────────────────
