@@ -154,6 +154,9 @@
   .info-progress-wrap { background:#f0f0f0; border-radius:20px; height:10px; overflow:hidden; margin: 6px 0 4px; }
   .info-progress-bar  { height:100%; background:#1a5f3f; border-radius:20px; transition:width 0.5s ease; }
   .info-progress-label { font-size:12px; color:#888; text-align:right; }
+  .import-btn { display:flex; align-items:center; justify-content:center; gap:8px; background:#f0f7f4; color:#1a5f3f; border:2px dashed #a5d6b5; padding:14px; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; width:100%; text-align:center; }
+  .import-btn:active { background:#e0f0e8; }
+  .import-mode-row { margin-top:10px; }
   .inf-rt-list { display:flex; flex-direction:column; gap:8px; }
   .inf-rt-row { background:#f8f8f8; border-radius:10px; padding:12px 14px; display:flex; align-items:center; justify-content:space-between; border:1px solid #eee; }
   .inf-rt-name { font-size:14px; font-weight:600; color:#1a1a1a; }
@@ -549,6 +552,21 @@
         <div class="section-title">Tanda Tangan Dokumen</div>
         <div class="field"><label>Nama Ketua RW</label><input type="text" id="s-ketua-rw" placeholder="Nama lengkap ketua RW"></div>
         <div class="field"><label>Nama Pengumpul Data / Ketua RT</label><input type="text" id="s-ketua-rt" placeholder="Nama ketua RT / pengumpul data"></div>
+      </div>
+      <div class="section">
+        <div class="section-title">Import Data dari Excel</div>
+        <p style="font-size:13px;color:#666;margin-bottom:12px;line-height:1.6;">Upload file Excel (.xlsx) yang sudah diekspor dari aplikasi ini. Data akan ditambahkan ke data yang sudah ada.</p>
+        <label class="import-btn" id="import-label">
+          <input type="file" id="import-file" accept=".xlsx,.xls" style="display:none" onchange="importExcel(this)">
+          <span id="import-btn-text">📂 Pilih File Excel</span>
+        </label>
+        <div id="import-status" style="display:none;margin-top:12px;padding:10px 14px;border-radius:8px;font-size:13px;font-weight:500;"></div>
+        <div class="import-mode-row">
+          <label style="font-size:13px;color:#555;font-weight:500;display:flex;align-items:center;gap:8px;cursor:pointer;">
+            <input type="checkbox" id="import-replace" style="width:16px;height:16px;accent-color:#1a5f3f">
+            Ganti semua data (hapus data lama sebelum import)
+          </label>
+        </div>
       </div>
       <div class="section">
         <div class="section-title">Data Tersimpan</div>
@@ -1818,6 +1836,184 @@ function renderInfo() {
       </div>
     </div>`;
   }).join('');
+}
+
+// ─── IMPORT EXCEL ─────────────────────────────────────────────────────────────
+function importExcel(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const statusEl = document.getElementById('import-status');
+  const btnText  = document.getElementById('import-btn-text');
+  btnText.textContent = '⏳ Memproses...';
+  statusEl.style.display = 'none';
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data    = new Uint8Array(e.target.result);
+      const wb      = XLSX.read(data, {type:'array'});
+
+      // Cari sheet Data_Warga_Master
+      const sheetName = wb.SheetNames.find(n => n === 'Data_Warga_Master') || wb.SheetNames[0];
+      const ws        = wb.Sheets[sheetName];
+      const rows      = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+
+      // Cari baris header H2 (baris yang berisi 'Permanen')
+      let headerRow = -1;
+      for (let i=0; i<Math.min(rows.length,10); i++) {
+        if (rows[i].some(v=>String(v).trim()==='Permanen')) { headerRow = i; break; }
+      }
+      if (headerRow === -1) throw new Error('Format tidak dikenali — pastikan ini file export dari aplikasi ini');
+
+      const dataRows = [];
+      for (let i = headerRow + 1; i < rows.length; i++) {
+        const r = rows[i];
+        // Berhenti jika kolom No bukan angka (sudah masuk bagian rekap/tanda tangan)
+        const no = r[0];
+        if (!no || isNaN(Number(no)) || Number(no) <= 0) break;
+
+        // ── Mapping kolom sesuai urutan export ──────────────────────────────
+        // 0=No 1=Kel 2=RT 3=RW 4=KK 5=NIK 6-8=Status 9=Nama 10-11=JK
+        // 12=Tempat 13=Tgl 14=Usia 15=Alamat 16=Pendidikan
+        // 17-20=Nikah 21-22=Kerja 23-24=Bansos 25-26=JenisBansos 27-29=Asuransi 30=Kontak
+        const cek = v => String(v||'').trim() === '✓';
+
+        // Status kependudukan
+        let status = '';
+        if (cek(r[6])) status='Permanen';
+        else if (cek(r[7])) status='Non Permanen';
+        else if (cek(r[8])) status='WNA';
+
+        // Jenis kelamin
+        let jk = '';
+        if (cek(r[10])) jk='Laki-Laki';
+        else if (cek(r[11])) jk='Perempuan';
+
+        // Tanggal lahir — konversi dari format "15 Mar 2000" ke yyyy-mm-dd
+        const tglStr  = String(r[13]||'').trim();
+        const tglParsed = parseTglIndo(tglStr);
+
+        // Status nikah
+        let statusNikah = '';
+        if (cek(r[17])) statusNikah='Menikah';
+        else if (cek(r[18])) statusNikah='Belum Menikah';
+        else if (cek(r[19])) statusNikah='Janda';
+        else if (cek(r[20])) statusNikah='Duda';
+
+        // Pekerjaan
+        let pekerjaan = '';
+        if (cek(r[21])) pekerjaan='Bekerja';
+        else if (cek(r[22])) pekerjaan='Tidak Bekerja';
+
+        // Bansos
+        let bansos = '';
+        if (cek(r[23])) bansos='Ya';
+        else if (cek(r[24])) bansos='Tidak';
+
+        // Jenis bansos
+        const jenisBansos = [];
+        if (cek(r[25])) jenisBansos.push('Tunai');
+        if (cek(r[26])) jenisBansos.push('Non Tunai');
+
+        // Asuransi
+        const asuransi = [];
+        if (cek(r[27])) asuransi.push('BPJS');
+        if (cek(r[28])) asuransi.push('Lainnya');
+        if (cek(r[29])) asuransi.push('Tidak Punya');
+
+        const usia    = hitungUsia(tglParsed);
+        const isLansia = usia !== null && usia >= 60;
+
+        dataRows.push({
+          id: Date.now() + Math.random(),
+          no: dataRows.length + 1,
+          kelurahan: String(r[1]||'').trim(),
+          rt:        String(r[2]||'').trim(),
+          rw:        String(r[3]||'').trim(),
+          nokk:      String(r[4]||'').trim(),
+          nik:       String(r[5]||'').trim(),
+          status, namaLengkap: String(r[9]||'').trim(),
+          jk, tanggalLahir: tglParsed, usia, isLansia,
+          kondisiLansia: [],
+          tempatLahir: String(r[12]||'').trim(),
+          alamat:      String(r[15]||'').trim(),
+          pendidikan:  String(r[16]||'').trim(),
+          statusNikah, pekerjaan, bansos, jenisBansos, asuransi,
+          kontak: String(r[30]||'').trim(),
+        });
+      }
+
+      if (dataRows.length === 0) throw new Error('Tidak ada data warga yang berhasil dibaca');
+
+      const replace = document.getElementById('import-replace').checked;
+      if (replace) {
+        wargaData = dataRows;
+      } else {
+        // Tambahkan, hindari duplikat NIK
+        const existingNIK = new Set(wargaData.map(w=>w.nik));
+        let added=0, skipped=0;
+        dataRows.forEach(w=>{
+          if (w.nik && existingNIK.has(w.nik)) { skipped++; return; }
+          wargaData.push(w);
+          if (w.nik) existingNIK.add(w.nik);
+          added++;
+        });
+        // Renumber
+        wargaData.forEach((w,i)=>w.no=i+1);
+
+        statusEl.style.background = '#e8f5ee';
+        statusEl.style.color      = '#1a5f3f';
+        statusEl.style.border     = '1px solid #a5d6b5';
+        statusEl.textContent      = `✓ ${added} data diimport${skipped>0?' ('+skipped+' duplikat NIK dilewati)':''}`;
+        statusEl.style.display    = 'block';
+        saveData(); updateAutoNo();
+        btnText.textContent = '📂 Pilih File Excel';
+        input.value = '';
+        showToast(`✓ ${added} data berhasil diimport`, 'success');
+        return;
+      }
+
+      // Renumber setelah replace
+      wargaData.forEach((w,i)=>w.no=i+1);
+      saveData(); updateAutoNo();
+
+      statusEl.style.background = '#e8f5ee';
+      statusEl.style.color      = '#1a5f3f';
+      statusEl.style.border     = '1px solid #a5d6b5';
+      statusEl.textContent      = `✓ ${dataRows.length} data berhasil diimport dari "${file.name}"`;
+      statusEl.style.display    = 'block';
+      btnText.textContent = '📂 Pilih File Excel';
+      input.value = '';
+      showToast(`✓ ${dataRows.length} data diimport`, 'success');
+
+    } catch(err) {
+      const statusEl = document.getElementById('import-status');
+      statusEl.style.background = '#fff0f0';
+      statusEl.style.color      = '#c0321a';
+      statusEl.style.border     = '1px solid #fcc';
+      statusEl.textContent      = '⚠ Gagal: ' + err.message;
+      statusEl.style.display    = 'block';
+      document.getElementById('import-btn-text').textContent = '📂 Pilih File Excel';
+      input.value = '';
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function parseTglIndo(str) {
+  if (!str) return '';
+  // Format: "15 Mar 2000"
+  const bulan = {Jan:'01',Feb:'02',Mar:'03',Apr:'04',Mei:'05',Jun:'06',
+                 Jul:'07',Agu:'08',Sep:'09',Okt:'10',Nov:'11',Des:'12'};
+  const parts = str.trim().split(' ');
+  if (parts.length === 3) {
+    const d = String(parts[0]).padStart(2,'0');
+    const m = bulan[parts[1]] || '';
+    const y = parts[2];
+    if (d && m && y) return `${y}-${m}-${d}`;
+  }
+  return '';
 }
 
 // ─── TOAST ────────────────────────────────────────────────────────────────────
