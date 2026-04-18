@@ -1899,51 +1899,139 @@ function exportExcel() {
     XLSX.utils.book_append_sheet(wb, wsRT, sheetName);
   });
 
-  // ── SHEET Data_Lansia ─────────────────────────────────────────────────────
+  // ── SHEET Data_Lansia — semua lansia + tabel data lengkap per RT ──────────
   const lansiaData = wargaData.filter(w=>w.isLansia);
   if (lansiaData.length > 0) {
+    const NC2 = 11;
     const LH1=['No','Kelurahan','RT','RW','NIK','Nama','Jenis Kelamin','','Kondisi','','Usia'];
     const LH2=['','','','','','','Laki-Laki','Perempuan','Miskin dan Terlantar','Tidak Ada Pendamping',''];
-    const aoa2=[
+
+    // helper baris data lansia
+    function lansiaRow(w, no) {
+      return [
+        no, w.kelurahan||kel, w.rt, w.rw||rw, w.nik, w.namaLengkap,
+        w.jk==='Laki-Laki'?'✓':'', w.jk==='Perempuan'?'✓':'',
+        (w.kondisiLansia||[]).includes('Miskin dan Terlantar')?'✓':'',
+        (w.kondisiLansia||[]).includes('Tidak Ada Pendamping')?'✓':'',
+        w.usia
+      ];
+    }
+
+    const aoa2 = [
       [`DATA LANSIA - KELURAHAN ${kel.toUpperCase()} RW ${rw} TAHUN ${thn}`],
       [`Kecamatan: ${kec}`, '', `Kota/Kab: ${kota}`],
       [], LH1, LH2
     ];
-    lansiaData.forEach((w,i)=>aoa2.push([
-      i+1, w.kelurahan||kel, w.rt, w.rw||rw, w.nik, w.namaLengkap,
-      w.jk==='Laki-Laki'?'✓':'', w.jk==='Perempuan'?'✓':'',
-      (w.kondisiLansia||[]).includes('Miskin dan Terlantar')?'✓':'',
-      (w.kondisiLansia||[]).includes('Tidak Ada Pendamping')?'✓':'',
-      w.usia
-    ]));
-    aoa2.push([],[],[]);
-    const l1=new Array(11).fill(''); l1[2]='Mengetahui,'; l1[8]='Pengumpul Data,'; aoa2.push(l1);
-    const l2=new Array(11).fill(''); l2[2]=`Ketua RW ${rw}`; l2[8]='Ketua RT / Pengumpul'; aoa2.push(l2);
-    for(let i=0;i<3;i++) aoa2.push(new Array(11).fill(''));
-    const l3=new Array(11).fill(''); l3[2]=`( ${ketuaRW} )`; l3[8]=`( ${ketuaRT} )`; aoa2.push(l3);
-    const ws2=XLSX.utils.aoa_to_sheet(aoa2);
-    ws2['!cols']=[{wch:4},{wch:16},{wch:4},{wch:4},{wch:18},{wch:24},{wch:10},{wch:10},{wch:20},{wch:20},{wch:6}];
-    ws2['!merges']=[{s:{r:0,c:0},e:{r:0,c:10}},{s:{r:3,c:6},e:{r:3,c:7}},{s:{r:3,c:8},e:{r:3,c:9}}];
 
-    // Styling Data_Lansia
-    const NC2=11, ROWS2=aoa2.length;
-    function enc2(r,c){return XLSX.utils.encode_cell({r,c});}
-    const tb={top:{style:'thin',color:{rgb:'AAAAAA'}},bottom:{style:'thin',color:{rgb:'AAAAAA'}},left:{style:'thin',color:{rgb:'AAAAAA'}},right:{style:'thin',color:{rgb:'AAAAAA'}}};
-    const mb={top:{style:'medium',color:{rgb:'2E7D32'}},bottom:{style:'medium',color:{rgb:'2E7D32'}},left:{style:'medium',color:{rgb:'2E7D32'}},right:{style:'medium',color:{rgb:'2E7D32'}}};
+    // ── 1. Tabel semua lansia (RW keseluruhan) ────────────────────────────
+    lansiaData.forEach((w,i)=>aoa2.push(lansiaRow(w, i+1)));
+
+    // tanda tangan RW
+    aoa2.push([],[],[]);
+    const l1=new Array(NC2).fill(''); l1[2]='Mengetahui,'; l1[8]='Pengumpul Data,'; aoa2.push(l1);
+    const l2=new Array(NC2).fill(''); l2[2]=`Ketua RW ${rw}`; l2[8]='Ketua RT / Pengumpul'; aoa2.push(l2);
+    for(let i=0;i<3;i++) aoa2.push(new Array(NC2).fill(''));
+    const l3=new Array(NC2).fill(''); l3[2]=`( ${ketuaRW} )`; l3[8]=`( ${ketuaRT} )`; aoa2.push(l3);
+
+    // ── 2. Tabel data lansia per RT (masing-masing lengkap) ───────────────
+    const lansiaRtList = [...new Set(lansiaData.map(w=>w.rt||'').filter(Boolean))]
+      .sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+
+    // Simpan info baris untuk styling nanti
+    const rtSections = []; // [{titleRow, h1Row, h2Row, dataStart, dataEnd, rtNo}]
+
+    lansiaRtList.forEach(rtNo => {
+      const dRT = lansiaData.filter(w=>(w.rt||'')===rtNo);
+      if (!dRT.length) return;
+
+      aoa2.push(new Array(NC2).fill('')); // spasi antar RT
+
+      const titleRow = aoa2.length;
+      const titleR = new Array(NC2).fill('');
+      titleR[0] = `Data Lansia RT ${rtNo} / RW ${rw}`;
+      aoa2.push(titleR);
+
+      const h1Row = aoa2.length; aoa2.push([...LH1]);
+      const h2Row = aoa2.length; aoa2.push([...LH2]);
+
+      const dataStart = aoa2.length;
+      dRT.forEach((w,i)=>aoa2.push(lansiaRow(w, i+1)));
+      const dataEnd = aoa2.length - 1;
+
+      rtSections.push({titleRow, h1Row, h2Row, dataStart, dataEnd, rtNo});
+
+      // tanda tangan per RT
+      aoa2.push([],[],[]);
+      const rt1=new Array(NC2).fill(''); rt1[2]='Mengetahui,'; rt1[8]='Pengumpul Data,'; aoa2.push(rt1);
+      const rt2=new Array(NC2).fill(''); rt2[2]=`Ketua RW ${rw}`; rt2[8]=`Ketua RT ${rtNo}`; aoa2.push(rt2);
+      for(let i=0;i<3;i++) aoa2.push(new Array(NC2).fill(''));
+      const rt3=new Array(NC2).fill(''); rt3[2]=`( ${ketuaRW} )`; rt3[8]=`( ${ketuaRT} )`; aoa2.push(rt3);
+    });
+
+    const ws2 = XLSX.utils.aoa_to_sheet(aoa2);
+    ws2['!cols']=[{wch:4},{wch:16},{wch:4},{wch:4},{wch:18},{wch:24},{wch:10},{wch:10},{wch:20},{wch:20},{wch:6}];
+
+    // Merges
+    const merges2 = [
+      {s:{r:0,c:0},e:{r:0,c:10}},
+      {s:{r:3,c:6},e:{r:3,c:7}},
+      {s:{r:3,c:8},e:{r:3,c:9}},
+    ];
+    // merge judul & header tiap RT section
+    rtSections.forEach(sec=>{
+      merges2.push({s:{r:sec.titleRow,c:0},e:{r:sec.titleRow,c:10}});
+      merges2.push({s:{r:sec.h1Row,c:6},e:{r:sec.h1Row,c:7}});
+      merges2.push({s:{r:sec.h1Row,c:8},e:{r:sec.h1Row,c:9}});
+    });
+    ws2['!merges'] = merges2;
+
+    // Styling
+    const ROWS2=aoa2.length;
+    function enc2(rr,cc){return XLSX.utils.encode_cell({r:rr,c:cc});}
+    const tb2={top:{style:'thin',color:{rgb:'AAAAAA'}},bottom:{style:'thin',color:{rgb:'AAAAAA'}},left:{style:'thin',color:{rgb:'AAAAAA'}},right:{style:'thin',color:{rgb:'AAAAAA'}}};
+    const mb2={top:{style:'medium',color:{rgb:'2E7D32'}},bottom:{style:'medium',color:{rgb:'2E7D32'}},left:{style:'medium',color:{rgb:'2E7D32'}},right:{style:'medium',color:{rgb:'2E7D32'}}};
+    const mbO={top:{style:'medium',color:{rgb:'E65100'}},bottom:{style:'medium',color:{rgb:'E65100'}},left:{style:'medium',color:{rgb:'E65100'}},right:{style:'medium',color:{rgb:'E65100'}}};
+
+    // Buat set baris khusus per RT untuk styling cepat
+    const rtTitleRows  = new Set(rtSections.map(s=>s.titleRow));
+    const rtH1Rows     = new Set(rtSections.map(s=>s.h1Row));
+    const rtH2Rows     = new Set(rtSections.map(s=>s.h2Row));
+    const rtDataRowSet = new Set();
+    rtSections.forEach(s=>{ for(let r=s.dataStart;r<=s.dataEnd;r++) rtDataRowSet.add(r); });
+
+    const globalDataEnd = 4 + lansiaData.length;
+
     for(let r=0;r<ROWS2;r++){
       for(let co=0;co<NC2;co++){
         const a=enc2(r,co);
         if(!ws2[a]) ws2[a]={t:'z',v:''};
-        if(r===0) ws2[a].s={fill:{patternType:'solid',fgColor:{rgb:'2E7D32'}},font:{bold:true,sz:12,color:{rgb:'FFFFFF'}},alignment:{horizontal:'center',vertical:'center'}};
-        else if(r===3) ws2[a].s={fill:{patternType:'solid',fgColor:{rgb:'C8E6C9'}},font:{bold:true,sz:10,color:{rgb:'1B5E20'}},alignment:{horizontal:'center',vertical:'center',wrapText:true},border:mb};
-        else if(r===4) ws2[a].s={fill:{patternType:'solid',fgColor:{rgb:'E8F5E9'}},font:{bold:true,sz:10,color:{rgb:'2E7D32'}},alignment:{horizontal:'center',vertical:'center',wrapText:true},border:mb};
-        else if(r>=5 && r<5+lansiaData.length) ws2[a].s={border:tb,alignment:{horizontal:[6,7,8,9].includes(co)?'center':'left',vertical:'center'}};
+
+        if(r===0)
+          ws2[a].s={fill:{patternType:'solid',fgColor:{rgb:'2E7D32'}},font:{bold:true,sz:12,color:{rgb:'FFFFFF'}},alignment:{horizontal:'center',vertical:'center'}};
+        else if(r===3)
+          ws2[a].s={fill:{patternType:'solid',fgColor:{rgb:'C8E6C9'}},font:{bold:true,sz:10,color:{rgb:'1B5E20'}},alignment:{horizontal:'center',vertical:'center',wrapText:true},border:mb2};
+        else if(r===4)
+          ws2[a].s={fill:{patternType:'solid',fgColor:{rgb:'E8F5E9'}},font:{bold:true,sz:10,color:{rgb:'2E7D32'}},alignment:{horizontal:'center',vertical:'center',wrapText:true},border:mb2};
+        else if(r>=5 && r<=globalDataEnd)
+          ws2[a].s={border:tb2,alignment:{horizontal:[6,7,8,9].includes(co)?'center':'left',vertical:'center'}};
+        // header judul per RT — oranye tua
+        else if(rtTitleRows.has(r))
+          ws2[a].s={fill:{patternType:'solid',fgColor:{rgb:'E65100'}},font:{bold:true,sz:11,color:{rgb:'FFFFFF'}},alignment:{horizontal:'left',vertical:'center'},border:mbO};
+        // H1 per RT — oranye muda
+        else if(rtH1Rows.has(r))
+          ws2[a].s={fill:{patternType:'solid',fgColor:{rgb:'FFF3E0'}},font:{bold:true,sz:10,color:{rgb:'E65100'}},alignment:{horizontal:'center',vertical:'center',wrapText:true},border:mbO};
+        // H2 per RT — oranye sangat muda
+        else if(rtH2Rows.has(r))
+          ws2[a].s={fill:{patternType:'solid',fgColor:{rgb:'FFF8F0'}},font:{bold:true,sz:10,color:{rgb:'EF6C00'}},alignment:{horizontal:'center',vertical:'center',wrapText:true},border:mbO};
+        // data baris per RT
+        else if(rtDataRowSet.has(r))
+          ws2[a].s={border:tb2,alignment:{horizontal:[6,7,8,9].includes(co)?'center':'left',vertical:'center'}};
       }
     }
     ws2['!rows']=[];
     for(let r=0;r<ROWS2;r++){
       if(r===0) ws2['!rows'][r]={hpt:22};
-      else if(r===3||r===4) ws2['!rows'][r]={hpt:32};
+      else if(r===3||r===4||rtH1Rows.has(r)||rtH2Rows.has(r)) ws2['!rows'][r]={hpt:32};
       else ws2['!rows'][r]={hpt:18};
     }
     XLSX.utils.book_append_sheet(wb, ws2, 'Data_Lansia');
