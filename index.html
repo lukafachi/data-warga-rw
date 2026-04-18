@@ -151,6 +151,7 @@
   .info-card.tidakkerja { background:#fff0e8; } .info-card.tidakkerja .info-card-val { color:#c0440a; } .info-card.tidakkerja .info-card-lbl { color:#bf360c; }
   .info-card.bansos   { background:#fff8e1; } .info-card.bansos .info-card-val { color:#f57f17; } .info-card.bansos .info-card-lbl { color:#f9a825; }
   .info-card.bpjs     { background:#e8f5ee; } .info-card.bpjs .info-card-val { color:#1a5f3f; } .info-card.bpjs .info-card-lbl { color:#2e7d32; }
+  .info-card.remaja-putri { background:linear-gradient(135deg,#fce4ec,#f8bbd0); } .info-card.remaja-putri .info-card-val { color:#880e4f; } .info-card.remaja-putri .info-card-lbl { color:#ad1457; }
   .info-progress-wrap { background:#f0f0f0; border-radius:20px; height:10px; overflow:hidden; margin: 6px 0 4px; }
   .info-progress-bar  { height:100%; background:#1a5f3f; border-radius:20px; transition:width 0.5s ease; }
   .info-progress-label { font-size:12px; color:#888; text-align:right; }
@@ -487,6 +488,11 @@
             <div class="info-card-lbl">Non-Produktif</div>
             <div class="info-card-sub">di luar 18–65</div>
           </div>
+          <div class="info-card remaja-putri" style="grid-column:1/-1">
+            <div class="info-card-val" id="inf-remaja-putri">0</div>
+            <div class="info-card-lbl">Remaja Putri</div>
+            <div class="info-card-sub">Perempuan 13 – 18 tahun</div>
+          </div>
         </div>
       </div>
 
@@ -512,17 +518,41 @@
 
       <!-- Bansos & Asuransi -->
       <div class="info-section">
-        <div class="info-section-title">Bansos & Asuransi</div>
+        <div class="info-section-title">Penerima Bansos</div>
         <div class="info-grid2">
           <div class="info-card bansos">
             <div class="info-card-val" id="inf-bansos">0</div>
             <div class="info-card-lbl">Penerima Bansos</div>
           </div>
-          <div class="info-card bpjs">
-            <div class="info-card-val" id="inf-bpjs">0</div>
-            <div class="info-card-lbl">Punya BPJS</div>
+          <div class="info-card" style="background:#fff8e1">
+            <div class="info-card-val" style="color:#e65100" id="inf-tidak-bansos">0</div>
+            <div class="info-card-lbl" style="color:#ef6c00">Tidak Bansos</div>
           </div>
         </div>
+      </div>
+
+      <!-- Asuransi Kesehatan -->
+      <div class="info-section">
+        <div class="info-section-title">Kepemilikan Asuransi Kesehatan</div>
+        <div class="info-grid3">
+          <div class="info-card bpjs">
+            <div class="info-card-val" id="inf-bpjs">0</div>
+            <div class="info-card-lbl">BPJS</div>
+          </div>
+          <div class="info-card" style="background:#f3e5f5">
+            <div class="info-card-val" style="color:#6a1b9a" id="inf-asuransi-lain">0</div>
+            <div class="info-card-lbl" style="color:#7b1fa2">Lainnya</div>
+          </div>
+          <div class="info-card" style="background:#fce4ec">
+            <div class="info-card-val" style="color:#ad1457" id="inf-tidak-asuransi">0</div>
+            <div class="info-card-lbl" style="color:#c2185b">Tidak Punya</div>
+          </div>
+        </div>
+        <!-- Progress bar BPJS -->
+        <div class="info-progress-wrap" style="margin-top:8px">
+          <div class="info-progress-bar" id="inf-bpjs-bar" style="width:0%;background:#1a5f3f"></div>
+        </div>
+        <div class="info-progress-label"><span id="inf-bpjs-pct">0%</span> warga punya BPJS</div>
       </div>
 
       <!-- Per RT -->
@@ -1472,6 +1502,44 @@ function buatSheetWarga(dataArr, judul, kel, rw, thn, kec, kota, ketuaRW, ketuaR
   nonProdRow[5]=nonProdData.filter(w=>w.pekerjaan==='Tidak Bekerja').length;
   aoa.push(nonProdRow);
 
+  // ── Tabel Rekapitulasi Asuransi Kesehatan ────────────────────────────────
+  const totBPJS      = dataArr.filter(w=>(w.asuransi||[]).includes('BPJS')).length;
+  const totAsnLain   = dataArr.filter(w=>(w.asuransi||[]).includes('Lainnya')).length;
+  const totTdkPunya  = dataArr.filter(w=>(w.asuransi||[]).includes('Tidak Punya')).length;
+
+  aoa.push(new Array(NC).fill('')); // spasi
+  const asnHdr=new Array(NC).fill(''); asnHdr[0]='Rekapitulasi Kepemilikan Asuransi Kesehatan'; aoa.push(asnHdr);
+  const asnHdr2=new Array(NC).fill('');
+  asnHdr2[0]='Jenis Asuransi'; asnHdr2[1]='Jumlah'; asnHdr2[2]='%';
+  aoa.push(asnHdr2);
+  const totalDataValid = dataArr.length;
+  [
+    ['BPJS',         totBPJS],
+    ['Lainnya',      totAsnLain],
+    ['Tidak Punya',  totTdkPunya],
+  ].forEach(([label, val]) => {
+    const row=new Array(NC).fill('');
+    row[0]=label; row[1]=val;
+    row[2]= totalDataValid>0 ? Math.round(val/totalDataValid*100)+'%' : '0%';
+    aoa.push(row);
+  });
+  const asnTotRow=new Array(NC).fill('');
+  asnTotRow[0]='TOTAL'; asnTotRow[1]=dataArr.length; asnTotRow[2]='100%';
+  aoa.push(asnTotRow);
+
+  // ── Tabel Remaja Putri (13-18 thn) ──────────────────────────────────────
+  const rpData  = dataArr.filter(w=>{ const u=hitungUsia(w.tanggalLahir); return w.jk==='Perempuan' && u!==null && u>=13 && u<=18; });
+  aoa.push(new Array(NC).fill(''));
+  const rpHdr=new Array(NC).fill(''); rpHdr[0]='Rekapitulasi Remaja Putri (Perempuan Usia 13 - 18 Tahun)'; aoa.push(rpHdr);
+  const rpHdr2=new Array(NC).fill(''); rpHdr2[0]='Usia (Thn)'; rpHdr2[1]='Jumlah'; aoa.push(rpHdr2);
+  // Hitung per usia 13-18
+  for (let u=13; u<=18; u++) {
+    const row=new Array(NC).fill('');
+    row[0]=u; row[1]=rpData.filter(w=>hitungUsia(w.tanggalLahir)===u).length;
+    aoa.push(row);
+  }
+  const rpTot=new Array(NC).fill(''); rpTot[0]='TOTAL'; rpTot[1]=rpData.length; aoa.push(rpTot);
+
   aoa.push([],[],[]);
   const sg1=new Array(NC).fill(''); sg1[7]='Mengetahui,'; sg1[25]='Pengumpul Data,'; aoa.push(sg1);
   const sg2=new Array(NC).fill(''); sg2[7]=`Ketua RW ${rw}`; sg2[25]='Ketua RT / Pengumpul'; aoa.push(sg2);
@@ -1674,6 +1742,117 @@ function buatSheetWarga(dataArr, judul, kel, rw, thn, kec, kota, ketuaRW, ketuaR
         };
       }
     }
+
+    // ── Styling tabel Asuransi (3 kolom: Jenis | Jumlah | %) ────────────────
+    // Letaknya setelah prodRow2 + 2 spasi = prodDataRow2 + 2 = asnTitleRow
+    const ASN_COLS = 3;
+    const asnTitleRow  = prodDataRow2 + 2;
+    const asnHeaderRow = asnTitleRow + 1;
+    const asnDataStart = asnTitleRow + 2;
+    const asnDataEnd   = asnDataStart + 2; // 3 baris: BPJS, Lainnya, Tidak Punya
+    const asnTotalRow  = asnDataEnd + 1;
+
+    if (r === asnTitleRow) {
+      for (let col=0; col<ASN_COLS; col++) {
+        const addr=enc(r,col);
+        if(!ws[addr]) ws[addr]={t:'z',v:''};
+        ws[addr].s = {
+          fill:{patternType:'solid',fgColor:{rgb:'004D40'}},
+          font:{bold:true,sz:11,color:{rgb:'FFFFFF'}},
+          alignment:{horizontal:'left',vertical:'center'},
+          border:{top:{style:'medium',color:{rgb:'004D40'}},bottom:{style:'medium',color:{rgb:'004D40'}},left:{style:'medium',color:{rgb:'004D40'}},right:{style:'medium',color:{rgb:'004D40'}}}
+        };
+      }
+    } else if (r === asnHeaderRow) {
+      for (let col=0; col<ASN_COLS; col++) {
+        const addr=enc(r,col);
+        if(!ws[addr]) ws[addr]={t:'z',v:''};
+        ws[addr].s = {
+          fill:{patternType:'solid',fgColor:{rgb:'E0F2F1'}},
+          font:{bold:true,sz:10,color:{rgb:'004D40'}},
+          alignment:{horizontal:'center',vertical:'center'},
+          border:{top:{style:'medium',color:{rgb:'00796B'}},bottom:{style:'medium',color:{rgb:'00796B'}},left:{style:'medium',color:{rgb:'00796B'}},right:{style:'medium',color:{rgb:'00796B'}}}
+        };
+      }
+    } else if (r >= asnDataStart && r <= asnDataEnd) {
+      for (let col=0; col<ASN_COLS; col++) {
+        const addr=enc(r,col);
+        if(!ws[addr]) ws[addr]={t:'z',v:''};
+        const isLabel = col===0;
+        ws[addr].s = {
+          fill: isLabel ? {patternType:'solid',fgColor:{rgb:'F5FFFE'}} : undefined,
+          font: isLabel ? {bold:true,color:{rgb:'004D40'},sz:10} : {sz:10},
+          alignment:{horizontal: isLabel?'left':'center',vertical:'center'},
+          border:{top:{style:'thin',color:{rgb:'AAAAAA'}},bottom:{style:'thin',color:{rgb:'AAAAAA'}},left:{style:'thin',color:{rgb:'AAAAAA'}},right:{style:'thin',color:{rgb:'AAAAAA'}}}
+        };
+      }
+    } else if (r === asnTotalRow) {
+      for (let col=0; col<ASN_COLS; col++) {
+        const addr=enc(r,col);
+        if(!ws[addr]) ws[addr]={t:'z',v:''};
+        ws[addr].s = {
+          fill:{patternType:'solid',fgColor:{rgb:'E0F2F1'}},
+          font:{bold:true,sz:10,color:{rgb:'004D40'}},
+          alignment:{horizontal:'center',vertical:'center'},
+          border:{top:{style:'medium',color:{rgb:'00796B'}},bottom:{style:'medium',color:{rgb:'00796B'}},left:{style:'medium',color:{rgb:'00796B'}},right:{style:'medium',color:{rgb:'00796B'}}}
+        };
+      }
+    }
+
+    // ── Styling tabel Remaja Putri (2 kolom: Usia | Jumlah) ─────────────────
+    // Letaknya setelah asnTotalRow + 2 spasi = rpTitleRow
+    const RP_COLS    = 2;
+    const rpTitleRow  = asnTotalRow + 2;
+    const rpHeaderRow = rpTitleRow + 1;
+    const rpDataStart = rpTitleRow + 2;
+    const rpDataEnd   = rpDataStart + 5; // 6 baris: usia 13-18
+    const rpTotalRow  = rpDataEnd + 1;
+
+    if (r === rpTitleRow) {
+      for (let col=0; col<RP_COLS; col++) {
+        const addr=enc(r,col);
+        if(!ws[addr]) ws[addr]={t:'z',v:''};
+        ws[addr].s = {
+          fill:{patternType:'solid',fgColor:{rgb:'880E4F'}},
+          font:{bold:true,sz:11,color:{rgb:'FFFFFF'}},
+          alignment:{horizontal:'left',vertical:'center'},
+          border:{top:{style:'medium',color:{rgb:'880E4F'}},bottom:{style:'medium',color:{rgb:'880E4F'}},left:{style:'medium',color:{rgb:'880E4F'}},right:{style:'medium',color:{rgb:'880E4F'}}}
+        };
+      }
+    } else if (r === rpHeaderRow) {
+      for (let col=0; col<RP_COLS; col++) {
+        const addr=enc(r,col);
+        if(!ws[addr]) ws[addr]={t:'z',v:''};
+        ws[addr].s = {
+          fill:{patternType:'solid',fgColor:{rgb:'FCE4EC'}},
+          font:{bold:true,sz:10,color:{rgb:'880E4F'}},
+          alignment:{horizontal:'center',vertical:'center'},
+          border:{top:{style:'medium',color:{rgb:'AD1457'}},bottom:{style:'medium',color:{rgb:'AD1457'}},left:{style:'medium',color:{rgb:'AD1457'}},right:{style:'medium',color:{rgb:'AD1457'}}}
+        };
+      }
+    } else if (r >= rpDataStart && r <= rpDataEnd) {
+      for (let col=0; col<RP_COLS; col++) {
+        const addr=enc(r,col);
+        if(!ws[addr]) ws[addr]={t:'z',v:''};
+        ws[addr].s = {
+          fill:{patternType:'solid',fgColor:{rgb:'FFF0F5'}},
+          font:{sz:10},
+          alignment:{horizontal:'center',vertical:'center'},
+          border:{top:{style:'thin',color:{rgb:'AAAAAA'}},bottom:{style:'thin',color:{rgb:'AAAAAA'}},left:{style:'thin',color:{rgb:'AAAAAA'}},right:{style:'thin',color:{rgb:'AAAAAA'}}}
+        };
+      }
+    } else if (r === rpTotalRow) {
+      for (let col=0; col<RP_COLS; col++) {
+        const addr=enc(r,col);
+        if(!ws[addr]) ws[addr]={t:'z',v:''};
+        ws[addr].s = {
+          fill:{patternType:'solid',fgColor:{rgb:'FCE4EC'}},
+          font:{bold:true,sz:10,color:{rgb:'880E4F'}},
+          alignment:{horizontal:'center',vertical:'center'},
+          border:{top:{style:'medium',color:{rgb:'AD1457'}},bottom:{style:'medium',color:{rgb:'AD1457'}},left:{style:'medium',color:{rgb:'AD1457'}},right:{style:'medium',color:{rgb:'AD1457'}}}
+        };
+      }
+    }
   }
 
   // Row heights: H1 & H2 lebih tinggi karena wrap text
@@ -1787,23 +1966,34 @@ function renderInfo() {
   const nonprod  = wargaData.filter(w=>{ const u=hitungUsia(w.tanggalLahir); return u!==null&&(u<18||u>65); }).length;
   const kerja    = wargaData.filter(w=>w.pekerjaan==='Bekerja').length;
   const tdk      = wargaData.filter(w=>w.pekerjaan==='Tidak Bekerja').length;
-  const bansos   = wargaData.filter(w=>w.bansos==='Ya').length;
-  const bpjs     = wargaData.filter(w=>(w.asuransi||[]).includes('BPJS')).length;
-  const pct      = total>0 ? Math.round(kerja/total*100) : 0;
+  const remajaputri   = wargaData.filter(w=>{ const u=hitungUsia(w.tanggalLahir); return w.jk==='Perempuan' && u!==null && u>=13 && u<=18; }).length;
+  const bansos        = wargaData.filter(w=>w.bansos==='Ya').length;
+  const tidakBansos   = wargaData.filter(w=>w.bansos==='Tidak').length;
+  const bpjs          = wargaData.filter(w=>(w.asuransi||[]).includes('BPJS')).length;
+  const asuransiLain  = wargaData.filter(w=>(w.asuransi||[]).includes('Lainnya')).length;
+  const tidakAsuransi = wargaData.filter(w=>(w.asuransi||[]).includes('Tidak Punya')).length;
+  const pct     = total>0 ? Math.round(kerja/total*100) : 0;
+  const bpjsPct = total>0 ? Math.round(bpjs/total*100) : 0;
 
-  document.getElementById('inf-total').textContent     = total;
-  document.getElementById('inf-pria').textContent      = pria;
-  document.getElementById('inf-wanita').textContent    = wanita;
-  document.getElementById('inf-produktif').textContent = produktif;
-  document.getElementById('inf-lansia').textContent    = lansia;
-  document.getElementById('inf-anak').textContent      = anak;
-  document.getElementById('inf-nonprod').textContent   = nonprod;
-  document.getElementById('inf-kerja').textContent     = kerja;
-  document.getElementById('inf-tidakkerja').textContent= tdk;
-  document.getElementById('inf-bansos').textContent    = bansos;
-  document.getElementById('inf-bpjs').textContent      = bpjs;
-  document.getElementById('inf-kerja-bar').style.width = pct+'%';
-  document.getElementById('inf-kerja-pct').textContent = pct+'%';
+  document.getElementById('inf-total').textContent       = total;
+  document.getElementById('inf-pria').textContent        = pria;
+  document.getElementById('inf-wanita').textContent      = wanita;
+  document.getElementById('inf-produktif').textContent   = produktif;
+  document.getElementById('inf-lansia').textContent      = lansia;
+  document.getElementById('inf-anak').textContent        = anak;
+  document.getElementById('inf-nonprod').textContent     = nonprod;
+  document.getElementById('inf-kerja').textContent       = kerja;
+  document.getElementById('inf-tidakkerja').textContent  = tdk;
+  document.getElementById('inf-bansos').textContent      = bansos;
+  document.getElementById('inf-remaja-putri').textContent  = remajaputri;
+  document.getElementById('inf-tidak-bansos').textContent= tidakBansos;
+  document.getElementById('inf-bpjs').textContent        = bpjs;
+  document.getElementById('inf-asuransi-lain').textContent  = asuransiLain;
+  document.getElementById('inf-tidak-asuransi').textContent = tidakAsuransi;
+  document.getElementById('inf-kerja-bar').style.width   = pct+'%';
+  document.getElementById('inf-kerja-pct').textContent   = pct+'%';
+  document.getElementById('inf-bpjs-bar').style.width    = bpjsPct+'%';
+  document.getElementById('inf-bpjs-pct').textContent    = bpjsPct+'%';
 
   // Label header
   document.getElementById('info-rw-label').textContent =
