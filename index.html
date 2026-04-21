@@ -1427,7 +1427,7 @@ function buatSheetWarga(dataArr, judul, kel, rw, thn, kec, kota, ketuaRW, ketuaR
   dataArr.forEach((w,i)=>{
     const u = hitungUsia(w.tanggalLahir);
     aoa.push([
-      i+1, w.kelurahan||kel, w.rt, w.rw||rw, w.nokk, w.nik,
+      (w._no||i+1), w.kelurahan||kel, w.rt, w.rw||rw, w.nokk, w.nik,
       w.status==='Permanen'?'✓':'', w.status==='Non Permanen'?'✓':'', w.status==='WNA'?'✓':'',
       w.namaLengkap, w.jk==='Laki-Laki'?'✓':'', w.jk==='Perempuan'?'✓':'',
       w.tempatLahir, w.tanggalLahir?fmtTgl(w.tanggalLahir):'',
@@ -1539,6 +1539,28 @@ function buatSheetWarga(dataArr, judul, kel, rw, thn, kec, kota, ketuaRW, ketuaR
     aoa.push(row);
   }
   const rpTot=new Array(NC).fill(''); rpTot[0]='TOTAL'; rpTot[1]=rpData.length; aoa.push(rpTot);
+
+  // ── Tabel Remaja Gadis (Perempuan 13-18 thn) per RT ──────────────────────
+  const gadisRtList2 = [...new Set(dataArr.map(w=>w.rt||'').filter(Boolean))]
+    .sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+
+  aoa.push(new Array(NC).fill(''));
+  const gHdr=new Array(NC).fill(''); gHdr[0]='Rekapitulasi Remaja Putri (Gadis) per RT'; aoa.push(gHdr);
+  const gHdr2=new Array(NC).fill(''); gHdr2[0]='RT'; gHdr2[1]='Usia 13'; gHdr2[2]='Usia 14'; gHdr2[3]='Usia 15'; gHdr2[4]='Usia 16'; gHdr2[5]='Usia 17'; gHdr2[6]='Usia 18'; gHdr2[7]='Total'; aoa.push(gHdr2);
+  const GADIS_COLS = 8;
+
+  gadisRtList2.forEach(rt=>{
+    const dRt = dataArr.filter(w=>(w.rt||'')===rt);
+    const row=new Array(NC).fill(''); row[0]='RT '+rt;
+    for(let u=13;u<=18;u++) row[u-12]=dRt.filter(w=>w.jk==='Perempuan'&&hitungUsia(w.tanggalLahir)===u).length;
+    row[7]=dRt.filter(w=>w.jk==='Perempuan'&&hitungUsia(w.tanggalLahir)!==null&&hitungUsia(w.tanggalLahir)>=13&&hitungUsia(w.tanggalLahir)<=18).length;
+    aoa.push(row);
+  });
+  // Baris total
+  const gTot=new Array(NC).fill(''); gTot[0]='TOTAL';
+  for(let u=13;u<=18;u++) gTot[u-12]=dataArr.filter(w=>w.jk==='Perempuan'&&hitungUsia(w.tanggalLahir)===u).length;
+  gTot[7]=dataArr.filter(w=>w.jk==='Perempuan'&&hitungUsia(w.tanggalLahir)!==null&&hitungUsia(w.tanggalLahir)>=13&&hitungUsia(w.tanggalLahir)<=18).length;
+  aoa.push(gTot);
 
   aoa.push([],[],[]);
   const sg1=new Array(NC).fill(''); sg1[7]='Mengetahui,'; sg1[25]='Pengumpul Data,'; aoa.push(sg1);
@@ -1853,6 +1875,41 @@ function buatSheetWarga(dataArr, judul, kel, rw, thn, kec, kota, ketuaRW, ketuaR
         };
       }
     }
+
+    // ── Styling tabel Gadis per RT (setelah rpTotalRow sudah terdefinisi) ────
+    const GADIS_COLS2   = 8;
+    const gadisTitleRow  = rpTotalRow + 2;
+    const gadisHeaderRow = gadisTitleRow + 1;
+    const gadisDataStart2= gadisTitleRow + 2;
+    const gadisRtCount   = new Set(dataArr.map(w=>w.rt||'').filter(Boolean)).size;
+    const gadisDataEnd2  = gadisDataStart2 + gadisRtCount - 1;
+    const gadisTotalRow2 = gadisDataEnd2 + 1;
+
+    if (r === gadisTitleRow) {
+      for (let col=0; col<GADIS_COLS2; col++) {
+        const addr=enc(r,col);
+        if(!ws[addr]) ws[addr]={t:'z',v:''};
+        ws[addr].s={fill:{patternType:'solid',fgColor:{rgb:'880E4F'}},font:{bold:true,sz:11,color:{rgb:'FFFFFF'}},alignment:{horizontal:'left',vertical:'center'},border:{top:{style:'medium',color:{rgb:'880E4F'}},bottom:{style:'medium',color:{rgb:'880E4F'}},left:{style:'medium',color:{rgb:'880E4F'}},right:{style:'medium',color:{rgb:'880E4F'}}}};
+      }
+    } else if (r === gadisHeaderRow) {
+      for (let col=0; col<GADIS_COLS2; col++) {
+        const addr=enc(r,col);
+        if(!ws[addr]) ws[addr]={t:'z',v:''};
+        ws[addr].s={fill:{patternType:'solid',fgColor:{rgb:'FCE4EC'}},font:{bold:true,sz:10,color:{rgb:'880E4F'}},alignment:{horizontal:'center',vertical:'center'},border:{top:{style:'medium',color:{rgb:'AD1457'}},bottom:{style:'medium',color:{rgb:'AD1457'}},left:{style:'medium',color:{rgb:'AD1457'}},right:{style:'medium',color:{rgb:'AD1457'}}}};
+      }
+    } else if (r >= gadisDataStart2 && r <= gadisDataEnd2) {
+      for (let col=0; col<GADIS_COLS2; col++) {
+        const addr=enc(r,col);
+        if(!ws[addr]) ws[addr]={t:'z',v:''};
+        ws[addr].s={fill:col===0?{patternType:'solid',fgColor:{rgb:'FFF0F5'}}:undefined,font:{bold:col===0,sz:10,color:col===0?{rgb:'880E4F'}:undefined},alignment:{horizontal:'center',vertical:'center'},border:{top:{style:'thin',color:{rgb:'AAAAAA'}},bottom:{style:'thin',color:{rgb:'AAAAAA'}},left:{style:'thin',color:{rgb:'AAAAAA'}},right:{style:'thin',color:{rgb:'AAAAAA'}}}};
+      }
+    } else if (r === gadisTotalRow2) {
+      for (let col=0; col<GADIS_COLS2; col++) {
+        const addr=enc(r,col);
+        if(!ws[addr]) ws[addr]={t:'z',v:''};
+        ws[addr].s={fill:{patternType:'solid',fgColor:{rgb:'FCE4EC'}},font:{bold:true,sz:10,color:{rgb:'880E4F'}},alignment:{horizontal:'center',vertical:'center'},border:{top:{style:'medium',color:{rgb:'AD1457'}},bottom:{style:'medium',color:{rgb:'AD1457'}},left:{style:'medium',color:{rgb:'AD1457'}},right:{style:'medium',color:{rgb:'AD1457'}}}};
+      }
+    }
   }
 
   // Row heights: H1 & H2 lebih tinggi karena wrap text
@@ -1875,9 +1932,15 @@ function exportExcel() {
   const ketuaRW=settings.ketuaRW||'___________', ketuaRT=settings.ketuaRT||'___________';
   const wb = XLSX.utils.book_new();
 
-  // ── SHEET 1: Data_Warga_Master (semua RT) ─────────────────────────────────
+  // ── SHEET 1: Data_Warga_Master (semua RT, diurutkan berdasarkan RT) ────────
+  const wargaSorted = [...wargaData].sort((a,b)=>
+    (a.rt||'').localeCompare(b.rt||'', undefined, {numeric:true})
+  );
+  // Renumber setelah sort (hanya untuk tampilan di Excel, tidak ubah data asli)
+  wargaSorted.forEach((w,i)=>{ w._no = i+1; });
+
   const wsMaster = buatSheetWarga(
-    wargaData,
+    wargaSorted,
     `FORMAT DATA WARGA - KELURAHAN ${kel.toUpperCase()} RW ${rw} TAHUN ${thn}`,
     kel, rw, thn, kec, kota, ketuaRW, ketuaRT
   );
@@ -1920,20 +1983,9 @@ function exportExcel() {
     const aoa2 = [
       [`DATA LANSIA - KELURAHAN ${kel.toUpperCase()} RW ${rw} TAHUN ${thn}`],
       [`Kecamatan: ${kec}`, '', `Kota/Kab: ${kota}`],
-      [], LH1, LH2
     ];
 
-    // ── 1. Tabel semua lansia (RW keseluruhan) ────────────────────────────
-    lansiaData.forEach((w,i)=>aoa2.push(lansiaRow(w, i+1)));
-
-    // tanda tangan RW
-    aoa2.push([],[],[]);
-    const l1=new Array(NC2).fill(''); l1[2]='Mengetahui,'; l1[8]='Pengumpul Data,'; aoa2.push(l1);
-    const l2=new Array(NC2).fill(''); l2[2]=`Ketua RW ${rw}`; l2[8]='Ketua RT / Pengumpul'; aoa2.push(l2);
-    for(let i=0;i<3;i++) aoa2.push(new Array(NC2).fill(''));
-    const l3=new Array(NC2).fill(''); l3[2]=`( ${ketuaRW} )`; l3[8]=`( ${ketuaRT} )`; aoa2.push(l3);
-
-    // ── 2. Tabel data lansia per RT (masing-masing lengkap) ───────────────
+    // ── Tabel data lansia per RT (masing-masing lengkap) ─────────────────
     const lansiaRtList = [...new Set(lansiaData.map(w=>w.rt||'').filter(Boolean))]
       .sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
 
@@ -1971,11 +2023,9 @@ function exportExcel() {
     const ws2 = XLSX.utils.aoa_to_sheet(aoa2);
     ws2['!cols']=[{wch:4},{wch:16},{wch:4},{wch:4},{wch:18},{wch:24},{wch:10},{wch:10},{wch:20},{wch:20},{wch:6}];
 
-    // Merges
+    // Merges — hanya judul utama + per RT section
     const merges2 = [
-      {s:{r:0,c:0},e:{r:0,c:10}},
-      {s:{r:3,c:6},e:{r:3,c:7}},
-      {s:{r:3,c:8},e:{r:3,c:9}},
+      {s:{r:0,c:0},e:{r:0,c:10}}, // judul halaman
     ];
     // merge judul & header tiap RT section
     rtSections.forEach(sec=>{
@@ -1999,21 +2049,13 @@ function exportExcel() {
     const rtDataRowSet = new Set();
     rtSections.forEach(s=>{ for(let r=s.dataStart;r<=s.dataEnd;r++) rtDataRowSet.add(r); });
 
-    const globalDataEnd = 4 + lansiaData.length;
-
     for(let r=0;r<ROWS2;r++){
       for(let co=0;co<NC2;co++){
         const a=enc2(r,co);
         if(!ws2[a]) ws2[a]={t:'z',v:''};
 
         if(r===0)
-          ws2[a].s={fill:{patternType:'solid',fgColor:{rgb:'2E7D32'}},font:{bold:true,sz:12,color:{rgb:'FFFFFF'}},alignment:{horizontal:'center',vertical:'center'}};
-        else if(r===3)
-          ws2[a].s={fill:{patternType:'solid',fgColor:{rgb:'C8E6C9'}},font:{bold:true,sz:10,color:{rgb:'1B5E20'}},alignment:{horizontal:'center',vertical:'center',wrapText:true},border:mb2};
-        else if(r===4)
-          ws2[a].s={fill:{patternType:'solid',fgColor:{rgb:'E8F5E9'}},font:{bold:true,sz:10,color:{rgb:'2E7D32'}},alignment:{horizontal:'center',vertical:'center',wrapText:true},border:mb2};
-        else if(r>=5 && r<=globalDataEnd)
-          ws2[a].s={border:tb2,alignment:{horizontal:[6,7,8,9].includes(co)?'center':'left',vertical:'center'}};
+          ws2[a].s={fill:{patternType:'solid',fgColor:{rgb:'E65100'}},font:{bold:true,sz:12,color:{rgb:'FFFFFF'}},alignment:{horizontal:'center',vertical:'center'}};
         // header judul per RT — oranye tua
         else if(rtTitleRows.has(r))
           ws2[a].s={fill:{patternType:'solid',fgColor:{rgb:'E65100'}},font:{bold:true,sz:11,color:{rgb:'FFFFFF'}},alignment:{horizontal:'left',vertical:'center'},border:mbO};
