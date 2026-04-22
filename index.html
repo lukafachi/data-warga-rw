@@ -491,7 +491,7 @@
           <div class="info-card remaja-putri" style="grid-column:1/-1">
             <div class="info-card-val" id="inf-remaja-putri">0</div>
             <div class="info-card-lbl">Remaja Putri</div>
-            <div class="info-card-sub">Perempuan 13 – 18 tahun</div>
+            <div class="info-card-sub">Perempuan 10 – 18 tahun</div>
           </div>
         </div>
       </div>
@@ -1463,115 +1463,94 @@ function buatSheetWarga(dataArr, judul, kel, rw, thn, kec, kota, ketuaRW, ketuaR
   const totKerja    = dataArr.filter(w=>w.pekerjaan==='Bekerja').length;
   const totTdkKerja = dataArr.filter(w=>w.pekerjaan==='Tidak Bekerja').length;
 
-  aoa.push([]);
-  const rH=new Array(NC).fill(''); rH[0]='Rekapitulasi Jumlah Warga per Usia (Tahun 2026)'; aoa.push(rH);
-  const rH2=new Array(NC).fill('');
-  rH2[0]='Usia (Thn)'; rH2[1]='Laki-Laki'; rH2[2]='Perempuan'; rH2[3]='Jumlah'; rH2[4]='Bekerja'; rH2[5]='Tidak Bekerja';
-  aoa.push(rH2);
-  for(let u=0;u<=usiaTertua;u++){
-    const row=new Array(NC).fill('');
-    row[0]=u; row[1]=uLL[u]||0; row[2]=uLK[u]||0; row[3]=uAll[u]||0;
-    row[4]=uKerja[u]||0; row[5]=uTdkKerja[u]||0;
-    aoa.push(row);
-  }
-  const tRow=new Array(NC).fill('');
-  tRow[0]='TOTAL'; tRow[1]=totLL; tRow[2]=totLK; tRow[3]=totAll; tRow[4]=totKerja; tRow[5]=totTdkKerja;
-  aoa.push(tRow);
-
-  // ── Baris ringkasan Usia Produktif (18-65) ───────────────────────────────
-  const prodData     = dataArr.filter(w=>{ const u=hitungUsia(w.tanggalLahir); return u!==null && u>=18 && u<=65; });
-  const prodLL       = prodData.filter(w=>w.jk==='Laki-Laki').length;
-  const prodLK       = prodData.filter(w=>w.jk==='Perempuan').length;
-  const prodAll      = prodData.length;
-  const prodKerja    = prodData.filter(w=>w.pekerjaan==='Bekerja').length;
-  const prodTdkKerja = prodData.filter(w=>w.pekerjaan==='Tidak Bekerja').length;
-
-  aoa.push(new Array(NC).fill('')); // spasi
-  const pHdr=new Array(NC).fill(''); pHdr[0]='Rekapitulasi Usia Produktif (18 - 65 Tahun)'; aoa.push(pHdr);
-  const pHdr2=new Array(NC).fill('');
-  pHdr2[0]='Kelompok'; pHdr2[1]='Laki-Laki'; pHdr2[2]='Perempuan'; pHdr2[3]='Jumlah'; pHdr2[4]='Bekerja'; pHdr2[5]='Tidak Bekerja';
-  aoa.push(pHdr2);
-  const pRow=new Array(NC).fill('');
-  pRow[0]='Usia Produktif (18-65 Thn)'; pRow[1]=prodLL; pRow[2]=prodLK; pRow[3]=prodAll; pRow[4]=prodKerja; pRow[5]=prodTdkKerja;
-  aoa.push(pRow);
-  const nonProdData     = dataArr.filter(w=>{ const u=hitungUsia(w.tanggalLahir); return u!==null && (u<18||u>65); });
-  const nonProdRow=new Array(NC).fill('');
-  nonProdRow[0]='Usia Non-Produktif'; nonProdRow[1]=nonProdData.filter(w=>w.jk==='Laki-Laki').length;
-  nonProdRow[2]=nonProdData.filter(w=>w.jk==='Perempuan').length; nonProdRow[3]=nonProdData.length;
-  nonProdRow[4]=nonProdData.filter(w=>w.pekerjaan==='Bekerja').length;
-  nonProdRow[5]=nonProdData.filter(w=>w.pekerjaan==='Tidak Bekerja').length;
-  aoa.push(nonProdRow);
-
-  // ── Tabel Rekapitulasi Asuransi Kesehatan ────────────────────────────────
-  const totBPJS      = dataArr.filter(w=>(w.asuransi||[]).includes('BPJS')).length;
-  const totAsnLain   = dataArr.filter(w=>(w.asuransi||[]).includes('Lainnya')).length;
-  const totTdkPunya  = dataArr.filter(w=>(w.asuransi||[]).includes('Tidak Punya')).length;
-
-  aoa.push(new Array(NC).fill('')); // spasi
-  const asnHdr=new Array(NC).fill(''); asnHdr[0]='Rekapitulasi Kepemilikan Asuransi Kesehatan'; aoa.push(asnHdr);
-  const asnHdr2=new Array(NC).fill('');
-  asnHdr2[0]='Jenis Asuransi'; asnHdr2[1]='Jumlah'; asnHdr2[2]='%';
-  aoa.push(asnHdr2);
-  const totalDataValid = dataArr.length;
-  [
-    ['BPJS',         totBPJS],
-    ['Lainnya',      totAsnLain],
-    ['Tidak Punya',  totTdkPunya],
-  ].forEach(([label, val]) => {
-    const row=new Array(NC).fill('');
-    row[0]=label; row[1]=val;
-    row[2]= totalDataValid>0 ? Math.round(val/totalDataValid*100)+'%' : '0%';
-    aoa.push(row);
-  });
-  const asnTotRow=new Array(NC).fill('');
-  asnTotRow[0]='TOTAL'; asnTotRow[1]=dataArr.length; asnTotRow[2]='100%';
-  aoa.push(asnTotRow);
-
-  // ── Tabel Remaja Putri (13-18 thn) ──────────────────────────────────────
-  const rpData  = dataArr.filter(w=>{ const u=hitungUsia(w.tanggalLahir); return w.jk==='Perempuan' && u!==null && u>=13 && u<=18; });
-  aoa.push(new Array(NC).fill(''));
-  const rpHdr=new Array(NC).fill(''); rpHdr[0]='Rekapitulasi Remaja Putri (Perempuan Usia 13 - 18 Tahun)'; aoa.push(rpHdr);
-  const rpHdr2=new Array(NC).fill(''); rpHdr2[0]='Usia (Thn)'; rpHdr2[1]='Jumlah'; aoa.push(rpHdr2);
-  // Hitung per usia 13-18
-  for (let u=13; u<=18; u++) {
-    const row=new Array(NC).fill('');
-    row[0]=u; row[1]=rpData.filter(w=>hitungUsia(w.tanggalLahir)===u).length;
-    aoa.push(row);
-  }
-  const rpTot=new Array(NC).fill(''); rpTot[0]='TOTAL'; rpTot[1]=rpData.length; aoa.push(rpTot);
-
-  // ── Tabel Remaja Gadis (Perempuan 13-18 thn) per RT ──────────────────────
-  const gadisRtList2 = [...new Set(dataArr.map(w=>w.rt||'').filter(Boolean))]
-    .sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
-
-  aoa.push(new Array(NC).fill(''));
-  const gHdr=new Array(NC).fill(''); gHdr[0]='Rekapitulasi Remaja Putri (Gadis) per RT'; aoa.push(gHdr);
-  const gHdr2=new Array(NC).fill(''); gHdr2[0]='RT'; gHdr2[1]='Usia 13'; gHdr2[2]='Usia 14'; gHdr2[3]='Usia 15'; gHdr2[4]='Usia 16'; gHdr2[5]='Usia 17'; gHdr2[6]='Usia 18'; gHdr2[7]='Total'; aoa.push(gHdr2);
-  const GADIS_COLS = 8;
-
-  gadisRtList2.forEach(rt=>{
-    const dRt = dataArr.filter(w=>(w.rt||'')===rt);
-    const row=new Array(NC).fill(''); row[0]='RT '+rt;
-    for(let u=13;u<=18;u++) row[u-12]=dRt.filter(w=>w.jk==='Perempuan'&&hitungUsia(w.tanggalLahir)===u).length;
-    row[7]=dRt.filter(w=>w.jk==='Perempuan'&&hitungUsia(w.tanggalLahir)!==null&&hitungUsia(w.tanggalLahir)>=13&&hitungUsia(w.tanggalLahir)<=18).length;
-    aoa.push(row);
-  });
-  // Baris total
-  const gTot=new Array(NC).fill(''); gTot[0]='TOTAL';
-  for(let u=13;u<=18;u++) gTot[u-12]=dataArr.filter(w=>w.jk==='Perempuan'&&hitungUsia(w.tanggalLahir)===u).length;
-  gTot[7]=dataArr.filter(w=>w.jk==='Perempuan'&&hitungUsia(w.tanggalLahir)!==null&&hitungUsia(w.tanggalLahir)>=13&&hitungUsia(w.tanggalLahir)<=18).length;
-  aoa.push(gTot);
-
+  // ── Tanda Tangan ──────────────────────────────────────────────────────────
   aoa.push([],[],[]);
   const sg1=new Array(NC).fill(''); sg1[7]='Mengetahui,'; sg1[25]='Pengumpul Data,'; aoa.push(sg1);
   const sg2=new Array(NC).fill(''); sg2[7]=`Ketua RW ${rw}`; sg2[25]='Ketua RT / Pengumpul'; aoa.push(sg2);
   for(let i=0;i<3;i++) aoa.push(new Array(NC).fill(''));
   const sg3=new Array(NC).fill(''); sg3[7]=`( ${ketuaRW} )`; sg3[25]=`( ${ketuaRT} )`; aoa.push(sg3);
 
-  const ws=XLSX.utils.aoa_to_sheet(aoa);
-  ws['!cols']=[{wch:4},{wch:16},{wch:4},{wch:4},{wch:17},{wch:18},{wch:9},{wch:12},{wch:5},{wch:24},{wch:10},{wch:10},{wch:14},{wch:13},{wch:6},{wch:24},{wch:17},{wch:9},{wch:13},{wch:7},{wch:6},{wch:8},{wch:13},{wch:5},{wch:6},{wch:7},{wch:10},{wch:6},{wch:9},{wch:12},{wch:16}];
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
 
-  const rekTitleRow = 5 + dataArr.length + 1;
+  // ══ REKAP DI SAMPING TABEL — mulai baris 3 (header H1), kolom 32+ ══════════
+  // Rekap mulai sejajar baris header tabel (row 3 = H1)
+  const RR = 3; // baris awal rekap (sama dengan H1)
+  // Gap kolom antar rekap
+  const C1  = 32; // Rekap Usia          (6 kolom: 32-37)
+  const C2  = 39; // Usia Produktif       (6 kolom: 39-44)
+  const C2b = 39; // Asuransi di bawah C2 (3 kolom: 39-41, baris RR+4)
+  const C3  = 46; // Remaja Putri         (2 kolom: 46-47)
+  const C4  = 49; // Gadis per RT         (11 kolom: 49-59)
+
+  // ── 1. Rekap Usia ────────────────────────────────────────────────────────
+  const rekUsiaAoa = [['Rekapitulasi Jumlah Warga per Usia (Tahun 2026)']];
+  rekUsiaAoa.push(['Usia (Thn)','Laki-Laki','Perempuan','Jumlah','Bekerja','Tidak Bekerja']);
+  for(let u=0;u<=usiaTertua;u++)
+    rekUsiaAoa.push([u, uLL[u]||0, uLK[u]||0, uAll[u]||0, uKerja[u]||0, uTdkKerja[u]||0]);
+  rekUsiaAoa.push(['TOTAL', totLL, totLK, totAll, totKerja, totTdkKerja]);
+  XLSX.utils.sheet_add_aoa(ws, rekUsiaAoa, {origin:{r:RR, c:C1}});
+
+  // ── 2. Usia Produktif ───────────────────────────────────────────────────
+  const prodData2    = dataArr.filter(w=>{ const u=hitungUsia(w.tanggalLahir); return u!==null&&u>=18&&u<=65; });
+  const nonProdData2 = dataArr.filter(w=>{ const u=hitungUsia(w.tanggalLahir); return u!==null&&(u<18||u>65); });
+  const rekProdAoa = [['Rekapitulasi Usia Produktif (18 - 65 Tahun)']];
+  rekProdAoa.push(['Kelompok','Laki-Laki','Perempuan','Jumlah','Bekerja','Tidak Bekerja']);
+  rekProdAoa.push(['Usia Produktif (18-65)',prodData2.filter(w=>w.jk==='Laki-Laki').length,prodData2.filter(w=>w.jk==='Perempuan').length,prodData2.length,prodData2.filter(w=>w.pekerjaan==='Bekerja').length,prodData2.filter(w=>w.pekerjaan==='Tidak Bekerja').length]);
+  rekProdAoa.push(['Usia Non-Produktif',nonProdData2.filter(w=>w.jk==='Laki-Laki').length,nonProdData2.filter(w=>w.jk==='Perempuan').length,nonProdData2.length,nonProdData2.filter(w=>w.pekerjaan==='Bekerja').length,nonProdData2.filter(w=>w.pekerjaan==='Tidak Bekerja').length]);
+  // Spasi lalu Asuransi di bawah Produktif
+  rekProdAoa.push([]);
+  const totBPJS2=dataArr.filter(w=>(w.asuransi||[]).includes('BPJS')).length;
+  const totAsnLain2=dataArr.filter(w=>(w.asuransi||[]).includes('Lainnya')).length;
+  const totTdkPunya2=dataArr.filter(w=>(w.asuransi||[]).includes('Tidak Punya')).length;
+  const tv=dataArr.length;
+  rekProdAoa.push(['Rekapitulasi Asuransi Kesehatan']);
+  rekProdAoa.push(['Jenis Asuransi','Jumlah','%']);
+  rekProdAoa.push(['BPJS',        totBPJS2,    tv>0?Math.round(totBPJS2/tv*100)+'%':'0%']);
+  rekProdAoa.push(['Lainnya',     totAsnLain2, tv>0?Math.round(totAsnLain2/tv*100)+'%':'0%']);
+  rekProdAoa.push(['Tidak Punya', totTdkPunya2,tv>0?Math.round(totTdkPunya2/tv*100)+'%':'0%']);
+  rekProdAoa.push(['TOTAL',       tv,          '100%']);
+  XLSX.utils.sheet_add_aoa(ws, rekProdAoa, {origin:{r:RR, c:C2}});
+
+  // ── 3. Remaja Putri per usia ────────────────────────────────────────────
+  const rpData2=dataArr.filter(w=>{ const u=hitungUsia(w.tanggalLahir); return w.jk==='Perempuan'&&u!==null&&u>=10&&u<=18; });
+  const rekRpAoa=[['Remaja Putri (Pr 10-18 Thn)'],['Usia (Thn)','Jumlah']];
+  for(let u=10;u<=18;u++) rekRpAoa.push([u, rpData2.filter(w=>hitungUsia(w.tanggalLahir)===u).length]);
+  rekRpAoa.push(['TOTAL', rpData2.length]);
+  XLSX.utils.sheet_add_aoa(ws, rekRpAoa, {origin:{r:RR, c:C3}});
+
+  // ── 4. Gadis per RT ─────────────────────────────────────────────────────
+  const gadisRtList3=[...new Set(dataArr.map(w=>w.rt||'').filter(Boolean))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+  const rekGadisAoa=[['Remaja Putri (Gadis) per RT'],['RT','Usia 10','Usia 11','Usia 12','Usia 13','Usia 14','Usia 15','Usia 16','Usia 17','Usia 18','Total']];
+  gadisRtList3.forEach(rt=>{
+    const dRt=dataArr.filter(w=>(w.rt||'')===rt);
+    const row=['RT '+rt];
+    for(let u=10;u<=18;u++) row.push(dRt.filter(w=>w.jk==='Perempuan'&&hitungUsia(w.tanggalLahir)===u).length);
+    row.push(dRt.filter(w=>w.jk==='Perempuan'&&hitungUsia(w.tanggalLahir)!==null&&hitungUsia(w.tanggalLahir)>=10&&hitungUsia(w.tanggalLahir)<=18).length);
+    rekGadisAoa.push(row);
+  });
+  const gTotRow=['TOTAL'];
+  for(let u=10;u<=18;u++) gTotRow.push(dataArr.filter(w=>w.jk==='Perempuan'&&hitungUsia(w.tanggalLahir)===u).length);
+  gTotRow.push(dataArr.filter(w=>w.jk==='Perempuan'&&hitungUsia(w.tanggalLahir)!==null&&hitungUsia(w.tanggalLahir)>=10&&hitungUsia(w.tanggalLahir)<=18).length);
+  rekGadisAoa.push(gTotRow);
+  XLSX.utils.sheet_add_aoa(ws, rekGadisAoa, {origin:{r:RR, c:C4}});
+
+  ws['!cols']=[
+    // Data utama (0-30)
+    {wch:4},{wch:16},{wch:4},{wch:4},{wch:17},{wch:18},{wch:9},{wch:12},{wch:5},{wch:24},{wch:10},{wch:10},{wch:14},{wch:13},{wch:6},{wch:24},{wch:17},{wch:9},{wch:13},{wch:7},{wch:6},{wch:8},{wch:13},{wch:5},{wch:6},{wch:7},{wch:10},{wch:6},{wch:9},{wch:12},{wch:16},
+    {wch:2},// 31 spasi
+    // Rekap Usia 32-37
+    {wch:10},{wch:10},{wch:10},{wch:8},{wch:9},{wch:11},
+    {wch:2},// 38 spasi
+    // Produktif+Asuransi 39-44
+    {wch:18},{wch:10},{wch:10},{wch:8},{wch:9},{wch:11},
+    {wch:2},// 45 spasi
+    // Remaja Putri 46-47
+    {wch:10},{wch:8},
+    {wch:2},// 48 spasi
+    // Gadis per RT 49-59
+    {wch:8},{wch:8},{wch:8},{wch:8},{wch:8},{wch:8},{wch:8},{wch:8},{wch:8},{wch:8},{wch:8}
+  ];
+
   ws['!merges']=[
     {s:{r:0,c:0},e:{r:0,c:30}},
     {s:{r:3,c:6},e:{r:3,c:8}},
@@ -1581,7 +1560,6 @@ function buatSheetWarga(dataArr, judul, kel, rw, thn, kec, kota, ketuaRW, ketuaR
     {s:{r:3,c:23},e:{r:3,c:24}},
     {s:{r:3,c:25},e:{r:3,c:26}},
     {s:{r:3,c:27},e:{r:3,c:29}},
-    {s:{r:rekTitleRow,c:0},e:{r:rekTitleRow,c:5}}, // merge judul rekap A-F
   ];
 
   // ── Styling: header hijau muda + garis tabel ──────────────────────────────
@@ -1687,230 +1665,80 @@ function buatSheetWarga(dataArr, judul, kel, rw, thn, kec, kota, ketuaRW, ketuaR
         if(!ws[addr]) ws[addr]={t:'z',v:''};
         ws[addr].s = centerCols.has(col) ? styleDataCenter : styleData;
       }
-    } else if (r === rekTitleRow) {
-      // Judul rekap — hanya kolom 0-3 saja
-      for (let col=0; col<REKAP_COLS; col++) {
-        const addr=enc(r,col);
-        if(!ws[addr]) ws[addr]={t:'z',v:''};
-        ws[addr].s = {
-          fill:{patternType:'solid', fgColor:{rgb:'1B5E20'}},
-          font:{bold:true, sz:11, color:{rgb:'FFFFFF'}},
-          alignment:{horizontal:'left', vertical:'center'},
-          border: medBorder
-        };
-      }
-    } else if (r === rekTitleRow + 1) {
-      // Header rekap kolom — hanya kolom 0-3
-      for (let col=0; col<REKAP_COLS; col++) {
-        const addr=enc(r,col);
-        if(!ws[addr]) ws[addr]={t:'z',v:''};
-        ws[addr].s = styleRekH;
-      }
-    } else if (r > rekTitleRow + 1 && r <= rekTitleRow + 1 + usiaTertua + 1) {
-      // Data rekap per usia — hanya kolom 0-3
-      for (let col=0; col<REKAP_COLS; col++) {
-        const addr=enc(r,col);
-        if(!ws[addr]) ws[addr]={t:'z',v:''};
-        ws[addr].s = styleRekData;
-      }
-    } else if (r === rekTitleRow + 2 + usiaTertua + 1) {
-      // Baris TOTAL rekap
-      for (let col=0; col<REKAP_COLS; col++) {
-        const addr=enc(r,col);
-        if(!ws[addr]) ws[addr]={t:'z',v:''};
-        ws[addr].s = styleTotal;
-      }
-    }
-
-    // ── Styling tabel Usia Produktif ──────────────────────────────────────────
-    // Struktur: TOTAL(rekTitleRow+2+usiaTertua+1) → kosong → judul → header → prodRow → nonProdRow
-    const prodTitleRow  = rekTitleRow + 2 + usiaTertua + 3;
-    const prodHeaderRow = prodTitleRow + 1;
-    const prodDataRow1  = prodTitleRow + 2;
-    const prodDataRow2  = prodTitleRow + 3;
-
-    if (r === prodTitleRow) {
-      for (let col=0; col<REKAP_COLS; col++) {
-        const addr=enc(r,col);
-        if(!ws[addr]) ws[addr]={t:'z',v:''};
-        ws[addr].s = {
-          fill:{patternType:'solid',fgColor:{rgb:'4A148C'}},
-          font:{bold:true,sz:11,color:{rgb:'FFFFFF'}},
-          alignment:{horizontal:'left',vertical:'center'},
-          border:{top:{style:'medium',color:{rgb:'4A148C'}},bottom:{style:'medium',color:{rgb:'4A148C'}},left:{style:'medium',color:{rgb:'4A148C'}},right:{style:'medium',color:{rgb:'4A148C'}}}
-        };
-      }
-    } else if (r === prodHeaderRow) {
-      for (let col=0; col<REKAP_COLS; col++) {
-        const addr=enc(r,col);
-        if(!ws[addr]) ws[addr]={t:'z',v:''};
-        ws[addr].s = {
-          fill:{patternType:'solid',fgColor:{rgb:'EDE7F6'}},
-          font:{bold:true,sz:10,color:{rgb:'4A148C'}},
-          alignment:{horizontal:'center',vertical:'center'},
-          border:{top:{style:'medium',color:{rgb:'7B1FA2'}},bottom:{style:'medium',color:{rgb:'7B1FA2'}},left:{style:'medium',color:{rgb:'7B1FA2'}},right:{style:'medium',color:{rgb:'7B1FA2'}}}
-        };
-      }
-    } else if (r === prodDataRow1 || r === prodDataRow2) {
-      for (let col=0; col<REKAP_COLS; col++) {
-        const addr=enc(r,col);
-        if(!ws[addr]) ws[addr]={t:'z',v:''};
-        const isLabel = col===0;
-        ws[addr].s = {
-          fill: isLabel ? {patternType:'solid',fgColor:{rgb:'F3E5F5'}} : undefined,
-          font: isLabel ? {bold:true,color:{rgb:'4A148C'},sz:10} : {sz:10},
-          alignment:{horizontal: isLabel?'left':'center',vertical:'center'},
-          border:{top:{style:'thin',color:{rgb:'AAAAAA'}},bottom:{style:'thin',color:{rgb:'AAAAAA'}},left:{style:'thin',color:{rgb:'AAAAAA'}},right:{style:'thin',color:{rgb:'AAAAAA'}}}
-        };
-      }
-    }
-
-    // ── Styling tabel Asuransi (3 kolom: Jenis | Jumlah | %) ────────────────
-    // Letaknya setelah prodRow2 + 2 spasi = prodDataRow2 + 2 = asnTitleRow
-    const ASN_COLS = 3;
-    const asnTitleRow  = prodDataRow2 + 2;
-    const asnHeaderRow = asnTitleRow + 1;
-    const asnDataStart = asnTitleRow + 2;
-    const asnDataEnd   = asnDataStart + 2; // 3 baris: BPJS, Lainnya, Tidak Punya
-    const asnTotalRow  = asnDataEnd + 1;
-
-    if (r === asnTitleRow) {
-      for (let col=0; col<ASN_COLS; col++) {
-        const addr=enc(r,col);
-        if(!ws[addr]) ws[addr]={t:'z',v:''};
-        ws[addr].s = {
-          fill:{patternType:'solid',fgColor:{rgb:'004D40'}},
-          font:{bold:true,sz:11,color:{rgb:'FFFFFF'}},
-          alignment:{horizontal:'left',vertical:'center'},
-          border:{top:{style:'medium',color:{rgb:'004D40'}},bottom:{style:'medium',color:{rgb:'004D40'}},left:{style:'medium',color:{rgb:'004D40'}},right:{style:'medium',color:{rgb:'004D40'}}}
-        };
-      }
-    } else if (r === asnHeaderRow) {
-      for (let col=0; col<ASN_COLS; col++) {
-        const addr=enc(r,col);
-        if(!ws[addr]) ws[addr]={t:'z',v:''};
-        ws[addr].s = {
-          fill:{patternType:'solid',fgColor:{rgb:'E0F2F1'}},
-          font:{bold:true,sz:10,color:{rgb:'004D40'}},
-          alignment:{horizontal:'center',vertical:'center'},
-          border:{top:{style:'medium',color:{rgb:'00796B'}},bottom:{style:'medium',color:{rgb:'00796B'}},left:{style:'medium',color:{rgb:'00796B'}},right:{style:'medium',color:{rgb:'00796B'}}}
-        };
-      }
-    } else if (r >= asnDataStart && r <= asnDataEnd) {
-      for (let col=0; col<ASN_COLS; col++) {
-        const addr=enc(r,col);
-        if(!ws[addr]) ws[addr]={t:'z',v:''};
-        const isLabel = col===0;
-        ws[addr].s = {
-          fill: isLabel ? {patternType:'solid',fgColor:{rgb:'F5FFFE'}} : undefined,
-          font: isLabel ? {bold:true,color:{rgb:'004D40'},sz:10} : {sz:10},
-          alignment:{horizontal: isLabel?'left':'center',vertical:'center'},
-          border:{top:{style:'thin',color:{rgb:'AAAAAA'}},bottom:{style:'thin',color:{rgb:'AAAAAA'}},left:{style:'thin',color:{rgb:'AAAAAA'}},right:{style:'thin',color:{rgb:'AAAAAA'}}}
-        };
-      }
-    } else if (r === asnTotalRow) {
-      for (let col=0; col<ASN_COLS; col++) {
-        const addr=enc(r,col);
-        if(!ws[addr]) ws[addr]={t:'z',v:''};
-        ws[addr].s = {
-          fill:{patternType:'solid',fgColor:{rgb:'E0F2F1'}},
-          font:{bold:true,sz:10,color:{rgb:'004D40'}},
-          alignment:{horizontal:'center',vertical:'center'},
-          border:{top:{style:'medium',color:{rgb:'00796B'}},bottom:{style:'medium',color:{rgb:'00796B'}},left:{style:'medium',color:{rgb:'00796B'}},right:{style:'medium',color:{rgb:'00796B'}}}
-        };
-      }
-    }
-
-    // ── Styling tabel Remaja Putri (2 kolom: Usia | Jumlah) ─────────────────
-    // Letaknya setelah asnTotalRow + 2 spasi = rpTitleRow
-    const RP_COLS    = 2;
-    const rpTitleRow  = asnTotalRow + 2;
-    const rpHeaderRow = rpTitleRow + 1;
-    const rpDataStart = rpTitleRow + 2;
-    const rpDataEnd   = rpDataStart + 5; // 6 baris: usia 13-18
-    const rpTotalRow  = rpDataEnd + 1;
-
-    if (r === rpTitleRow) {
-      for (let col=0; col<RP_COLS; col++) {
-        const addr=enc(r,col);
-        if(!ws[addr]) ws[addr]={t:'z',v:''};
-        ws[addr].s = {
-          fill:{patternType:'solid',fgColor:{rgb:'880E4F'}},
-          font:{bold:true,sz:11,color:{rgb:'FFFFFF'}},
-          alignment:{horizontal:'left',vertical:'center'},
-          border:{top:{style:'medium',color:{rgb:'880E4F'}},bottom:{style:'medium',color:{rgb:'880E4F'}},left:{style:'medium',color:{rgb:'880E4F'}},right:{style:'medium',color:{rgb:'880E4F'}}}
-        };
-      }
-    } else if (r === rpHeaderRow) {
-      for (let col=0; col<RP_COLS; col++) {
-        const addr=enc(r,col);
-        if(!ws[addr]) ws[addr]={t:'z',v:''};
-        ws[addr].s = {
-          fill:{patternType:'solid',fgColor:{rgb:'FCE4EC'}},
-          font:{bold:true,sz:10,color:{rgb:'880E4F'}},
-          alignment:{horizontal:'center',vertical:'center'},
-          border:{top:{style:'medium',color:{rgb:'AD1457'}},bottom:{style:'medium',color:{rgb:'AD1457'}},left:{style:'medium',color:{rgb:'AD1457'}},right:{style:'medium',color:{rgb:'AD1457'}}}
-        };
-      }
-    } else if (r >= rpDataStart && r <= rpDataEnd) {
-      for (let col=0; col<RP_COLS; col++) {
-        const addr=enc(r,col);
-        if(!ws[addr]) ws[addr]={t:'z',v:''};
-        ws[addr].s = {
-          fill:{patternType:'solid',fgColor:{rgb:'FFF0F5'}},
-          font:{sz:10},
-          alignment:{horizontal:'center',vertical:'center'},
-          border:{top:{style:'thin',color:{rgb:'AAAAAA'}},bottom:{style:'thin',color:{rgb:'AAAAAA'}},left:{style:'thin',color:{rgb:'AAAAAA'}},right:{style:'thin',color:{rgb:'AAAAAA'}}}
-        };
-      }
-    } else if (r === rpTotalRow) {
-      for (let col=0; col<RP_COLS; col++) {
-        const addr=enc(r,col);
-        if(!ws[addr]) ws[addr]={t:'z',v:''};
-        ws[addr].s = {
-          fill:{patternType:'solid',fgColor:{rgb:'FCE4EC'}},
-          font:{bold:true,sz:10,color:{rgb:'880E4F'}},
-          alignment:{horizontal:'center',vertical:'center'},
-          border:{top:{style:'medium',color:{rgb:'AD1457'}},bottom:{style:'medium',color:{rgb:'AD1457'}},left:{style:'medium',color:{rgb:'AD1457'}},right:{style:'medium',color:{rgb:'AD1457'}}}
-        };
-      }
-    }
-
-    // ── Styling tabel Gadis per RT (setelah rpTotalRow sudah terdefinisi) ────
-    const GADIS_COLS2   = 8;
-    const gadisTitleRow  = rpTotalRow + 2;
-    const gadisHeaderRow = gadisTitleRow + 1;
-    const gadisDataStart2= gadisTitleRow + 2;
-    const gadisRtCount   = new Set(dataArr.map(w=>w.rt||'').filter(Boolean)).size;
-    const gadisDataEnd2  = gadisDataStart2 + gadisRtCount - 1;
-    const gadisTotalRow2 = gadisDataEnd2 + 1;
-
-    if (r === gadisTitleRow) {
-      for (let col=0; col<GADIS_COLS2; col++) {
-        const addr=enc(r,col);
-        if(!ws[addr]) ws[addr]={t:'z',v:''};
-        ws[addr].s={fill:{patternType:'solid',fgColor:{rgb:'880E4F'}},font:{bold:true,sz:11,color:{rgb:'FFFFFF'}},alignment:{horizontal:'left',vertical:'center'},border:{top:{style:'medium',color:{rgb:'880E4F'}},bottom:{style:'medium',color:{rgb:'880E4F'}},left:{style:'medium',color:{rgb:'880E4F'}},right:{style:'medium',color:{rgb:'880E4F'}}}};
-      }
-    } else if (r === gadisHeaderRow) {
-      for (let col=0; col<GADIS_COLS2; col++) {
-        const addr=enc(r,col);
-        if(!ws[addr]) ws[addr]={t:'z',v:''};
-        ws[addr].s={fill:{patternType:'solid',fgColor:{rgb:'FCE4EC'}},font:{bold:true,sz:10,color:{rgb:'880E4F'}},alignment:{horizontal:'center',vertical:'center'},border:{top:{style:'medium',color:{rgb:'AD1457'}},bottom:{style:'medium',color:{rgb:'AD1457'}},left:{style:'medium',color:{rgb:'AD1457'}},right:{style:'medium',color:{rgb:'AD1457'}}}};
-      }
-    } else if (r >= gadisDataStart2 && r <= gadisDataEnd2) {
-      for (let col=0; col<GADIS_COLS2; col++) {
-        const addr=enc(r,col);
-        if(!ws[addr]) ws[addr]={t:'z',v:''};
-        ws[addr].s={fill:col===0?{patternType:'solid',fgColor:{rgb:'FFF0F5'}}:undefined,font:{bold:col===0,sz:10,color:col===0?{rgb:'880E4F'}:undefined},alignment:{horizontal:'center',vertical:'center'},border:{top:{style:'thin',color:{rgb:'AAAAAA'}},bottom:{style:'thin',color:{rgb:'AAAAAA'}},left:{style:'thin',color:{rgb:'AAAAAA'}},right:{style:'thin',color:{rgb:'AAAAAA'}}}};
-      }
-    } else if (r === gadisTotalRow2) {
-      for (let col=0; col<GADIS_COLS2; col++) {
-        const addr=enc(r,col);
-        if(!ws[addr]) ws[addr]={t:'z',v:''};
-        ws[addr].s={fill:{patternType:'solid',fgColor:{rgb:'FCE4EC'}},font:{bold:true,sz:10,color:{rgb:'880E4F'}},alignment:{horizontal:'center',vertical:'center'},border:{top:{style:'medium',color:{rgb:'AD1457'}},bottom:{style:'medium',color:{rgb:'AD1457'}},left:{style:'medium',color:{rgb:'AD1457'}},right:{style:'medium',color:{rgb:'AD1457'}}}};
-      }
     }
   }
+
+  // ── Styling rekap vertikal (di kolom A) ─────────────────────────────────
+  // Rekap mulai setelah: 5 header rows + data + 3 kosong + 4 ttd + 1 kosong = R_REK
+  // Hitung posisi tiap rekap secara berurutan
+  let R_REK = 5 + dataArr.length + 3 + 4 + 1; // baris awal rekap usia
+
+  // ── Styling rekap di samping tabel (sheet_add_aoa sudah menulis data, sekarang style) ──
+  function sCell(wsRef, r, c, s) {
+    const a = XLSX.utils.encode_cell({r, c});
+    if (!wsRef[a]) wsRef[a] = {t:'z', v:''};
+    wsRef[a].s = s;
+  }
+  function sRow(wsRef, r, cStart, cEnd, s) {
+    for (let c = cStart; c <= cEnd; c++) sCell(wsRef, r, c, s);
+  }
+
+  // Style presets
+  const sGT={fill:{patternType:'solid',fgColor:{rgb:'1B5E20'}},font:{bold:true,sz:11,color:{rgb:'FFFFFF'}},alignment:{horizontal:'left',vertical:'center'},border:medBorder};
+  const sGH={fill:{patternType:'solid',fgColor:{rgb:'C8E6C9'}},font:{bold:true,sz:10,color:{rgb:'1B5E20'}},alignment:{horizontal:'center',vertical:'center'},border:medBorder};
+  const sGTot={fill:{patternType:'solid',fgColor:{rgb:'E8F5E9'}},font:{bold:true,sz:10,color:{rgb:'1B5E20'}},alignment:{horizontal:'center',vertical:'center'},border:medBorder};
+  const sGD={alignment:{horizontal:'center',vertical:'center'},border:thinBorder};
+  const sPT={fill:{patternType:'solid',fgColor:{rgb:'4A148C'}},font:{bold:true,sz:11,color:{rgb:'FFFFFF'}},alignment:{horizontal:'left',vertical:'center'},border:{top:{style:'medium',color:{rgb:'4A148C'}},bottom:{style:'medium',color:{rgb:'4A148C'}},left:{style:'medium',color:{rgb:'4A148C'}},right:{style:'medium',color:{rgb:'4A148C'}}}};
+  const sPH={fill:{patternType:'solid',fgColor:{rgb:'EDE7F6'}},font:{bold:true,sz:10,color:{rgb:'4A148C'}},alignment:{horizontal:'center',vertical:'center'},border:{top:{style:'medium',color:{rgb:'7B1FA2'}},bottom:{style:'medium',color:{rgb:'7B1FA2'}},left:{style:'medium',color:{rgb:'7B1FA2'}},right:{style:'medium',color:{rgb:'7B1FA2'}}}};
+  const sTT={fill:{patternType:'solid',fgColor:{rgb:'004D40'}},font:{bold:true,sz:11,color:{rgb:'FFFFFF'}},alignment:{horizontal:'left',vertical:'center'},border:{top:{style:'medium',color:{rgb:'004D40'}},bottom:{style:'medium',color:{rgb:'004D40'}},left:{style:'medium',color:{rgb:'004D40'}},right:{style:'medium',color:{rgb:'004D40'}}}};
+  const sTH={fill:{patternType:'solid',fgColor:{rgb:'E0F2F1'}},font:{bold:true,sz:10,color:{rgb:'004D40'}},alignment:{horizontal:'center',vertical:'center'},border:{top:{style:'medium',color:{rgb:'00796B'}},bottom:{style:'medium',color:{rgb:'00796B'}},left:{style:'medium',color:{rgb:'00796B'}},right:{style:'medium',color:{rgb:'00796B'}}}};
+  const sTTot={fill:{patternType:'solid',fgColor:{rgb:'E0F2F1'}},font:{bold:true,sz:10,color:{rgb:'004D40'}},alignment:{horizontal:'center',vertical:'center'},border:{top:{style:'medium',color:{rgb:'00796B'}},bottom:{style:'medium',color:{rgb:'00796B'}},left:{style:'medium',color:{rgb:'00796B'}},right:{style:'medium',color:{rgb:'00796B'}}}};
+  const sTD={fill:{patternType:'solid',fgColor:{rgb:'F5FFFE'}},alignment:{horizontal:'center',vertical:'center'},border:thinBorder};
+  const sPkT={fill:{patternType:'solid',fgColor:{rgb:'880E4F'}},font:{bold:true,sz:11,color:{rgb:'FFFFFF'}},alignment:{horizontal:'left',vertical:'center'},border:{top:{style:'medium',color:{rgb:'880E4F'}},bottom:{style:'medium',color:{rgb:'880E4F'}},left:{style:'medium',color:{rgb:'880E4F'}},right:{style:'medium',color:{rgb:'880E4F'}}}};
+  const sPkH={fill:{patternType:'solid',fgColor:{rgb:'FCE4EC'}},font:{bold:true,sz:10,color:{rgb:'880E4F'}},alignment:{horizontal:'center',vertical:'center'},border:{top:{style:'medium',color:{rgb:'AD1457'}},bottom:{style:'medium',color:{rgb:'AD1457'}},left:{style:'medium',color:{rgb:'AD1457'}},right:{style:'medium',color:{rgb:'AD1457'}}}};
+  const sPkTot={fill:{patternType:'solid',fgColor:{rgb:'FCE4EC'}},font:{bold:true,sz:10,color:{rgb:'880E4F'}},alignment:{horizontal:'center',vertical:'center'},border:{top:{style:'medium',color:{rgb:'AD1457'}},bottom:{style:'medium',color:{rgb:'AD1457'}},left:{style:'medium',color:{rgb:'AD1457'}},right:{style:'medium',color:{rgb:'AD1457'}}}};
+  const sPkD={fill:{patternType:'solid',fgColor:{rgb:'FFF0F5'}},alignment:{horizontal:'center',vertical:'center'},border:thinBorder};
+
+  // 1. Rekap Usia (C1=32, 6 col): row RR = judul, RR+1 = hdr, RR+2..RR+2+usiaTertua = data, +1 = TOTAL
+  sRow(ws, RR,   C1, C1+5, sGT);
+  sRow(ws, RR+1, C1, C1+5, sGH);
+  for (let i=0; i<=usiaTertua; i++) sRow(ws, RR+2+i, C1, C1+5, sGD);
+  sRow(ws, RR+2+usiaTertua+1, C1, C1+5, sGTot);
+
+  // 2. Produktif (C2=39, 6 col): judul, hdr, 2 data rows
+  sRow(ws, RR,   C2, C2+5, sPT);
+  sRow(ws, RR+1, C2, C2+5, sPH);
+  sRow(ws, RR+2, C2, C2+5, sGD);
+  sRow(ws, RR+3, C2, C2+5, sGD);
+  // Asuransi di bawah Produktif (offset +5: spasi di RR+4, judul RR+5, hdr RR+6, data RR+7-9, total RR+10)
+  sRow(ws, RR+5,  C2, C2+2, sTT);
+  sRow(ws, RR+6,  C2, C2+2, sTH);
+  sRow(ws, RR+7,  C2, C2+2, sTD);
+  sRow(ws, RR+8,  C2, C2+2, sTD);
+  sRow(ws, RR+9,  C2, C2+2, sTD);
+  sRow(ws, RR+10, C2, C2+2, sTTot);
+
+  // 3. Remaja Putri (C3=46, 2 col): judul, hdr, 9 data (10-18), TOTAL
+  sRow(ws, RR,    C3, C3+1, sPkT);
+  sRow(ws, RR+1,  C3, C3+1, sPkH);
+  for (let i=0; i<9; i++) sRow(ws, RR+2+i, C3, C3+1, sPkD);
+  sRow(ws, RR+11, C3, C3+1, sPkTot);
+
+  // 4. Gadis per RT (C4=49, 11 col): judul, hdr, RT baris, TOTAL
+  const gadisRtCnt = new Set(dataArr.map(w=>w.rt||'').filter(Boolean)).size;
+  sRow(ws, RR,              C4, C4+10, sPkT);
+  sRow(ws, RR+1,            C4, C4+10, sPkH);
+  for (let i=0; i<gadisRtCnt; i++) sRow(ws, RR+2+i, C4, C4+10, sGD);
+  sRow(ws, RR+2+gadisRtCnt, C4, C4+10, sPkTot);
+
+  // Merge judul rekap
+  const mergesRek = ws['!merges'] || [];
+  mergesRek.push({s:{r:RR,c:C1},e:{r:RR,c:C1+5}});  // judul Rekap Usia
+  mergesRek.push({s:{r:RR,c:C2},e:{r:RR,c:C2+5}});  // judul Produktif
+  mergesRek.push({s:{r:RR+5,c:C2},e:{r:RR+5,c:C2+2}});// judul Asuransi
+  mergesRek.push({s:{r:RR,c:C3},e:{r:RR,c:C3+1}});  // judul Remaja Putri
+  mergesRek.push({s:{r:RR,c:C4},e:{r:RR,c:C4+10}}); // judul Gadis per RT
+  ws['!merges'] = mergesRek;
 
   // Row heights: H1 & H2 lebih tinggi karena wrap text
   ws['!rows'] = [];
@@ -1952,6 +1780,8 @@ function exportExcel() {
   rtList.forEach(rtNo => {
     const dataRT = wargaData.filter(w=>(w.rt||'')=== rtNo);
     if (!dataRT.length) return;
+    // Nomor mulai dari 1 untuk setiap sheet RT (bukan nomor dari master)
+    dataRT.forEach((w,i) => { w._no = i + 1; });
     const wsRT = buatSheetWarga(
       dataRT,
       `FORMAT DATA WARGA - KELURAHAN ${kel.toUpperCase()} RT ${rtNo} / RW ${rw} TAHUN ${thn}`,
@@ -2096,7 +1926,7 @@ function renderInfo() {
   const nonprod  = wargaData.filter(w=>{ const u=hitungUsia(w.tanggalLahir); return u!==null&&(u<18||u>65); }).length;
   const kerja    = wargaData.filter(w=>w.pekerjaan==='Bekerja').length;
   const tdk      = wargaData.filter(w=>w.pekerjaan==='Tidak Bekerja').length;
-  const remajaputri   = wargaData.filter(w=>{ const u=hitungUsia(w.tanggalLahir); return w.jk==='Perempuan' && u!==null && u>=13 && u<=18; }).length;
+  const remajaputri   = wargaData.filter(w=>{ const u=hitungUsia(w.tanggalLahir); return w.jk==='Perempuan' && u!==null && u>=10 && u<=18; }).length;
   const bansos        = wargaData.filter(w=>w.bansos==='Ya').length;
   const tidakBansos   = wargaData.filter(w=>w.bansos==='Tidak').length;
   const bpjs          = wargaData.filter(w=>(w.asuransi||[]).includes('BPJS')).length;
