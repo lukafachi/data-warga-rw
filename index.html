@@ -1792,6 +1792,153 @@ function exportExcel() {
     XLSX.utils.book_append_sheet(wb, wsRT, sheetName);
   });
 
+  // ── SHEET per RT: Duda_Janda_RT_XX — masing-masing RT dapat sheet sendiri ──
+  const allDjRtList = [...new Set(wargaData.map(w=>w.rt||'').filter(Boolean))]
+    .sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+
+  allDjRtList.forEach(rtNo => {
+    const rtDuda  = wargaData.filter(w=>(w.rt||'')===rtNo && w.statusNikah==='Duda');
+    const rtJanda = wargaData.filter(w=>(w.rt||'')===rtNo && w.statusNikah==='Janda');
+    // Buat sheet meski kosong, agar tiap RT selalu ada
+    const NC_DJ = 8;
+    const DJ_H  = ['No','Kelurahan','RT','RW','NIK','Nama Lengkap','Usia','Nomor Kontak'];
+
+    function djRow2(w, no) {
+      return [no, w.kelurahan||kel, w.rt, w.rw||rw, w.nik, w.namaLengkap,
+              hitungUsia(w.tanggalLahir)??'', w.kontak||''];
+    }
+
+    const aoaDJ = [
+      [`DATA DUDA DAN JANDA - RT ${rtNo} / RW ${rw} - KEL. ${kel.toUpperCase()} - ${thn}`],
+      [`Kecamatan: ${kec}`, '', `Kota/Kab: ${kota}`],
+      []
+    ];
+
+    const secs = {};
+
+    // ── Tabel Duda ──────────────────────────────────────────────────────────
+    secs.dudaTitleR = aoaDJ.length;
+    const dTitle = new Array(NC_DJ).fill('');
+    dTitle[0] = `DUDA  —  RT ${rtNo} / RW ${rw}`;
+    dTitle[NC_DJ-2] = 'Jumlah:'; dTitle[NC_DJ-1] = rtDuda.length;
+    aoaDJ.push(dTitle);
+
+    secs.dudaH = aoaDJ.length;
+    aoaDJ.push([...DJ_H]);
+    secs.dudaDataStart = aoaDJ.length;
+    if (rtDuda.length > 0) {
+      rtDuda.forEach((w,i) => aoaDJ.push(djRow2(w, i+1)));
+    } else {
+      const er = new Array(NC_DJ).fill(''); er[0]='(tidak ada data)';
+      aoaDJ.push(er);
+    }
+    secs.dudaDataEnd = aoaDJ.length - 1;
+    // Baris total duda
+    secs.dudaTotalR = aoaDJ.length;
+    const dTot = new Array(NC_DJ).fill('');
+    dTot[0]='TOTAL DUDA'; dTot[NC_DJ-1]=rtDuda.length;
+    aoaDJ.push(dTot);
+
+    aoaDJ.push(new Array(NC_DJ).fill('')); // spasi
+
+    // ── Tabel Janda ─────────────────────────────────────────────────────────
+    secs.jandaTitleR = aoaDJ.length;
+    const jTitle = new Array(NC_DJ).fill('');
+    jTitle[0] = `JANDA  —  RT ${rtNo} / RW ${rw}`;
+    jTitle[NC_DJ-2] = 'Jumlah:'; jTitle[NC_DJ-1] = rtJanda.length;
+    aoaDJ.push(jTitle);
+
+    secs.jandaH = aoaDJ.length;
+    aoaDJ.push([...DJ_H]);
+    secs.jandaDataStart = aoaDJ.length;
+    if (rtJanda.length > 0) {
+      rtJanda.forEach((w,i) => aoaDJ.push(djRow2(w, i+1)));
+    } else {
+      const er2 = new Array(NC_DJ).fill(''); er2[0]='(tidak ada data)';
+      aoaDJ.push(er2);
+    }
+    secs.jandaDataEnd = aoaDJ.length - 1;
+    // Baris total janda
+    secs.jandaTotalR = aoaDJ.length;
+    const jTot = new Array(NC_DJ).fill('');
+    jTot[0]='TOTAL JANDA'; jTot[NC_DJ-1]=rtJanda.length;
+    aoaDJ.push(jTot);
+
+    // Ringkasan total
+    aoaDJ.push(new Array(NC_DJ).fill(''));
+    const sumHdr = new Array(NC_DJ).fill('');
+    sumHdr[0]='Ringkasan'; aoaDJ.push(sumHdr);
+    const secs_sum_r = aoaDJ.length;
+    const sumRows = [
+      ['Total Duda',  rtDuda.length],
+      ['Total Janda', rtJanda.length],
+      ['Total Duda + Janda', rtDuda.length + rtJanda.length],
+    ];
+    sumRows.forEach(([lbl,val]) => {
+      const row = new Array(NC_DJ).fill(''); row[0]=lbl; row[1]=val; aoaDJ.push(row);
+    });
+    const secs_sum_end = aoaDJ.length - 1;
+
+    // Tanda tangan
+    aoaDJ.push([],[],[]);
+    const dj1=new Array(NC_DJ).fill(''); dj1[1]='Mengetahui,'; dj1[5]='Pengumpul Data,'; aoaDJ.push(dj1);
+    const dj2=new Array(NC_DJ).fill(''); dj2[1]=`Ketua RW ${rw}`; dj2[5]=`Ketua RT ${rtNo}`; aoaDJ.push(dj2);
+    for(let i=0;i<3;i++) aoaDJ.push(new Array(NC_DJ).fill(''));
+    const dj3=new Array(NC_DJ).fill(''); dj3[1]=`( ${ketuaRW} )`; dj3[5]=`( ${ketuaRT} )`; aoaDJ.push(dj3);
+
+    const wsDJ = XLSX.utils.aoa_to_sheet(aoaDJ);
+    wsDJ['!cols'] = [{wch:22},{wch:14},{wch:4},{wch:4},{wch:18},{wch:26},{wch:6},{wch:14}];
+
+    // Styling
+    const tbDJ={top:{style:'thin',color:{rgb:'AAAAAA'}},bottom:{style:'thin',color:{rgb:'AAAAAA'}},left:{style:'thin',color:{rgb:'AAAAAA'}},right:{style:'thin',color:{rgb:'AAAAAA'}}};
+    const mbBlue={top:{style:'medium',color:{rgb:'1565C0'}},bottom:{style:'medium',color:{rgb:'1565C0'}},left:{style:'medium',color:{rgb:'1565C0'}},right:{style:'medium',color:{rgb:'1565C0'}}};
+    const mbPink={top:{style:'medium',color:{rgb:'AD1457'}},bottom:{style:'medium',color:{rgb:'AD1457'}},left:{style:'medium',color:{rgb:'AD1457'}},right:{style:'medium',color:{rgb:'AD1457'}}};
+    const mbGray={top:{style:'medium',color:{rgb:'555555'}},bottom:{style:'medium',color:{rgb:'555555'}},left:{style:'medium',color:{rgb:'555555'}},right:{style:'medium',color:{rgb:'555555'}}};
+
+    function sc(r,col,s){ const a=XLSX.utils.encode_cell({r,c:col}); if(!wsDJ[a])wsDJ[a]={t:'z',v:''}; wsDJ[a].s=s; }
+    function sr(r,s){ for(let col=0;col<NC_DJ;col++) sc(r,col,s); }
+
+    // Judul halaman
+    sr(0,{fill:{patternType:'solid',fgColor:{rgb:'1A237E'}},font:{bold:true,sz:13,color:{rgb:'FFFFFF'}},alignment:{horizontal:'center',vertical:'center'}});
+
+    // Duda
+    sr(secs.dudaTitleR, {fill:{patternType:'solid',fgColor:{rgb:'1565C0'}},font:{bold:true,sz:12,color:{rgb:'FFFFFF'}},alignment:{horizontal:'left',vertical:'center'},border:mbBlue});
+    sr(secs.dudaH,      {fill:{patternType:'solid',fgColor:{rgb:'BBDEFB'}},font:{bold:true,sz:10,color:{rgb:'0D47A1'}},alignment:{horizontal:'center',vertical:'center'},border:mbBlue});
+    for(let r=secs.dudaDataStart;r<=secs.dudaDataEnd;r++) sr(r,{border:tbDJ,alignment:{horizontal:'left',vertical:'center'}});
+    sr(secs.dudaTotalR, {fill:{patternType:'solid',fgColor:{rgb:'E3F2FD'}},font:{bold:true,sz:10,color:{rgb:'0D47A1'}},alignment:{horizontal:'left',vertical:'center'},border:mbBlue});
+
+    // Janda
+    sr(secs.jandaTitleR,{fill:{patternType:'solid',fgColor:{rgb:'AD1457'}},font:{bold:true,sz:12,color:{rgb:'FFFFFF'}},alignment:{horizontal:'left',vertical:'center'},border:mbPink});
+    sr(secs.jandaH,     {fill:{patternType:'solid',fgColor:{rgb:'FCE4EC'}},font:{bold:true,sz:10,color:{rgb:'880E4F'}},alignment:{horizontal:'center',vertical:'center'},border:mbPink});
+    for(let r=secs.jandaDataStart;r<=secs.jandaDataEnd;r++) sr(r,{border:tbDJ,alignment:{horizontal:'left',vertical:'center'}});
+    sr(secs.jandaTotalR,{fill:{patternType:'solid',fgColor:{rgb:'FCE4EC'}},font:{bold:true,sz:10,color:{rgb:'880E4F'}},alignment:{horizontal:'left',vertical:'center'},border:mbPink});
+
+    // Ringkasan
+    sr(secs_sum_r-1,{fill:{patternType:'solid',fgColor:{rgb:'424242'}},font:{bold:true,sz:11,color:{rgb:'FFFFFF'}},alignment:{horizontal:'left',vertical:'center'},border:mbGray});
+    for(let r=secs_sum_r;r<=secs_sum_end;r++){
+      const isTot=r===secs_sum_end;
+      sr(r,{fill:isTot?{patternType:'solid',fgColor:{rgb:'EEEEEE'}}:undefined,font:{bold:isTot,sz:10},alignment:{horizontal:'left',vertical:'center'},border:tbDJ});
+    }
+
+    // Merges
+    wsDJ['!merges'] = [
+      {s:{r:0,c:0},e:{r:0,c:NC_DJ-1}},
+      {s:{r:secs.dudaTitleR,c:0},e:{r:secs.dudaTitleR,c:NC_DJ-3}},
+      {s:{r:secs.jandaTitleR,c:0},e:{r:secs.jandaTitleR,c:NC_DJ-3}},
+      {s:{r:secs_sum_r-1,c:0},e:{r:secs_sum_r-1,c:NC_DJ-1}},
+    ];
+
+    wsDJ['!rows'] = [];
+    for(let r=0;r<aoaDJ.length;r++){
+      if(r===0) wsDJ['!rows'][r]={hpt:24};
+      else if(r===secs.dudaTitleR||r===secs.jandaTitleR) wsDJ['!rows'][r]={hpt:22};
+      else wsDJ['!rows'][r]={hpt:18};
+    }
+
+    const djSheetName = `Duda_Janda_RT_${rtNo.padStart(2,'0')}`;
+    XLSX.utils.book_append_sheet(wb, wsDJ, djSheetName);
+  });
+
   // ── SHEET Data_Lansia — semua lansia + tabel data lengkap per RT ──────────
   const lansiaData = wargaData.filter(w=>w.isLansia);
   if (lansiaData.length > 0) {
