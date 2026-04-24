@@ -155,6 +155,42 @@
   .info-progress-wrap { background:#f0f0f0; border-radius:20px; height:10px; overflow:hidden; margin: 6px 0 4px; }
   .info-progress-bar  { height:100%; background:#1a5f3f; border-radius:20px; transition:width 0.5s ease; }
   .info-progress-label { font-size:12px; color:#888; text-align:right; }
+  /* DUPLIKAT PAGE */
+  .dup-header { background: #fff8e1; border-bottom: 1px solid #ffe082; padding: 14px 16px; }
+  .dup-title { font-size:16px; font-weight:700; color:#f57f17; }
+  .dup-sub { font-size:12px; color:#e65100; margin-top:3px; }
+  .dup-group { background:#fff; border-radius:12px; border:1.5px solid #ffe082; margin-bottom:14px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+  .dup-group-header { background:#fff8e1; padding:10px 14px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #ffe082; }
+  .dup-group-name { font-size:15px; font-weight:700; color:#e65100; }
+  .dup-group-count { background:#ff6f00; color:#fff; font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px; }
+  .dup-person { padding:11px 14px; border-bottom:1px solid #f5f5f5; }
+  .dup-person:last-child { border-bottom:none; }
+  .dup-person-name { font-size:14px; font-weight:600; color:#1a1a1a; }
+  .dup-person-meta { font-size:12px; color:#888; margin-top:2px; }
+  .dup-diff { display:flex; flex-wrap:wrap; gap:6px; margin-top:7px; }
+  .dup-tag { font-size:11px; padding:3px 9px; border-radius:20px; font-weight:600; }
+  .dup-tag.same  { background:#e8f5ee; color:#1a5f3f; }
+  .dup-tag.diff  { background:#ffebee; color:#c62828; border:1px solid #ef9a9a; }
+  .dup-tag.warn  { background:#fff3e0; color:#e65100; }
+  .dup-edit-btn { background:#1a5f3f; color:#fff; border:none; padding:5px 12px; border-radius:20px; font-size:12px; font-weight:600; cursor:pointer; }
+  .dup-del-btn  { background:#ffebee; color:#c62828; border:1px solid #ef9a9a; padding:5px 12px; border-radius:20px; font-size:12px; font-weight:600; cursor:pointer; }
+  .dup-del-btn:active { background:#c62828; color:#fff; }
+  .dup-btn-row  { display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; }
+  /* Konfirmasi modal hapus duplikat */
+  .dup-confirm-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:2000; align-items:center; justify-content:center; padding:20px; }
+  .dup-confirm-overlay.open { display:flex; animation:fadeIn 0.2s ease; }
+  .dup-confirm-box { background:#fff; border-radius:16px; padding:24px 20px; max-width:380px; width:100%; box-shadow:0 8px 32px rgba(0,0,0,0.18); }
+  .dup-confirm-icon { font-size:36px; text-align:center; margin-bottom:12px; }
+  .dup-confirm-title { font-size:16px; font-weight:700; color:#c62828; text-align:center; margin-bottom:8px; }
+  .dup-confirm-msg { font-size:13px; color:#555; text-align:center; line-height:1.6; margin-bottom:20px; }
+  .dup-confirm-name { font-weight:700; color:#1a1a1a; }
+  .dup-confirm-detail { background:#fff8f8; border:1px solid #ffcdd2; border-radius:8px; padding:10px 12px; margin-bottom:18px; font-size:12px; color:#555; line-height:1.7; }
+  .dup-confirm-btns { display:flex; gap:10px; }
+  .dup-confirm-btns button { flex:1; padding:11px; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; border:none; }
+  .dup-confirm-cancel { background:#f0f0f0; color:#555; }
+  .dup-confirm-delete { background:#c62828; color:#fff; }
+  .dup-confirm-delete:active { background:#b71c1c; }
+
   .import-btn { display:flex; align-items:center; justify-content:center; gap:8px; background:#f0f7f4; color:#1a5f3f; border:2px dashed #a5d6b5; padding:14px; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; width:100%; text-align:center; }
   .import-btn:active { background:#e0f0e8; }
   .import-mode-row { margin-top:10px; }
@@ -240,6 +276,7 @@
     <div class="tab active" onclick="showPage('form')">✏️ Input</div>
     <div class="tab" onclick="showPage('list')">📋 Daftar</div>
     <div class="tab" onclick="showPage('info')">📊 Info</div>
+    <div class="tab" onclick="showPage('duplikat')">⚠️ Duplikat</div>
     <div class="tab" onclick="showPage('settings')">⚙️ Pengaturan</div>
   </div>
 
@@ -566,6 +603,18 @@
       <div style="height:20px"></div>
     </div>
 
+    <!-- ══════════════ DUPLIKAT PAGE ══════════════ -->
+    <div id="page-duplikat" class="page">
+      <div class="dup-header">
+        <div class="dup-title">⚠️ Nama Duplikat</div>
+        <div class="dup-sub" id="dup-sub">Mendeteksi nama yang sama...</div>
+      </div>
+      <div id="dup-list" style="padding:14px 16px">
+        <div class="empty-state"><div class="ei">✅</div><p>Tidak ada nama duplikat.</p></div>
+      </div>
+      <div style="height:20px"></div>
+    </div>
+
     <!-- ══════════════ SETTINGS PAGE ══════════════ -->
     <div id="page-settings" class="page">
       <div class="section">
@@ -616,6 +665,7 @@
     <button class="export-btn" onclick="exportExcel()">⬇ Export ke Excel (.xlsx)</button>
   </div>
   <div class="action-bar" id="action-bar-info" style="display:none; border:none; padding:0; height:0"></div>
+  <div class="action-bar" id="action-bar-duplikat" style="display:none; border:none; padding:0; height:0"></div>
   <div class="action-bar" id="action-bar-settings" style="display:none">
     <button class="btn btn-add" onclick="saveSettings()">✓ Simpan Pengaturan</button>
   </div>
@@ -751,6 +801,20 @@
     <div class="modal-footer">
       <button class="btn btn-clear" onclick="tutupModal()">Batal</button>
       <button class="btn btn-add" onclick="simpanEdit()">✓ Simpan Perubahan</button>
+    </div>
+  </div>
+</div>
+
+<!-- KONFIRMASI HAPUS DUPLIKAT -->
+<div class="dup-confirm-overlay" id="dup-confirm-overlay">
+  <div class="dup-confirm-box">
+    <div class="dup-confirm-icon">🗑️</div>
+    <div class="dup-confirm-title">Hapus Data Ini?</div>
+    <div class="dup-confirm-msg">Anda akan menghapus data berikut secara permanen:</div>
+    <div class="dup-confirm-detail" id="dup-confirm-detail">—</div>
+    <div class="dup-confirm-btns">
+      <button class="dup-confirm-cancel" onclick="tutupKonfirmDuplikat()">Batal</button>
+      <button class="dup-confirm-delete" onclick="konfirmHapusDuplikat()">Ya, Hapus</button>
     </div>
   </div>
 </div>
@@ -943,16 +1007,17 @@ function applySettings() {
 function showPage(p) {
   document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-  ['form','list','info','settings'].forEach(n=>{
+  ['form','list','info','duplikat','settings'].forEach(n=>{
     const ab=document.getElementById('action-bar-'+n);
     if(ab) ab.style.display='none';
   });
   document.getElementById('page-'+p).classList.add('active');
-  document.querySelectorAll('.tab')[['form','list','info','settings'].indexOf(p)].classList.add('active');
+  document.querySelectorAll('.tab')[['form','list','info','duplikat','settings'].indexOf(p)].classList.add('active');
   const ab=document.getElementById('action-bar-'+p);
   if(ab) ab.style.display='flex';
-  if (p==='list') renderList();
-  if (p==='info') renderInfo();
+  if (p==='list')     renderList();
+  if (p==='info')     renderInfo();
+  if (p==='duplikat') renderDuplikat();
   document.querySelector('.page-content').scrollTop=0;
 }
 
@@ -2311,6 +2376,139 @@ function parseTglIndo(str) {
     if (d && m && y) return `${y}-${m}-${d}`;
   }
   return '';
+}
+
+// ─── DUPLIKAT ─────────────────────────────────────────────────────────────────
+function renderDuplikat() {
+  // Cari nama yang sama persis (case-insensitive, trim)
+  const nameMap = {};
+  wargaData.forEach(w => {
+    const key = w.namaLengkap.trim().toLowerCase();
+    if (!nameMap[key]) nameMap[key] = [];
+    nameMap[key].push(w);
+  });
+
+  // Hanya nama yang muncul lebih dari 1 kali
+  const dupGroups = Object.entries(nameMap)
+    .filter(([,arr]) => arr.length > 1)
+    .sort((a,b) => b[1].length - a[1].length);
+
+  const container = document.getElementById('dup-list');
+  const subEl     = document.getElementById('dup-sub');
+
+  if (dupGroups.length === 0) {
+    subEl.textContent = 'Tidak ada nama duplikat ditemukan';
+    container.innerHTML = '<div class="empty-state"><div class="ei">✅</div><p>Semua nama unik.<br>Tidak ada duplikat.</p></div>';
+    return;
+  }
+
+  const totalDup = dupGroups.reduce((s,[,arr])=>s+arr.length, 0);
+  subEl.textContent = `${dupGroups.length} nama duplikat · ${totalDup} data terdampak`;
+
+  container.innerHTML = dupGroups.map(([,persons]) => {
+    const nama = persons[0].namaLengkap;
+
+    // Bandingkan setiap field antar semua entri dalam grup
+    const allNIK   = [...new Set(persons.map(p=>p.nik))];
+    const allKK    = [...new Set(persons.map(p=>p.nokk))];
+    const allRT    = [...new Set(persons.map(p=>p.rt))];
+    const allRW    = [...new Set(persons.map(p=>p.rw))];
+    const allTgl   = [...new Set(persons.map(p=>p.tanggalLahir))];
+    const allJK    = [...new Set(persons.map(p=>p.jk))];
+    const allAlamat= [...new Set(persons.map(p=>p.alamat))];
+
+    const nikDiff   = allNIK.length   > 1;
+    const kkDiff    = allKK.length    > 1;
+    const rtDiff    = allRT.length    > 1;
+    const rwDiff    = allRW.length    > 1;
+    const tglDiff   = allTgl.length   > 1;
+    const jkDiff    = allJK.length    > 1;
+    const alamatDiff= allAlamat.length> 1;
+
+    const personCards = persons.map((p, idx) => {
+      const usia = hitungUsia(p.tanggalLahir);
+      return `<div class="dup-person">
+        <div class="dup-person-name">${idx+1}. ${p.namaLengkap}</div>
+        <div class="dup-person-meta">No.${p.no} · RT ${p.rt||'-'} / RW ${p.rw||'-'}</div>
+        <div class="dup-diff">
+          <span class="dup-tag ${nikDiff?'diff':'same'}">NIK: ${p.nik||'-'}</span>
+          <span class="dup-tag ${kkDiff?'diff':'same'}">KK: ${p.nokk||'-'}</span>
+          ${tglDiff?`<span class="dup-tag diff">Lahir: ${p.tanggalLahir?fmtTgl(p.tanggalLahir):'-'}</span>`:''}
+          ${jkDiff ?`<span class="dup-tag diff">JK: ${p.jk||'-'}</span>`:''}
+          ${rtDiff ?`<span class="dup-tag warn">RT: ${p.rt||'-'}</span>`:''}
+          ${alamatDiff?`<span class="dup-tag warn">Alamat: ${(p.alamat||'-').substring(0,30)}</span>`:''}
+        </div>
+        <div class="dup-btn-row">
+          <button class="dup-edit-btn" onclick="bukaEdit(${p.id})">✏ Edit</button>
+          <button class="dup-del-btn" onclick="mintaHapusDuplikat(${p.id})">🗑 Hapus</button>
+        </div>
+      </div>`;
+    }).join('');
+
+    // Ringkasan perbedaan
+    const diffList = [];
+    if (nikDiff)    diffList.push('NIK berbeda');
+    if (kkDiff)     diffList.push('No. KK berbeda');
+    if (tglDiff)    diffList.push('Tanggal lahir berbeda');
+    if (jkDiff)     diffList.push('Jenis kelamin berbeda');
+    if (rtDiff)     diffList.push('RT berbeda');
+    if (alamatDiff) diffList.push('Alamat berbeda');
+    const diffSummary = diffList.length > 0
+      ? `<span style="font-size:12px;color:#c62828">⚠ ${diffList.join(' · ')}</span>`
+      : `<span style="font-size:12px;color:#1a5f3f">Data identik — kemungkinan duplikat entri</span>`;
+
+    return `<div class="dup-group">
+      <div class="dup-group-header">
+        <div>
+          <div class="dup-group-name">${nama}</div>
+          <div style="margin-top:3px">${diffSummary}</div>
+        </div>
+        <span class="dup-group-count">${persons.length}x</span>
+      </div>
+      ${personCards}
+    </div>`;
+  }).join('');
+}
+
+// ─── HAPUS DUPLIKAT ───────────────────────────────────────────────────────────
+let dupDeleteId = null;
+
+function mintaHapusDuplikat(id) {
+  const w = wargaData.find(x=>x.id===id);
+  if (!w) return;
+  dupDeleteId = id;
+
+  // Isi detail konfirmasi
+  const usia = hitungUsia(w.tanggalLahir);
+  const detail = [
+    `<b>Nama :</b> ${w.namaLengkap}`,
+    `<b>NIK &nbsp;:</b> ${w.nik||'-'}`,
+    `<b>No.KK:</b> ${w.nokk||'-'}`,
+    `<b>RT/RW:</b> RT ${w.rt||'-'} / RW ${w.rw||'-'}`,
+    `<b>Usia &nbsp;:</b> ${usia!==null?usia+' tahun':'-'}`,
+    `<b>Alamat:</b> ${w.alamat||'-'}`,
+  ].join('<br>');
+
+  document.getElementById('dup-confirm-detail').innerHTML = detail;
+  document.getElementById('dup-confirm-overlay').classList.add('open');
+}
+
+function tutupKonfirmDuplikat() {
+  document.getElementById('dup-confirm-overlay').classList.remove('open');
+  dupDeleteId = null;
+}
+
+function konfirmHapusDuplikat() {
+  if (!dupDeleteId) return;
+  const w = wargaData.find(x=>x.id===dupDeleteId);
+  const nama = w ? w.namaLengkap : '';
+  wargaData = wargaData.filter(x=>x.id!==dupDeleteId);
+  wargaData.forEach((w,i)=>w.no=i+1);
+  saveData();
+  updateAutoNo();
+  tutupKonfirmDuplikat();
+  renderDuplikat(); // refresh halaman duplikat
+  showToast(`🗑 Data "${nama}" dihapus`, 'error');
 }
 
 // ─── TOAST ────────────────────────────────────────────────────────────────────
