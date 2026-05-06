@@ -989,7 +989,7 @@ function checkLansia() {
     banner.classList.remove('show');
     secKond.classList.remove('show');
     // clear kondisi jika bukan lansia
-    document.querySelectorAll('.kondisi-lansia').forEach(c => { c.checked=false; c.closest('.cb-item').classList.remove('selected'); });
+    document.querySelectorAll('.kondisi-lansia').forEach(c => { c.checked=false; if(c.parentElement)c.parentElement.classList.remove('selected'); });
   }
   checkStatusAnak();
 }
@@ -1003,7 +1003,7 @@ function checkStatusAnak() {
     sec.classList.add('show');
   } else {
     sec.classList.remove('show');
-    document.querySelectorAll('.status-anak').forEach(c => { c.checked=false; c.closest('.cb-item').classList.remove('selected'); });
+    document.querySelectorAll('.status-anak').forEach(c => { c.checked=false; if(c.parentElement)c.parentElement.classList.remove('selected'); });
   }
 }
 
@@ -1013,7 +1013,7 @@ function toggleBansos(show) {
   if (show) { sec.classList.add('show'); }
   else {
     sec.classList.remove('show');
-    document.querySelectorAll('.jenis-bansos').forEach(c => { c.checked=false; c.closest('.cb-item').classList.remove('selected'); });
+    document.querySelectorAll('.jenis-bansos').forEach(c => { c.checked=false; if(c.parentElement)c.parentElement.classList.remove('selected'); });
   }
 }
 
@@ -1021,14 +1021,17 @@ function toggleBansos(show) {
 function setupInteractions() {
   document.querySelectorAll('.rb-item input[type=radio]').forEach(r => {
     r.addEventListener('change', () => {
-      r.closest('.radio-group').querySelectorAll('.rb-item').forEach(i=>i.classList.remove('selected'));
-      r.closest('.rb-item').classList.add('selected');
+      // Hapus selected dari semua sibling dalam grup
+      const grp = r.parentElement && r.parentElement.parentElement;
+      if (grp) grp.querySelectorAll('.rb-item').forEach(i=>i.classList.remove('selected'));
+      if (r.parentElement) r.parentElement.classList.add('selected');
     });
   });
   document.querySelectorAll('.cb-item input[type=checkbox]').forEach(c => {
-    c.addEventListener('change', () => c.closest('.cb-item').classList.toggle('selected', c.checked));
+    c.addEventListener('change', () => {
+      if (c.parentElement) c.parentElement.classList.toggle('selected', c.checked);
+    });
   });
-  // Saat jenis kelamin berubah, update opsi nikah
   document.querySelectorAll('input[name="jk"]').forEach(r => {
     r.addEventListener('change', () => updateOpsiNikah());
   });
@@ -1040,24 +1043,19 @@ function updateOpsiNikah() {
   const rbDuda  = document.getElementById('rb-duda');
   const curNikah = document.querySelector('input[name="nikah"]:checked');
 
-  // Sembunyikan dulu keduanya
-  rbJanda.style.display = 'none';
-  rbDuda.style.display  = 'none';
+  if (rbJanda) rbJanda.style.display = 'none';
+  if (rbDuda)  rbDuda.style.display  = 'none';
 
   if (jk) {
-    if (jk.value === 'Perempuan') {
-      rbJanda.style.display = '';
-    } else if (jk.value === 'Laki-Laki') {
-      rbDuda.style.display = '';
-    }
+    if (jk.value === 'Perempuan' && rbJanda) rbJanda.style.display = '';
+    else if (jk.value === 'Laki-Laki' && rbDuda) rbDuda.style.display = '';
   }
 
-  // Jika opsi yang sedang dipilih tidak lagi terlihat, reset pilihan nikah
   if (curNikah && (curNikah.value === 'Janda' || curNikah.value === 'Duda')) {
-    const parentVisible = curNikah.closest('.rb-item').style.display !== 'none';
-    if (!parentVisible) {
+    const par = curNikah.parentElement;
+    if (par && par.style.display === 'none') {
       curNikah.checked = false;
-      curNikah.closest('.rb-item').classList.remove('selected');
+      par.classList.remove('selected');
     }
   }
 }
@@ -1177,8 +1175,8 @@ function tambahWarga() {
 }
 
 function markErr(id) {
-  const el=document.getElementById(id); el.style.borderColor='#e53935'; el.focus();
-  setTimeout(()=>el.style.borderColor='',2000);
+  const el=document.getElementById(id); if(!el)return; el.style.borderColor='#e53935'; el.focus();
+  setTimeout(()=>{ if(el)el.style.borderColor=''; },2000);
 }
 
 function clearForm() {
@@ -1188,12 +1186,12 @@ function clearForm() {
   document.getElementById('f-tgl-m').value='';
   document.getElementById('f-tgl-y').value='';
   tglLahir='';
-  document.querySelectorAll('input[type="radio"]').forEach(r=>{r.checked=false;r.closest('.rb-item').classList.remove('selected');});
+  document.querySelectorAll('input[type="radio"]').forEach(r=>{r.checked=false;if(r.parentElement)r.parentElement.classList.remove('selected');});
   // Reset opsi janda/duda
   document.getElementById('rb-janda').style.display='none';
   document.getElementById('rb-duda').style.display='none';
-  document.querySelectorAll('.jenis-bansos,.asuransi,.kondisi-lansia,.status-anak').forEach(c=>{c.checked=false;c.closest('.cb-item').classList.remove('selected');});
-  document.querySelectorAll('input[name="disabilitas"]').forEach(r=>{r.checked=false;r.closest('.rb-item').classList.remove('selected');});
+  document.querySelectorAll('.jenis-bansos,.asuransi,.kondisi-lansia,.status-anak').forEach(c=>{c.checked=false;if(c.parentElement)c.parentElement.classList.remove('selected');});
+  document.querySelectorAll('input[name="disabilitas"]').forEach(r=>{r.checked=false;if(r.parentElement)r.parentElement.classList.remove('selected');});
   document.getElementById('sec-bansos').classList.remove('show');
   document.getElementById('sec-kondisi-lansia').classList.remove('show');
   document.getElementById('sec-status-anak').classList.remove('show');
@@ -1394,31 +1392,38 @@ function hapusWarga(id) {
 let editId = null;
 let eTglLahir = '';
 
-function eBuildDates() {
-  const dSel = document.getElementById('e-tgl-d');
-  if (dSel.options.length > 1) return; // sudah dibangun
-  for (let i=1;i<=31;i++) { const o=document.createElement('option'); o.value=String(i).padStart(2,'0'); o.textContent=i; dSel.appendChild(o); }
-  const ySel = document.getElementById('e-tgl-y');
-  const now = new Date().getFullYear();
-  for (let y=now;y>=1920;y--) { const o=document.createElement('option'); o.value=y; o.textContent=y; ySel.appendChild(o); }
+// Helper aman: set style.display tanpa crash jika elemen null
+function eSafeDisplay(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = val;
+}
+// Helper aman: toggle class
+function eSafeClass(el, cls, force) {
+  if (el) el.classList.toggle(cls, force);
 }
 
-function eSetupInteractions() {
-  document.querySelectorAll('#modal-edit .rb-item input[type=radio]').forEach(r=>{
-    r.addEventListener('change',()=>{
-      r.closest('.radio-group').querySelectorAll('.rb-item').forEach(i=>i.classList.remove('selected'));
-      r.closest('.rb-item').classList.add('selected');
-    });
-  });
-  document.querySelectorAll('#modal-edit .cb-item input[type=checkbox]').forEach(cb=>{
-    cb.addEventListener('change',()=>cb.closest('.cb-item').classList.toggle('selected',cb.checked));
-  });
+function eBuildDates() {
+  const dSel = document.getElementById('e-tgl-d');
+  if (!dSel || dSel.options.length > 1) return;
+  for (let i=1;i<=31;i++) {
+    const o=document.createElement('option');
+    o.value=String(i).padStart(2,'0'); o.textContent=i;
+    dSel.appendChild(o);
+  }
+  const ySel = document.getElementById('e-tgl-y');
+  if (!ySel) return;
+  const now = new Date().getFullYear();
+  for (let y=now;y>=1920;y--) {
+    const o=document.createElement('option');
+    o.value=y; o.textContent=y;
+    ySel.appendChild(o);
+  }
 }
 
 function eOnDateChange() {
-  const d=document.getElementById('e-tgl-d').value;
-  const m=document.getElementById('e-tgl-m').value;
-  const y=document.getElementById('e-tgl-y').value;
+  const d = (document.getElementById('e-tgl-d')||{}).value||'';
+  const m = (document.getElementById('e-tgl-m')||{}).value||'';
+  const y = (document.getElementById('e-tgl-y')||{}).value||'';
   eTglLahir = (d&&m&&y) ? `${y}-${m}-${d}` : '';
   eCheckLansia();
 }
@@ -1426,11 +1431,17 @@ function eOnDateChange() {
 function eCheckLansia() {
   const usia = hitungUsia(eTglLahir);
   const isLansia = usia !== null && usia >= 60;
-  document.getElementById('e-lansia-banner').classList.toggle('show', isLansia);
-  if (isLansia) document.getElementById('e-lansia-usia').textContent = usia;
-  document.getElementById('e-sec-kondisi-wrap').style.display = isLansia ? 'block' : 'none';
+  const banner = document.getElementById('e-lansia-banner');
+  const lansiaUsia = document.getElementById('e-lansia-usia');
+  const kondisiWrap = document.getElementById('e-sec-kondisi-wrap');
+  if (banner) banner.classList.toggle('show', isLansia);
+  if (isLansia && lansiaUsia) lansiaUsia.textContent = usia;
+  if (kondisiWrap) kondisiWrap.style.display = isLansia ? 'block' : 'none';
   if (!isLansia) {
-    document.querySelectorAll('.e-kondisi-lansia').forEach(c=>{c.checked=false;c.closest('.cb-item').classList.remove('selected');});
+    document.querySelectorAll('.e-kondisi-lansia').forEach(c => {
+      c.checked = false;
+      if (c.parentElement) c.parentElement.classList.remove('selected');
+    });
   }
   eCheckStatusAnak();
 }
@@ -1439,11 +1450,12 @@ function eCheckStatusAnak() {
   const usia = hitungUsia(eTglLahir);
   const isAnak = usia !== null && usia <= 19;
   const sec = document.getElementById('e-sec-status-anak');
-  if (isAnak) {
-    sec.classList.add('show');
-  } else {
-    sec.classList.remove('show');
-    document.querySelectorAll('.e-status-anak').forEach(c=>{c.checked=false;c.closest('.cb-item').classList.remove('selected');});
+  if (sec) sec.classList.toggle('show', isAnak);
+  if (!isAnak) {
+    document.querySelectorAll('.e-status-anak').forEach(c => {
+      c.checked = false;
+      if (c.parentElement) c.parentElement.classList.remove('selected');
+    });
   }
 }
 
@@ -1451,157 +1463,188 @@ function eUpdateNikah() {
   const jk = document.querySelector('input[name="e-jk"]:checked');
   const rbJ = document.getElementById('e-rb-janda');
   const rbD = document.getElementById('e-rb-duda');
-  rbJ.style.display='none'; rbD.style.display='none';
+  if (rbJ) rbJ.style.display = 'none';
+  if (rbD) rbD.style.display = 'none';
   if (jk) {
-    if (jk.value==='Perempuan') rbJ.style.display='';
-    if (jk.value==='Laki-Laki') rbD.style.display='';
+    if (jk.value === 'Perempuan' && rbJ) rbJ.style.display = '';
+    if (jk.value === 'Laki-Laki' && rbD) rbD.style.display = '';
   }
-  // reset janda/duda jika jk berubah dan tidak relevan
+  // Reset janda/duda jika tidak relevan
   const curNikah = document.querySelector('input[name="e-nikah"]:checked');
   if (curNikah && (curNikah.value==='Janda'||curNikah.value==='Duda')) {
-    if (curNikah.closest('.rb-item').style.display==='none') {
-      curNikah.checked=false; curNikah.closest('.rb-item').classList.remove('selected');
+    const par = curNikah.parentElement;
+    if (par && par.style.display === 'none') {
+      curNikah.checked = false;
+      par.classList.remove('selected');
     }
   }
 }
 
 function eToggleBansos(show) {
-  const sec=document.getElementById('e-sec-bansos');
-  if(show) { sec.classList.add('show'); }
-  else {
+  const sec = document.getElementById('e-sec-bansos');
+  if (!sec) return;
+  if (show) {
+    sec.classList.add('show');
+  } else {
     sec.classList.remove('show');
-    document.querySelectorAll('.e-jenis-bansos').forEach(c=>{c.checked=false;c.closest('.cb-item').classList.remove('selected');});
+    document.querySelectorAll('.e-jenis-bansos').forEach(c => {
+      c.checked = false;
+      if (c.parentElement) c.parentElement.classList.remove('selected');
+    });
   }
 }
 
 function eSetRadio(name, value) {
-  document.querySelectorAll(`input[name="${name}"]`).forEach(r=>{
-    r.checked = (r.value===value);
-    r.closest('.rb-item').classList.toggle('selected', r.checked);
+  document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
+    r.checked = (r.value === value);
+    if (r.parentElement) r.parentElement.classList.toggle('selected', r.checked);
   });
 }
 
 function eSetChecks(cls, values) {
-  document.querySelectorAll('.'+cls).forEach(c=>{
+  document.querySelectorAll('.' + cls).forEach(c => {
     c.checked = values.includes(c.value);
-    c.closest('.cb-item').classList.toggle('selected', c.checked);
+    if (c.parentElement) c.parentElement.classList.toggle('selected', c.checked);
   });
 }
 
 function bukaEdit(id) {
-  const w = wargaData.find(x=>x.id===id);
+  const w = wargaData.find(x => x.id === id);
   if (!w) return;
   editId = id;
   eBuildDates();
-  eSetupInteractions();
 
-  // Isi semua field
-  document.getElementById('e-rt').value       = w.rt||'';
-  document.getElementById('e-rw').value       = w.rw||'';
-  document.getElementById('e-nokk').value     = w.nokk||'';
-  document.getElementById('e-nik').value      = w.nik||'';
-  document.getElementById('e-nama').value     = w.namaLengkap||'';
-  document.getElementById('e-tempat').value   = w.tempatLahir||'';
-  document.getElementById('e-alamat').value   = w.alamat||'';
-  document.getElementById('e-pendidikan').value = w.pendidikan||'';
-  document.getElementById('e-kontak').value   = w.kontak||'';
+  // Helper getter dengan fallback
+  function sid(id) { return document.getElementById(id) || {value:''}; }
+
+  // Isi semua field teks
+  sid('e-rt').value        = w.rt||'';
+  sid('e-rw').value        = w.rw||'';
+  sid('e-nokk').value      = w.nokk||'';
+  sid('e-nik').value       = w.nik||'';
+  sid('e-nama').value      = w.namaLengkap||'';
+  sid('e-tempat').value    = w.tempatLahir||'';
+  sid('e-alamat').value    = w.alamat||'';
+  sid('e-pendidikan').value= w.pendidikan||'';
+  sid('e-kontak').value    = w.kontak||'';
 
   // Tanggal lahir
   eTglLahir = w.tanggalLahir||'';
   if (eTglLahir) {
-    const [y,m,d] = eTglLahir.split('-');
-    document.getElementById('e-tgl-d').value = d;
-    document.getElementById('e-tgl-m').value = m;
-    document.getElementById('e-tgl-y').value = y;
+    const parts = eTglLahir.split('-');
+    sid('e-tgl-y').value = parts[0]||'';
+    sid('e-tgl-m').value = parts[1]||'';
+    sid('e-tgl-d').value = parts[2]||'';
   } else {
-    document.getElementById('e-tgl-d').value='';
-    document.getElementById('e-tgl-m').value='';
-    document.getElementById('e-tgl-y').value='';
+    sid('e-tgl-d').value='';
+    sid('e-tgl-m').value='';
+    sid('e-tgl-y').value='';
   }
 
-  eSetRadio('e-status', w.status||'');
-  eSetRadio('e-jk',     w.jk||'');
-  eSetRadio('e-kerja',  w.pekerjaan||'');
-  eSetRadio('e-bansos', w.bansos||'');
-  eSetChecks('e-jenis-bansos', w.jenisBansos||[]);
-  eSetChecks('e-asuransi', w.asuransi||[]);
-  eSetChecks('e-kondisi-lansia', w.kondisiLansia||[]);
-  eSetChecks('e-status-anak', w.statusAnak||[]);
+  // Radio buttons
+  eSetRadio('e-status',    w.status||'');
+  eSetRadio('e-jk',        w.jk||'');
+  eSetRadio('e-kerja',     w.pekerjaan||'');
   eSetRadio('e-disabilitas', w.disabilitas||'');
 
-  // Update nikah opsi & set value
-  eUpdateNikah();
+  // Tampilkan janda/duda sesuai JK sebelum set nikah
+  const rbJ = document.getElementById('e-rb-janda');
+  const rbD = document.getElementById('e-rb-duda');
+  if (rbJ) rbJ.style.display = 'none';
+  if (rbD) rbD.style.display = 'none';
+  if (w.jk === 'Perempuan' && rbJ) rbJ.style.display = '';
+  if (w.jk === 'Laki-Laki' && rbD) rbD.style.display = '';
   eSetRadio('e-nikah', w.statusNikah||'');
-  // Pastikan janda/duda terlihat dulu sebelum set
-  const jkVal = w.jk||'';
-  if (jkVal==='Perempuan') document.getElementById('e-rb-janda').style.display='';
-  if (jkVal==='Laki-Laki') document.getElementById('e-rb-duda').style.display='';
 
-  // Bansos section
-  if (w.bansos==='Ya') document.getElementById('e-sec-bansos').classList.add('show');
-  else document.getElementById('e-sec-bansos').classList.remove('show');
+  // Bansos
+  eSetRadio('e-bansos', w.bansos||'');
+  eSetChecks('e-jenis-bansos', w.jenisBansos||[]);
+  const secBansos = document.getElementById('e-sec-bansos');
+  if (secBansos) secBansos.classList.toggle('show', w.bansos==='Ya');
 
-  // Lansia check
+  // Asuransi
+  eSetChecks('e-asuransi', w.asuransi||[]);
+
+  // Lansia & anak (setelah eTglLahir di-set)
   eCheckLansia();
+  // Override kondisi lansia jika ada data
+  if (w.kondisiLansia && w.kondisiLansia.length) eSetChecks('e-kondisi-lansia', w.kondisiLansia);
+  if (w.statusAnak && w.statusAnak.length) eSetChecks('e-status-anak', w.statusAnak);
 
   // Buka modal
-  document.getElementById('modal-edit').classList.add('open');
-  document.getElementById('modal-body').scrollTop=0;
+  const modal = document.getElementById('modal-edit');
+  if (modal) modal.classList.add('open');
+  const mb = document.getElementById('modal-body');
+  if (mb) mb.scrollTop = 0;
 }
 
 function tutupModal() {
-  document.getElementById('modal-edit').classList.remove('open');
+  const modal = document.getElementById('modal-edit');
+  if (modal) modal.classList.remove('open');
   editId = null;
 }
 
 function eGetRadio(name) {
-  const el=document.querySelector(`input[name="${name}"]:checked`);
-  return el?el.value:'';
+  const el = document.querySelector(`input[name="${name}"]:checked`);
+  return el ? el.value : '';
 }
+
 function eGetChecks(cls) {
-  return Array.from(document.querySelectorAll('.'+cls+':checked')).map(x=>x.value);
+  return Array.from(document.querySelectorAll('.' + cls + ':checked')).map(x => x.value);
 }
 
 function simpanEdit() {
-  const nama = document.getElementById('e-nama').value.trim();
-  const nik  = document.getElementById('e-nik').value.trim();
+  const namaEl = document.getElementById('e-nama');
+  const nikEl  = document.getElementById('e-nik');
+  const nama = namaEl ? namaEl.value.trim() : '';
+  const nik  = nikEl  ? nikEl.value.trim()  : '';
   if (!nama) { showToast('⚠ Nama lengkap wajib diisi','error'); return; }
   if (!nik)  { showToast('⚠ NIK wajib diisi','error'); return; }
 
-  const usia    = hitungUsia(eTglLahir);
-  const isLansia = usia!==null && usia>=60;
-  const isAnak   = usia!==null && usia<=19;
+  const usia     = hitungUsia(eTglLahir);
+  const isLansia = usia !== null && usia >= 60;
+  const isAnak   = usia !== null && usia <= 19;
 
-  const idx = wargaData.findIndex(x=>x.id===editId);
-  if (idx===-1) return;
+  const idx = wargaData.findIndex(x => x.id === editId);
+  if (idx === -1) return;
 
-  // Pertahankan id & no, update semua field lainnya
+  function gv(id) { const el=document.getElementById(id); return el?el.value:''; }
+
   wargaData[idx] = {
     ...wargaData[idx],
-    rt: document.getElementById('e-rt').value,
-    rw: document.getElementById('e-rw').value,
-    nokk: document.getElementById('e-nokk').value,
-    nik, namaLengkap: nama,
-    status: eGetRadio('e-status'),
-    jk: eGetRadio('e-jk'),
+    rt:           gv('e-rt'),
+    rw:           gv('e-rw'),
+    nokk:         gv('e-nokk'),
+    nik,
+    namaLengkap:  nama,
+    status:       eGetRadio('e-status'),
+    jk:           eGetRadio('e-jk'),
     tanggalLahir: eTglLahir,
-    usia, isLansia,
+    usia,
+    isLansia,
     kondisiLansia: isLansia ? eGetChecks('e-kondisi-lansia') : [],
-    statusAnak: isAnak ? eGetChecks('e-status-anak') : [],
-    disabilitas: eGetRadio('e-disabilitas'),
-    statusNikah: eGetRadio('e-nikah'),
-    tempatLahir: document.getElementById('e-tempat').value,
-    alamat: document.getElementById('e-alamat').value,
-    pendidikan: document.getElementById('e-pendidikan').value,
-    pekerjaan: eGetRadio('e-kerja'),
-    bansos: eGetRadio('e-bansos'),
-    jenisBansos: eGetChecks('e-jenis-bansos'),
-    asuransi: eGetChecks('e-asuransi'),
-    kontak: document.getElementById('e-kontak').value,
+    statusAnak:    isAnak   ? eGetChecks('e-status-anak')    : [],
+    disabilitas:  eGetRadio('e-disabilitas'),
+    statusNikah:  eGetRadio('e-nikah'),
+    tempatLahir:  gv('e-tempat'),
+    alamat:       gv('e-alamat'),
+    pendidikan:   gv('e-pendidikan'),
+    pekerjaan:    eGetRadio('e-kerja'),
+    bansos:       eGetRadio('e-bansos'),
+    jenisBansos:  eGetChecks('e-jenis-bansos'),
+    asuransi:     eGetChecks('e-asuransi'),
+    kontak:       gv('e-kontak'),
   };
 
-  saveData(); renderList(); tutupModal();
+  saveData();
+  renderList();
+  tutupModal();
   showToast('✓ Data ' + nama + ' diperbarui', 'success');
+}
+
+// ─── HELPER GLOBAL ────────────────────────────────────────────────────────────
+function sanitizeAoa(aoa) {
+  return aoa.map(row => Array.isArray(row) ? row.map(v => (v===null||v===undefined) ? "" : v) : row);
 }
 
 // ─── HELPER: buat worksheet data warga (dipakai RW master & per RT) ──────────
@@ -1722,79 +1765,11 @@ function buatSheetWarga(dataArr, judul, kel, rw, thn, kec, kota, ketuaRW, ketuaR
   for(let i=0;i<3;i++) aoa.push(new Array(NC).fill(''));
   const sg3=new Array(NC).fill(''); sg3[7]=`( ${ketuaRW} )`; sg3[25]=`( ${ketuaRT} )`; aoa.push(sg3);
 
-  const ws = XLSX.utils.aoa_to_sheet(aoa);
-
-  // ══ REKAP DI SAMPING TABEL — mulai sejajar header tabel Permanen, kolom 33+ ══
-  // RR harus menunjuk ke baris header H1 tabel Permanen (split1H1R)
-  const RR = split1H1R; // baris awal rekap = header tabel Permanen
-  // Kolom rekap mulai setelah NC (32 kolom data) + 1 spasi
-  const C1  = 33; // Rekap Usia Produktif  (6 kolom: 33-38)
-  const C2  = 40; // Rekap Produktif       (6 kolom: 40-45)
-  const C2b = 40; // Asuransi di bawah C2
-  const C3  = 47; // Remaja Putri         (2 kolom: 47-48)
-  const C4  = 50; // Gadis per RT         (11 kolom: 50-60)
-
-  // Rekap Usia dipindah ke sheet tersendiri (Rekap_Usia) — tidak ditaruh di sini
-
-  // ── 2. Usia Produktif ───────────────────────────────────────────────────
-  const prodData2    = dataArr.filter(w=>{ const u=hitungUsia(w.tanggalLahir); return u!==null&&u>=18&&u<=65; });
-  const nonProdData2 = dataArr.filter(w=>{ const u=hitungUsia(w.tanggalLahir); return u!==null&&(u<18||u>65); });
-  const rekProdAoa = [['Rekapitulasi Usia Produktif (18 - 65 Tahun)']];
-  rekProdAoa.push(['Kelompok','Laki-Laki','Perempuan','Jumlah','Bekerja','Tidak Bekerja']);
-  rekProdAoa.push(['Usia Produktif (18-65)',prodData2.filter(w=>w.jk==='Laki-Laki').length,prodData2.filter(w=>w.jk==='Perempuan').length,prodData2.length,prodData2.filter(w=>w.pekerjaan==='Bekerja').length,prodData2.filter(w=>w.pekerjaan==='Tidak Bekerja').length]);
-  rekProdAoa.push(['Usia Non-Produktif',nonProdData2.filter(w=>w.jk==='Laki-Laki').length,nonProdData2.filter(w=>w.jk==='Perempuan').length,nonProdData2.length,nonProdData2.filter(w=>w.pekerjaan==='Bekerja').length,nonProdData2.filter(w=>w.pekerjaan==='Tidak Bekerja').length]);
-  // Spasi lalu Asuransi di bawah Produktif
-  rekProdAoa.push([]);
-  const totBPJS2=dataArr.filter(w=>(w.asuransi||[]).includes('BPJS')).length;
-  const totAsnLain2=dataArr.filter(w=>(w.asuransi||[]).includes('Lainnya')).length;
-  const totTdkPunya2=dataArr.filter(w=>(w.asuransi||[]).includes('Tidak Punya')).length;
-  const tv=dataArr.length;
-  rekProdAoa.push(['Rekapitulasi Asuransi Kesehatan']);
-  rekProdAoa.push(['Jenis Asuransi','Jumlah','%']);
-  rekProdAoa.push(['BPJS',        totBPJS2,    tv>0?Math.round(totBPJS2/tv*100)+'%':'0%']);
-  rekProdAoa.push(['Lainnya',     totAsnLain2, tv>0?Math.round(totAsnLain2/tv*100)+'%':'0%']);
-  rekProdAoa.push(['Tidak Punya', totTdkPunya2,tv>0?Math.round(totTdkPunya2/tv*100)+'%':'0%']);
-  rekProdAoa.push(['TOTAL',       tv,          '100%']);
-  XLSX.utils.sheet_add_aoa(ws, rekProdAoa, {origin:{r:RR, c:C2}});
-
-  // ── 3. Remaja Putri per usia ────────────────────────────────────────────
-  const rpData2=dataArr.filter(w=>{ const u=hitungUsia(w.tanggalLahir); return w.jk==='Perempuan'&&u!==null&&u>=10&&u<=18; });
-  const rekRpAoa=[['Remaja Putri (Pr 10-18 Thn)'],['Usia (Thn)','Jumlah']];
-  for(let u=10;u<=18;u++) rekRpAoa.push([u, rpData2.filter(w=>hitungUsia(w.tanggalLahir)===u).length]);
-  rekRpAoa.push(['TOTAL', rpData2.length]);
-  XLSX.utils.sheet_add_aoa(ws, rekRpAoa, {origin:{r:RR, c:C3}});
-
-  // ── 4. Gadis per RT ─────────────────────────────────────────────────────
-  const gadisRtList3=[...new Set(dataArr.map(w=>w.rt||'').filter(Boolean))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
-  const rekGadisAoa=[['Remaja Putri (Gadis) per RT'],['RT','Usia 10','Usia 11','Usia 12','Usia 13','Usia 14','Usia 15','Usia 16','Usia 17','Usia 18','Total']];
-  gadisRtList3.forEach(rt=>{
-    const dRt=dataArr.filter(w=>(w.rt||'')===rt);
-    const row=['RT '+rt];
-    for(let u=10;u<=18;u++) row.push(dRt.filter(w=>w.jk==='Perempuan'&&hitungUsia(w.tanggalLahir)===u).length);
-    row.push(dRt.filter(w=>w.jk==='Perempuan'&&hitungUsia(w.tanggalLahir)!==null&&hitungUsia(w.tanggalLahir)>=10&&hitungUsia(w.tanggalLahir)<=18).length);
-    rekGadisAoa.push(row);
-  });
-  const gTotRow=['TOTAL'];
-  for(let u=10;u<=18;u++) gTotRow.push(dataArr.filter(w=>w.jk==='Perempuan'&&hitungUsia(w.tanggalLahir)===u).length);
-  gTotRow.push(dataArr.filter(w=>w.jk==='Perempuan'&&hitungUsia(w.tanggalLahir)!==null&&hitungUsia(w.tanggalLahir)>=10&&hitungUsia(w.tanggalLahir)<=18).length);
-  rekGadisAoa.push(gTotRow);
-  XLSX.utils.sheet_add_aoa(ws, rekGadisAoa, {origin:{r:RR, c:C4}});
+  const ws = XLSX.utils.aoa_to_sheet(sanitizeAoa(aoa));
 
   ws['!cols']=[
-    // Data utama (0-31): No Kel RT RW KK NIK Perm NonPerm WNA Menumpang Nama LL Pr Tempat Tgl Usia Alamat Pend Nikah x4 Kerja x2 Bansos x2 JenisB x2 Asur x3 Kontak
+    // Data utama (0-32): No Kel RT RW KK NIK Perm NonPerm WNA Menumpang Nama LL Pr Tempat Tgl Usia Alamat Pend Nikah x4 Kerja x2 Bansos x2 JenisB x2 Asur x3 Disabilitas Kontak
     {wch:4},{wch:16},{wch:4},{wch:4},{wch:17},{wch:18},{wch:9},{wch:12},{wch:5},{wch:13},{wch:24},{wch:10},{wch:10},{wch:14},{wch:13},{wch:6},{wch:24},{wch:17},{wch:9},{wch:13},{wch:7},{wch:6},{wch:8},{wch:13},{wch:5},{wch:6},{wch:7},{wch:10},{wch:6},{wch:9},{wch:12},{wch:9},{wch:16},
-    {wch:2},// 32 spasi
-    // C1: Rekap Usia Produktif (33-38)
-    {wch:20},{wch:10},{wch:10},{wch:8},{wch:9},{wch:11},
-    {wch:2},// 39 spasi
-    // C2: Produktif+Asuransi (40-45)
-    {wch:20},{wch:10},{wch:10},{wch:8},{wch:9},{wch:11},
-    {wch:2},// 46 spasi
-    // C3: Remaja Putri (47-48)
-    {wch:10},{wch:8},
-    {wch:2},// 49 spasi
-    // C4: Gadis per RT (50-60)
-    {wch:8},{wch:8},{wch:8},{wch:8},{wch:8},{wch:8},{wch:8},{wch:8},{wch:8},{wch:8},{wch:8}
   ];
   ws['!merges']=[
     {s:{r:0,c:0},e:{r:0,c:32}},  // judul halaman
@@ -1906,47 +1881,6 @@ function buatSheetWarga(dataArr, judul, kel, rw, thn, kec, kota, ketuaRW, ketuaR
   const sPkTot={fill:{patternType:'solid',fgColor:{rgb:'FCE4EC'}},font:{bold:true,sz:10,color:{rgb:'880E4F'}},alignment:{horizontal:'center',vertical:'center'},border:{top:{style:'medium',color:{rgb:'AD1457'}},bottom:{style:'medium',color:{rgb:'AD1457'}},left:{style:'medium',color:{rgb:'AD1457'}},right:{style:'medium',color:{rgb:'AD1457'}}}};
   const sPkD={fill:{patternType:'solid',fgColor:{rgb:'FFF0F5'}},alignment:{horizontal:'center',vertical:'center'},border:thinBorder};
 
-  // 1. Rekap Usia (C1=32, 6 col): row RR = judul, RR+1 = hdr, RR+2..RR+2+usiaTertua = data, +1 = TOTAL
-  sRow(ws, RR,   C1, C1+5, sGT);
-  sRow(ws, RR+1, C1, C1+5, sGH);
-  for (let i=0; i<=usiaTertua; i++) sRow(ws, RR+2+i, C1, C1+5, sGD);
-  sRow(ws, RR+2+usiaTertua+1, C1, C1+5, sGTot);
-
-  // 2. Produktif (C2=39, 6 col): judul, hdr, 2 data rows
-  sRow(ws, RR,   C2, C2+5, sPT);
-  sRow(ws, RR+1, C2, C2+5, sPH);
-  sRow(ws, RR+2, C2, C2+5, sGD);
-  sRow(ws, RR+3, C2, C2+5, sGD);
-  // Asuransi di bawah Produktif (offset +5: spasi di RR+4, judul RR+5, hdr RR+6, data RR+7-9, total RR+10)
-  sRow(ws, RR+5,  C2, C2+2, sTT);
-  sRow(ws, RR+6,  C2, C2+2, sTH);
-  sRow(ws, RR+7,  C2, C2+2, sTD);
-  sRow(ws, RR+8,  C2, C2+2, sTD);
-  sRow(ws, RR+9,  C2, C2+2, sTD);
-  sRow(ws, RR+10, C2, C2+2, sTTot);
-
-  // 3. Remaja Putri (C3=46, 2 col): judul, hdr, 9 data (10-18), TOTAL
-  sRow(ws, RR,    C3, C3+1, sPkT);
-  sRow(ws, RR+1,  C3, C3+1, sPkH);
-  for (let i=0; i<9; i++) sRow(ws, RR+2+i, C3, C3+1, sPkD);
-  sRow(ws, RR+11, C3, C3+1, sPkTot);
-
-  // 4. Gadis per RT (C4=49, 11 col): judul, hdr, RT baris, TOTAL
-  const gadisRtCnt = new Set(dataArr.map(w=>w.rt||'').filter(Boolean)).size;
-  sRow(ws, RR,              C4, C4+10, sPkT);
-  sRow(ws, RR+1,            C4, C4+10, sPkH);
-  for (let i=0; i<gadisRtCnt; i++) sRow(ws, RR+2+i, C4, C4+10, sGD);
-  sRow(ws, RR+2+gadisRtCnt, C4, C4+10, sPkTot);
-
-  // Merge judul rekap
-  const mergesRek = ws['!merges'] || [];
-  mergesRek.push({s:{r:RR,c:C1},e:{r:RR,c:C1+5}});  // judul Rekap Usia
-  mergesRek.push({s:{r:RR,c:C2},e:{r:RR,c:C2+5}});  // judul Produktif
-  mergesRek.push({s:{r:RR+5,c:C2},e:{r:RR+5,c:C2+2}});// judul Asuransi
-  mergesRek.push({s:{r:RR,c:C3},e:{r:RR,c:C3+1}});  // judul Remaja Putri
-  mergesRek.push({s:{r:RR,c:C4},e:{r:RR,c:C4+10}}); // judul Gadis per RT
-  ws['!merges'] = mergesRek;
-
   // ── Styling tabel split Permanen & Non-Permanen ───────────────────────────
   const sbBlue ={fill:{patternType:'solid',fgColor:{rgb:'1565C0'}},font:{bold:true,sz:11,color:{rgb:'FFFFFF'}},alignment:{horizontal:'left',vertical:'center'},border:{top:{style:'medium',color:{rgb:'1565C0'}},bottom:{style:'medium',color:{rgb:'1565C0'}},left:{style:'medium',color:{rgb:'1565C0'}},right:{style:'medium',color:{rgb:'1565C0'}}}};
   const sbBlueH={fill:{patternType:'solid',fgColor:{rgb:'BBDEFB'}},font:{bold:true,sz:10,color:{rgb:'0D47A1'}},alignment:{horizontal:'center',vertical:'center'},border:{top:{style:'medium',color:{rgb:'1565C0'}},bottom:{style:'medium',color:{rgb:'1565C0'}},left:{style:'medium',color:{rgb:'1565C0'}},right:{style:'medium',color:{rgb:'1565C0'}}}};
@@ -2019,6 +1953,7 @@ function exportExcel() {
   const kec=settings.kecamatan||'___________', kota=settings.kota||'___________';
   const ketuaRW=settings.ketuaRW||'___________', ketuaRT=settings.ketuaRT||'___________';
   const wb = XLSX.utils.book_new();
+  // Sanitize: replace null/undefined values in aoa arrays to empty string
 
   // ── SHEET 1: Data_Warga_Master (semua RT, diurutkan berdasarkan RT) ────────
   const wargaSorted = [...wargaData].sort((a,b)=>
@@ -2086,13 +2021,14 @@ function exportExcel() {
     for(let i=0;i<3;i++) aoaR.push(new Array(NC_R).fill(''));
     const r3=new Array(NC_R).fill(''); r3[1]=`( ${ketuaRW} )`; r3[5]=`( ${ketuaRT} )`; aoaR.push(r3);
 
-    const wsR=XLSX.utils.aoa_to_sheet(aoaR);
+    const wsR=XLSX.utils.aoa_to_sheet(sanitizeAoa(aoaR));
     wsR['!cols']=[{wch:6},{wch:10},{wch:12},{wch:12},{wch:10},{wch:10},{wch:14}];
     const tbR={top:{style:'thin',color:{rgb:'AAAAAA'}},bottom:{style:'thin',color:{rgb:'AAAAAA'}},left:{style:'thin',color:{rgb:'AAAAAA'}},right:{style:'thin',color:{rgb:'AAAAAA'}}};
     const mbR={top:{style:'medium',color:{rgb:'2E7D32'}},bottom:{style:'medium',color:{rgb:'2E7D32'}},left:{style:'medium',color:{rgb:'2E7D32'}},right:{style:'medium',color:{rgb:'2E7D32'}}};
     for(let r=0;r<aoaR.length;r++){
       for(let col=0;col<NC_R;col++){
-        const a=XLSX.utils.encode_cell({r,c:col}); if(!wsR[a])wsR[a]={t:'z',v:''};
+        const a=XLSX.utils.encode_cell({r,c:col});
+        if(!wsR[a]||wsR[a]===null) wsR[a]={t:'s',v:''};
         if(r===0) wsR[a].s={fill:{patternType:'solid',fgColor:{rgb:'2E7D32'}},font:{bold:true,sz:13,color:{rgb:'FFFFFF'}},alignment:{horizontal:'center',vertical:'center'}};
         else if(r===3) wsR[a].s={fill:{patternType:'solid',fgColor:{rgb:'C8E6C9'}},font:{bold:true,sz:10,color:{rgb:'1B5E20'}},alignment:{horizontal:'center',vertical:'center'},border:mbR};
         else if(r>=4&&r<4+usiaTertua2+1) wsR[a].s={border:tbR,alignment:{horizontal:'center',vertical:'center'}};
@@ -2102,6 +2038,190 @@ function exportExcel() {
     wsR['!merges']=[{s:{r:0,c:0},e:{r:0,c:NC_R-1}}];
     wsR['!rows']=[]; for(let r=0;r<aoaR.length;r++) wsR['!rows'][r]={hpt:r===0?22:r===3?24:18};
     XLSX.utils.book_append_sheet(wb, wsR, 'Rekap_Usia');
+  }
+
+  // ── SHEET Rekap_Ringkasan — semua rekap dalam satu sheet vertikal ──────────
+  {
+    const NC_RK = 11; // kolom terlebar = gadis per RT (RT + 9 usia + Total)
+    const tv_rk = wargaData.length;
+
+    // helper data
+    const prodRK    = wargaData.filter(w=>{ const u=hitungUsia(w.tanggalLahir); return u!==null&&u>=18&&u<=65; });
+    const nonProdRK = wargaData.filter(w=>{ const u=hitungUsia(w.tanggalLahir); return u!==null&&(u<18||u>65); });
+    const lansiaRK  = wargaData.filter(w=>{ const u=hitungUsia(w.tanggalLahir); return u!==null&&u>=60; });
+    const anakRK    = wargaData.filter(w=>{ const u=hitungUsia(w.tanggalLahir); return u!==null&&u<=17; });
+    const rpRK      = wargaData.filter(w=>{ const u=hitungUsia(w.tanggalLahir); return w.jk==='Perempuan'&&u!==null&&u>=10&&u<=18; });
+    const totBPJS_rk   = wargaData.filter(w=>(w.asuransi||[]).includes('BPJS')).length;
+    const totLain_rk   = wargaData.filter(w=>(w.asuransi||[]).includes('Lainnya')).length;
+    const totTdkAsn_rk = wargaData.filter(w=>(w.asuransi||[]).includes('Tidak Punya')).length;
+    const totBansos_rk = wargaData.filter(w=>w.bansos==='Ya').length;
+    const totDisab_rk  = wargaData.filter(w=>w.disabilitas==='Ya').length;
+    const totYatim_rk  = wargaData.filter(w=>(w.statusAnak||[]).includes('Yatim')).length;
+    const totPiatu_rk  = wargaData.filter(w=>(w.statusAnak||[]).includes('Piatu')).length;
+    const totYP_rk     = wargaData.filter(w=>(w.statusAnak||[]).includes('Yatim Piatu')).length;
+    const rtListRK = [...new Set(wargaData.map(w=>w.rt||'').filter(Boolean))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+
+    // Styles
+    const tb_rk={top:{style:'thin',color:{rgb:'AAAAAA'}},bottom:{style:'thin',color:{rgb:'AAAAAA'}},left:{style:'thin',color:{rgb:'AAAAAA'}},right:{style:'thin',color:{rgb:'AAAAAA'}}};
+    function mbRK(hex){return{top:{style:'medium',color:{rgb:hex}},bottom:{style:'medium',color:{rgb:hex}},left:{style:'medium',color:{rgb:hex}},right:{style:'medium',color:{rgb:hex}}};}
+    function stTitle(bg,fg){fg=fg||'FFFFFF';return{fill:{patternType:'solid',fgColor:{rgb:bg}},font:{bold:true,sz:12,color:{rgb:fg}},alignment:{horizontal:'left',vertical:'center'},border:mbRK(bg)};}
+    function stHdr(bg,fg,bh){return{fill:{patternType:'solid',fgColor:{rgb:bg}},font:{bold:true,sz:10,color:{rgb:fg}},alignment:{horizontal:'center',vertical:'center',wrapText:true},border:mbRK(bh||bg)};}
+    function stTot(bg,fg,bh){return{fill:{patternType:'solid',fgColor:{rgb:bg}},font:{bold:true,sz:10,color:{rgb:fg}},alignment:{horizontal:'center',vertical:'center'},border:mbRK(bh||bg)};}
+    const stData={border:tb_rk,alignment:{horizontal:'center',vertical:'center'}};
+    const stDataL={border:tb_rk,alignment:{horizontal:'left',vertical:'center'}};
+
+    function encRK(r,c){return XLSX.utils.encode_cell({r,c});}
+    function scRK(ws,r,c,s){
+      const a=encRK(r,c);
+      if(!ws[a]) ws[a]={t:'s',v:''};
+      if(ws[a]===null||ws[a]===undefined) ws[a]={t:'s',v:''};
+      ws[a].s=s;
+    }
+    function srRK(ws,r,cS,cE,s){for(let c=cS;c<=cE;c++)scRK(ws,r,c,s);}
+
+    const aoaRK=[
+      [`REKAPITULASI DATA WARGA — KEL. ${kel.toUpperCase()} RW ${rw} TAHUN ${thn}`],
+      [`Kecamatan: ${kec}`, '', `Kota/Kab: ${kota}`],
+      [],
+    ];
+    const mergesRK=[{s:{r:0,c:0},e:{r:0,c:NC_RK-1}}];
+
+    // ── Blok 1: Rekap Umum ────────────────────────────────────────────────────
+    const b1Title=aoaRK.length;
+    aoaRK.push(['REKAP UMUM WARGA']);
+    const b1Hdr=aoaRK.length;
+    aoaRK.push(['Kelompok','Laki-Laki','Perempuan','Jumlah','%']);
+    const b1Start=aoaRK.length;
+    const totalLL=wargaData.filter(w=>w.jk==='Laki-Laki').length;
+    const totalPR=wargaData.filter(w=>w.jk==='Perempuan').length;
+    const pct=(n)=>tv_rk>0?Math.round(n/tv_rk*100)+'%':'0%';
+    [
+      ['Total Warga', totalLL, totalPR, tv_rk, '100%'],
+      ['Usia Produktif (18–65)', prodRK.filter(w=>w.jk==='Laki-Laki').length, prodRK.filter(w=>w.jk==='Perempuan').length, prodRK.length, pct(prodRK.length)],
+      ['Usia Non-Produktif', nonProdRK.filter(w=>w.jk==='Laki-Laki').length, nonProdRK.filter(w=>w.jk==='Perempuan').length, nonProdRK.length, pct(nonProdRK.length)],
+      ['Lansia (≥60 thn)', lansiaRK.filter(w=>w.jk==='Laki-Laki').length, lansiaRK.filter(w=>w.jk==='Perempuan').length, lansiaRK.length, pct(lansiaRK.length)],
+      ['Anak-anak (≤17 thn)', anakRK.filter(w=>w.jk==='Laki-Laki').length, anakRK.filter(w=>w.jk==='Perempuan').length, anakRK.length, pct(anakRK.length)],
+      ['Bekerja', wargaData.filter(w=>w.pekerjaan==='Bekerja'&&w.jk==='Laki-Laki').length, wargaData.filter(w=>w.pekerjaan==='Bekerja'&&w.jk==='Perempuan').length, wargaData.filter(w=>w.pekerjaan==='Bekerja').length, pct(wargaData.filter(w=>w.pekerjaan==='Bekerja').length)],
+      ['Tidak Bekerja', wargaData.filter(w=>w.pekerjaan==='Tidak Bekerja'&&w.jk==='Laki-Laki').length, wargaData.filter(w=>w.pekerjaan==='Tidak Bekerja'&&w.jk==='Perempuan').length, wargaData.filter(w=>w.pekerjaan==='Tidak Bekerja').length, pct(wargaData.filter(w=>w.pekerjaan==='Tidak Bekerja').length)],
+    ].forEach(r=>aoaRK.push(r));
+    const b1End=aoaRK.length-1;
+    aoaRK.push([]);
+
+    // ── Blok 2: Status Tempat Tinggal ─────────────────────────────────────────
+    const b2Title=aoaRK.length;
+    aoaRK.push(['STATUS TEMPAT TINGGAL']);
+    const b2Hdr=aoaRK.length;
+    aoaRK.push(['Status','Laki-Laki','Perempuan','Jumlah','%']);
+    const b2Start=aoaRK.length;
+    ['Permanen','Non Permanen','WNA','Menumpang'].forEach(s=>{
+      const d=wargaData.filter(w=>w.status===s);
+      aoaRK.push([s, d.filter(w=>w.jk==='Laki-Laki').length, d.filter(w=>w.jk==='Perempuan').length, d.length, pct(d.length)]);
+    });
+    const b2TotR=aoaRK.length;
+    aoaRK.push(['TOTAL','','',tv_rk,'100%']);
+    aoaRK.push([]);
+
+    // ── Blok 3: Asuransi Kesehatan ────────────────────────────────────────────
+    const b3Title=aoaRK.length;
+    aoaRK.push(['KEPEMILIKAN ASURANSI KESEHATAN']);
+    const b3Hdr=aoaRK.length;
+    aoaRK.push(['Jenis Asuransi','Jumlah','%']);
+    const b3Start=aoaRK.length;
+    [['BPJS',totBPJS_rk],['Lainnya',totLain_rk],['Tidak Punya',totTdkAsn_rk]].forEach(([lbl,n])=>aoaRK.push([lbl,n,pct(n)]));
+    const b3TotR=aoaRK.length;
+    aoaRK.push(['TOTAL',tv_rk,'100%']);
+    aoaRK.push([]);
+
+    // ── Blok 4: Bansos & Disabilitas & Yatim Piatu ───────────────────────────
+    const b4Title=aoaRK.length;
+    aoaRK.push(['BANSOS, DISABILITAS & YATIM PIATU']);
+    const b4Hdr=aoaRK.length;
+    aoaRK.push(['Kategori','Jumlah','%']);
+    const b4Start=aoaRK.length;
+    [['Penerima Bansos',totBansos_rk],['Penyandang Disabilitas',totDisab_rk],['Yatim',totYatim_rk],['Piatu',totPiatu_rk],['Yatim Piatu',totYP_rk]].forEach(([lbl,n])=>aoaRK.push([lbl,n,pct(n)]));
+    const b4End=aoaRK.length-1;
+    aoaRK.push([]);
+
+    // ── Blok 5: Remaja Putri per Usia ─────────────────────────────────────────
+    const b5Title=aoaRK.length;
+    aoaRK.push(['REMAJA PUTRI (PEREMPUAN USIA 10–18 TAHUN)']);
+    const b5Hdr=aoaRK.length;
+    aoaRK.push(['Usia (Thn)','Jumlah','%']);
+    const b5Start=aoaRK.length;
+    for(let u=10;u<=18;u++){const n=rpRK.filter(w=>hitungUsia(w.tanggalLahir)===u).length;aoaRK.push([u+' tahun',n,rpRK.length>0?Math.round(n/rpRK.length*100)+'%':'0%']);}
+    const b5TotR=aoaRK.length;
+    aoaRK.push(['TOTAL',rpRK.length,'100%']);
+    aoaRK.push([]);
+
+    // ── Blok 6: Gadis per RT ──────────────────────────────────────────────────
+    const b6Title=aoaRK.length;
+    aoaRK.push(['REMAJA PUTRI (GADIS) PER RT']);
+    const b6Hdr=aoaRK.length;
+    aoaRK.push(['RT','Usia 10','Usia 11','Usia 12','Usia 13','Usia 14','Usia 15','Usia 16','Usia 17','Usia 18','Total']);
+    const b6Start=aoaRK.length;
+    rtListRK.forEach(rt=>{
+      const dRt=wargaData.filter(w=>(w.rt||'')===rt);
+      const row=['RT '+rt];
+      for(let u=10;u<=18;u++) row.push(dRt.filter(w=>w.jk==='Perempuan'&&hitungUsia(w.tanggalLahir)===u).length);
+      row.push(dRt.filter(w=>w.jk==='Perempuan'&&hitungUsia(w.tanggalLahir)!==null&&hitungUsia(w.tanggalLahir)>=10&&hitungUsia(w.tanggalLahir)<=18).length);
+      aoaRK.push(row);
+    });
+    const b6TotR=aoaRK.length;
+    const gTot=['TOTAL'];
+    for(let u=10;u<=18;u++) gTot.push(wargaData.filter(w=>w.jk==='Perempuan'&&hitungUsia(w.tanggalLahir)===u).length);
+    gTot.push(rpRK.length);
+    aoaRK.push(gTot);
+    aoaRK.push([]);
+
+    // ── TTD ───────────────────────────────────────────────────────────────────
+    aoaRK.push([],[],[]);
+    const rk1=new Array(NC_RK).fill(''); rk1[1]='Mengetahui,'; rk1[7]='Pengumpul Data,'; aoaRK.push(rk1);
+    const rk2=new Array(NC_RK).fill(''); rk2[1]=`Ketua RW ${rw}`; rk2[7]='Sekretaris RW'; aoaRK.push(rk2);
+    for(let i=0;i<3;i++) aoaRK.push(new Array(NC_RK).fill(''));
+    const rk3=new Array(NC_RK).fill(''); rk3[1]=`( ${ketuaRW} )`; rk3[7]=`( ${ketuaRT} )`; aoaRK.push(rk3);
+
+    const wsRK=XLSX.utils.aoa_to_sheet(sanitizeAoa(aoaRK));
+    wsRK['!cols']=[{wch:26},{wch:11},{wch:11},{wch:11},{wch:8},{wch:8},{wch:8},{wch:8},{wch:8},{wch:8},{wch:10}];
+
+    // Apply styles
+    // Row 0 judul
+    srRK(wsRK,0,0,NC_RK-1,{fill:{patternType:'solid',fgColor:{rgb:'1B5E20'}},font:{bold:true,sz:13,color:{rgb:'FFFFFF'}},alignment:{horizontal:'center',vertical:'center'}});
+
+    const bloks=[
+      {t:b1Title, h:b1Hdr, dS:b1Start, dE:b1End, tot:-1,   cols:5, bg:'1565C0', bgH:'BBDEFB', fg:'FFFFFF', fgH:'0D47A1', bHex:'0D47A1'},
+      {t:b2Title, h:b2Hdr, dS:b2Start, dE:b2TotR-1, tot:b2TotR, cols:5, bg:'2E7D32', bgH:'C8E6C9', fg:'FFFFFF', fgH:'1B5E20', bHex:'2E7D32'},
+      {t:b3Title, h:b3Hdr, dS:b3Start, dE:b3TotR-1, tot:b3TotR, cols:3, bg:'00695C', bgH:'E0F2F1', fg:'FFFFFF', fgH:'004D40', bHex:'00695C'},
+      {t:b4Title, h:b4Hdr, dS:b4Start, dE:b4End,   tot:-1,   cols:3, bg:'6A1B9A', bgH:'EDE7F6', fg:'FFFFFF', fgH:'4A148C', bHex:'7B1FA2'},
+      {t:b5Title, h:b5Hdr, dS:b5Start, dE:b5TotR-1, tot:b5TotR, cols:3, bg:'AD1457', bgH:'FCE4EC', fg:'FFFFFF', fgH:'880E4F', bHex:'AD1457'},
+      {t:b6Title, h:b6Hdr, dS:b6Start, dE:b6TotR-1, tot:b6TotR, cols:NC_RK, bg:'E65100', bgH:'FFE0B2', fg:'FFFFFF', fgH:'BF360C', bHex:'E65100'},
+    ];
+
+    bloks.forEach(({t,h,dS,dE,tot,cols,bg,bgH,fg,fgH,bHex})=>{
+      srRK(wsRK,t,0,cols-1,stTitle(bg,fg));
+      mergesRK.push({s:{r:t,c:0},e:{r:t,c:cols-1}});
+      srRK(wsRK,h,0,cols-1,stHdr(bgH,fgH,bHex));
+      for(let r=dS;r<=dE;r++){
+        scRK(wsRK,r,0,stDataL);
+        for(let c=1;c<cols;c++) scRK(wsRK,r,c,stData);
+      }
+      if(tot>=0){
+        srRK(wsRK,tot,0,cols-1,stTot(bgH,fgH,bHex));
+      }
+    });
+
+    // b6 total row — special (b6TotR bukan dE+1 karena push setelah loop)
+    srRK(wsRK,b6TotR,0,NC_RK-1,stTot('FFE0B2','BF360C','E65100'));
+
+    wsRK['!merges']=mergesRK;
+    wsRK['!rows']=[];
+    for(let r=0;r<aoaRK.length;r++){
+      if(r===0) wsRK['!rows'][r]={hpt:26};
+      else if(bloks.some(b=>r===b.t)) wsRK['!rows'][r]={hpt:22};
+      else if(bloks.some(b=>r===b.h)) wsRK['!rows'][r]={hpt:24};
+      else wsRK['!rows'][r]={hpt:18};
+    }
+
+    XLSX.utils.book_append_sheet(wb, wsRK, 'Rekap_Ringkasan');
   }
 
   // ── SHEET per RT: Duda_Janda_RT_XX — masing-masing RT dapat sheet sendiri ──
@@ -2198,7 +2318,7 @@ function exportExcel() {
     for(let i=0;i<3;i++) aoaDJ.push(new Array(NC_DJ).fill(''));
     const dj3=new Array(NC_DJ).fill(''); dj3[1]=`( ${ketuaRW} )`; dj3[5]=`( ${ketuaRT} )`; aoaDJ.push(dj3);
 
-    const wsDJ = XLSX.utils.aoa_to_sheet(aoaDJ);
+    const wsDJ = XLSX.utils.aoa_to_sheet(sanitizeAoa(aoaDJ));
     wsDJ['!cols'] = [{wch:22},{wch:14},{wch:4},{wch:4},{wch:18},{wch:26},{wch:6},{wch:14}];
 
     // Styling
@@ -2309,7 +2429,7 @@ function exportExcel() {
       const rt3=new Array(NC2).fill(''); rt3[2]=`( ${ketuaRW} )`; rt3[8]=`( ${ketuaRT} )`; aoa2.push(rt3);
     });
 
-    const ws2 = XLSX.utils.aoa_to_sheet(aoa2);
+    const ws2 = XLSX.utils.aoa_to_sheet(sanitizeAoa(aoa2));
     ws2['!cols']=[{wch:4},{wch:16},{wch:4},{wch:4},{wch:18},{wch:24},{wch:10},{wch:10},{wch:20},{wch:20},{wch:6}];
 
     // Merges — hanya judul utama + per RT section
@@ -2472,7 +2592,7 @@ function exportExcel() {
     for(let i=0;i<3;i++) aoaYP.push(new Array(NC_YP).fill(''));
     const yp3=new Array(NC_YP).fill(''); yp3[2]=`( ${ketuaRW} )`; yp3[7]=`( ${ketuaRT} )`; aoaYP.push(yp3);
 
-    const wsYP = XLSX.utils.aoa_to_sheet(aoaYP);
+    const wsYP = XLSX.utils.aoa_to_sheet(sanitizeAoa(aoaYP));
     wsYP['!cols'] = [{wch:4},{wch:16},{wch:4},{wch:4},{wch:17},{wch:18},{wch:24},{wch:10},{wch:10},{wch:14},{wch:13},{wch:6},{wch:24},{wch:16},{wch:14},{wch:8},{wch:6},{wch:14}];
 
     const tbYP={top:{style:'thin',color:{rgb:'AAAAAA'}},bottom:{style:'thin',color:{rgb:'AAAAAA'}},left:{style:'thin',color:{rgb:'AAAAAA'}},right:{style:'thin',color:{rgb:'AAAAAA'}}};
@@ -2611,7 +2731,7 @@ function exportExcel() {
     for(let i=0;i<3;i++) aoaDB.push(new Array(NC_DB_FINAL).fill(''));
     const db3=new Array(NC_DB_FINAL).fill(''); db3[2]=`( ${ketuaRW} )`; db3[9]=`( ${ketuaRT} )`; aoaDB.push(db3);
 
-    const wsDB = XLSX.utils.aoa_to_sheet(aoaDB);
+    const wsDB = XLSX.utils.aoa_to_sheet(sanitizeAoa(aoaDB));
     wsDB['!cols'] = [{wch:4},{wch:16},{wch:4},{wch:4},{wch:17},{wch:18},{wch:24},{wch:10},{wch:10},{wch:14},{wch:13},{wch:6},{wch:24},{wch:16},{wch:14},{wch:8},{wch:14}];
 
     const tbDB={top:{style:'thin',color:{rgb:'AAAAAA'}},bottom:{style:'thin',color:{rgb:'AAAAAA'}},left:{style:'thin',color:{rgb:'AAAAAA'}},right:{style:'thin',color:{rgb:'AAAAAA'}}};
