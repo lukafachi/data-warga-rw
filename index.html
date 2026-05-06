@@ -247,38 +247,95 @@
   .chip-clear { background: #f0f0f0; border: none; border-radius: 20px; padding: 5px 10px; font-size: 12px; color: #999; cursor: pointer; }
   .chip-clear:active { background: #ffe5e5; color: #c00; }
 
-  /* MODAL EDIT */
-  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: flex-end; justify-content: center; }
-  .modal-overlay.open { display: flex; animation: slideUp 0.25s ease; }
-  @keyframes slideUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
-  .modal-box { background: #fff; border-radius: 20px 20px 0 0; width: 100%; max-width: 520px; max-height: 92vh; display: flex; flex-direction: column; }
-  .modal-header { padding: 16px 16px 12px; border-bottom: 1px solid #eee; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
-  .modal-header h3 { font-size: 16px; font-weight: 600; color: #1a1a1a; }
-  .modal-close { background: #f0f0f0; border: none; width: 30px; height: 30px; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #555; }
-  .modal-body { overflow-y: auto; -webkit-overflow-scrolling: touch; flex: 1; padding-bottom: 8px; }
-  .modal-footer { padding: 12px 16px; border-top: 1px solid #eee; display: flex; gap: 10px; flex-shrink: 0; padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+  /* MODAL EDIT — Mobile-First Redesign */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 1000; align-items: flex-end; justify-content: center; }
+  .modal-overlay.open { display: flex; animation: slideUp 0.28s cubic-bezier(0.32,0.72,0,1); }
+  @keyframes slideUp { from { opacity:0; transform:translateY(40px); } to { opacity:1; transform:translateY(0); } }
+  .modal-box { background: #f5f5f5; border-radius: 20px 20px 0 0; width: 100%; max-width: 520px; max-height: 93vh; display: flex; flex-direction: column; }
+
+  /* Modal Header */
+  .modal-header { padding: 14px 16px 12px; background: #1a5f3f; border-radius: 20px 20px 0 0; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+  .modal-header h3 { font-size: 15px; font-weight: 700; color: #fff; }
+  .modal-header .modal-person-name { font-size: 12px; color: rgba(255,255,255,0.75); margin-top: 1px; }
+  .modal-close { background: rgba(255,255,255,0.2); border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0; }
+  .modal-close:active { background: rgba(255,255,255,0.35); }
+
+  /* Modal Body */
+  .modal-body { overflow-y: auto; -webkit-overflow-scrolling: touch; flex: 1; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+
+  /* Edit Cards — setiap kelompok field jadi card */
+  .edit-card { background: #fff; border-radius: 14px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .edit-card-title { font-size: 10px; font-weight: 700; color: #1a5f3f; text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+  .edit-card-title span { font-size: 14px; }
+
+  /* Fields dalam card */
+  .edit-card .field { margin-bottom: 10px; }
+  .edit-card .field:last-child { margin-bottom: 0; }
+  .edit-card .field label { display: block; font-size: 12px; color: #888; margin-bottom: 5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+  .edit-card .field input, .edit-card .field select {
+    width: 100%; padding: 11px 13px; border: 1.5px solid #eee; border-radius: 10px;
+    font-size: 15px; background: #fafafa; color: #1a1a1a; outline: none;
+    -webkit-appearance: none; appearance: none; font-family: inherit;
+  }
+  .edit-card .field input:focus, .edit-card .field select:focus { border-color: #1a5f3f; background: #fff; box-shadow: 0 0 0 3px rgba(26,95,63,0.1); }
+  .edit-card .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .edit-card .row3 { display: grid; grid-template-columns: 1fr 2fr 2fr; gap: 8px; }
+
+  /* Pill radio/checkbox dalam card */
+  .edit-card .pill-group { display: flex; flex-wrap: wrap; gap: 8px; }
+  .edit-card .pill {
+    display: flex; align-items: center; gap: 6px; font-size: 14px; cursor: pointer;
+    background: #f4f4f4; padding: 9px 16px; border-radius: 24px; border: 1.5px solid #e5e5e5;
+    user-select: none; font-weight: 500; transition: all 0.15s; color: #444;
+  }
+  .edit-card .pill input { width: 0; height: 0; position: absolute; opacity: 0; }
+  .edit-card .pill.selected { background: #e8f5ee; border-color: #1a5f3f; color: #1a5f3f; font-weight: 600; }
+  .edit-card .pill:active { transform: scale(0.97); }
+
+  /* Anak section — purple */
+  .edit-card.card-anak { background: #faf5ff; border: 1.5px solid #e0ccff; }
+  .edit-card.card-anak .edit-card-title { color: #6a1b9a; }
+  .edit-card.card-anak .pill { background: #f3e8ff; border-color: #d8b4fe; color: #6d28d9; }
+  .edit-card.card-anak .pill.selected { background: #d8b4fe; border-color: #7c3aed; color: #4c1d95; font-weight: 700; }
+
+  /* Anak badge */
+  .anak-usia-badge { display: inline-flex; align-items: center; gap: 5px; background: #ede9fe; border: 1px solid #c4b5fd; border-radius: 20px; padding: 5px 12px; font-size: 12px; font-weight: 600; color: #6d28d9; margin-bottom: 10px; }
+
+  /* Lansia card — orange */
+  .edit-card.card-lansia { background: #fffbf5; border: 1.5px solid #fed7aa; }
+  .edit-card.card-lansia .edit-card-title { color: #c2410c; }
+  .edit-card.card-lansia .pill { background: #fff7ed; border-color: #fdba74; color: #9a3412; }
+  .edit-card.card-lansia .pill.selected { background: #fed7aa; border-color: #f97316; color: #7c2d12; font-weight: 700; }
+
+  /* Lansia badge */
+  .lansia-usia-badge { display: inline-flex; align-items: center; gap: 5px; background: #fff7ed; border: 1px solid #fed7aa; border-radius: 20px; padding: 5px 12px; font-size: 12px; font-weight: 600; color: #c2410c; margin-bottom: 10px; }
+
+  /* Disabilitas card — blue */
+  .edit-card.card-disabilitas { background: #f0f7ff; border: 1.5px solid #bfdbfe; }
+  .edit-card.card-disabilitas .edit-card-title { color: #1e40af; }
+  .edit-card.card-disabilitas .pill { background: #eff6ff; border-color: #93c5fd; color: #1e40af; }
+  .edit-card.card-disabilitas .pill.selected { background: #bfdbfe; border-color: #3b82f6; color: #1e3a8a; font-weight: 700; }
+
+  /* Bansos card */
+  .edit-card.card-bansos { background: #fffdf0; border: 1.5px solid #fde68a; }
+  .edit-card.card-bansos .edit-card-title { color: #92400e; }
+  .edit-card.card-bansos .pill.selected { background: #fde68a; border-color: #f59e0b; color: #78350f; }
+
+  /* Conditional wrapper */
+  .edit-cond { display: none; }
+  .edit-cond.show { display: flex; flex-direction: column; gap: 10px; animation: fadeIn 0.2s ease; }
+
+  /* Footer */
+  .modal-footer { padding: 12px 16px; border-top: 1px solid #eee; display: flex; gap: 10px; flex-shrink: 0; background: #fff; padding-bottom: max(12px, env(safe-area-inset-bottom)); border-radius: 0; }
+
+  /* Edit button on card list */
   .edit-btn { position: absolute; top: 12px; right: 44px; background: #e8f5ee; border: none; color: #1a5f3f; cursor: pointer; width: 28px; height: 28px; border-radius: 50%; font-size: 13px; display: flex; align-items: center; justify-content: center; }
   .edit-btn:active { background: #b2dfcc; }
-  /* Dalam modal, section sama seperti form */
-  .modal-body .section { padding: 12px 16px; border-bottom: 4px solid #f5f5f5; }
-  .modal-body .section-title { font-size: 11px; font-weight: 700; color: #1a5f3f; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 10px; }
-  .modal-body .field { margin-bottom: 10px; }
-  .modal-body .field:last-child { margin-bottom: 0; }
-  .modal-body .field label { display: block; font-size: 13px; color: #555; margin-bottom: 4px; font-weight: 500; }
-  .modal-body .field input, .modal-body .field select { width: 100%; padding: 9px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; background: #fff; color: #1a1a1a; outline: none; -webkit-appearance: none; }
-  .modal-body .field input:focus, .modal-body .field select:focus { border-color: #1a5f3f; box-shadow: 0 0 0 3px rgba(26,95,63,0.1); }
-  .modal-body .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .modal-body .radio-group, .modal-body .checkbox-group { display: flex; flex-wrap: wrap; gap: 7px; }
-  .modal-body .rb-item, .modal-body .cb-item { display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; background: #f8f8f8; padding: 7px 12px; border-radius: 20px; border: 1px solid #ddd; user-select: none; font-weight: 500; transition: background 0.15s, border-color 0.15s; }
-  .modal-body .rb-item input, .modal-body .cb-item input { width: 15px; height: 15px; accent-color: #1a5f3f; flex-shrink: 0; }
-  .modal-body .rb-item.selected, .modal-body .cb-item.selected { background: #e8f5ee; border-color: #1a5f3f; color: #1a5f3f; }
-  .modal-body .date-row { display: grid; grid-template-columns: 1fr 2fr 2fr; gap: 8px; }
-  .modal-body .date-row select { padding: 9px 8px; font-size: 13px; }
+
+  /* Compat aliases for modal-body selectors still used in JS */
   .modal-body .conditional-section { display: none; }
   .modal-body .conditional-section.show { display: block; }
-  .modal-body .sub-section { margin-top: 12px; padding-top: 12px; border-top: 1px dashed #ddd; }
-  .modal-body .sub-section-title { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-  .modal-lansia-banner { display: none; background: #fff3e0; border: 1px solid #fb8c00; border-radius: 8px; padding: 9px 12px; margin-top: 10px; font-size: 12px; color: #e65100; font-weight: 600; }
+  .modal-lansia-banner { display: none; }
   .modal-lansia-banner.show { display: block; }
 </style>
 </head>
@@ -718,50 +775,54 @@
   </div>
 </div>
 
-<!-- MODAL EDIT -->
+<!-- MODAL EDIT — Mobile-First Card Layout -->
 <div class="modal-overlay" id="modal-edit">
   <div class="modal-box">
+    <!-- Header -->
     <div class="modal-header">
-      <h3>✏️ Edit Data Warga</h3>
+      <div>
+        <h3>✏️ Edit Data Warga</h3>
+        <div class="modal-person-name" id="modal-person-name">—</div>
+      </div>
       <button class="modal-close" onclick="tutupModal()">✕</button>
     </div>
+
     <div class="modal-body" id="modal-body">
 
-      <div class="section">
-        <div class="section-title">Informasi Administratif</div>
-        <div class="row2">
-          <div class="field"><label>RT</label><input type="text" id="e-rt" inputmode="numeric" maxlength="3"></div>
-          <div class="field"><label>RW</label><input type="text" id="e-rw" inputmode="numeric" maxlength="3"></div>
+      <!-- Card 1: Identitas Dokumen -->
+      <div class="edit-card">
+        <div class="edit-card-title"><span>🪪</span> Identitas Dokumen</div>
+        <div class="field row2">
+          <div class="field"><label>RT</label><input type="text" id="e-rt" inputmode="numeric" maxlength="3" placeholder="01"></div>
+          <div class="field"><label>RW</label><input type="text" id="e-rw" inputmode="numeric" maxlength="3" placeholder="01"></div>
         </div>
-        <div class="row2">
-          <div class="field"><label>No. KK</label><input type="text" id="e-nokk" inputmode="numeric" maxlength="16"></div>
-          <div class="field"><label>NIK</label><input type="text" id="e-nik" inputmode="numeric" maxlength="16"></div>
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="section-title">Status Kependudukan</div>
-        <div class="radio-group" id="erg-status">
-          <label class="rb-item"><input type="radio" name="e-status" value="Permanen"> Permanen</label>
-          <label class="rb-item"><input type="radio" name="e-status" value="Non Permanen"> Non Permanen</label>
-          <label class="rb-item"><input type="radio" name="e-status" value="WNA"> WNA</label>
-          <label class="rb-item"><input type="radio" name="e-status" value="Menumpang Alamat"> Menumpang Alamat</label>
+        <div class="field"><label>No. KK</label><input type="text" id="e-nokk" inputmode="numeric" maxlength="16" placeholder="3273..."></div>
+        <div class="field"><label>NIK *</label><input type="text" id="e-nik" inputmode="numeric" maxlength="16" placeholder="3273..."></div>
+        <div class="field">
+          <label>Status Kependudukan</label>
+          <div class="pill-group" id="erg-status">
+            <label class="pill"><input type="radio" name="e-status" value="Permanen"> Permanen</label>
+            <label class="pill"><input type="radio" name="e-status" value="Non Permanen"> Non Permanen</label>
+            <label class="pill"><input type="radio" name="e-status" value="WNA"> WNA</label>
+            <label class="pill"><input type="radio" name="e-status" value="Menumpang Alamat"> Menumpang Alamat</label>
+          </div>
         </div>
       </div>
 
-      <div class="section">
-        <div class="section-title">Data Pribadi</div>
-        <div class="field"><label>Nama Lengkap</label><input type="text" id="e-nama"></div>
+      <!-- Card 2: Data Pribadi -->
+      <div class="edit-card">
+        <div class="edit-card-title"><span>👤</span> Data Pribadi</div>
+        <div class="field"><label>Nama Lengkap *</label><input type="text" id="e-nama" placeholder="Nama sesuai KTP"></div>
         <div class="field">
           <label>Jenis Kelamin</label>
-          <div class="radio-group" id="erg-jk">
-            <label class="rb-item"><input type="radio" name="e-jk" value="Laki-Laki" onchange="eUpdateNikah()"> Laki-Laki</label>
-            <label class="rb-item"><input type="radio" name="e-jk" value="Perempuan" onchange="eUpdateNikah()"> Perempuan</label>
+          <div class="pill-group" id="erg-jk">
+            <label class="pill"><input type="radio" name="e-jk" value="Laki-Laki" onchange="eUpdateNikah()"> 👨 Laki-Laki</label>
+            <label class="pill"><input type="radio" name="e-jk" value="Perempuan" onchange="eUpdateNikah()"> 👩 Perempuan</label>
           </div>
         </div>
         <div class="field">
           <label>Tanggal Lahir</label>
-          <div class="date-row">
+          <div class="row3">
             <select id="e-tgl-d" onchange="eOnDateChange()"><option value="">Tgl</option></select>
             <select id="e-tgl-m" onchange="eOnDateChange()">
               <option value="">Bulan</option>
@@ -774,10 +835,11 @@
             </select>
             <select id="e-tgl-y" onchange="eOnDateChange()"><option value="">Tahun</option></select>
           </div>
-          <div class="modal-lansia-banner" id="e-lansia-banner">👴 Lansia — Usia <span id="e-lansia-usia">0</span> Tahun</div>
+          <!-- hidden compat elements -->
+          <div class="modal-lansia-banner" id="e-lansia-banner" style="display:none"><span id="e-lansia-usia"></span></div>
         </div>
-        <div class="field"><label>Tempat Lahir</label><input type="text" id="e-tempat"></div>
-        <div class="field"><label>Alamat</label><input type="text" id="e-alamat"></div>
+        <div class="field"><label>Tempat Lahir</label><input type="text" id="e-tempat" placeholder="Kota / Kabupaten"></div>
+        <div class="field"><label>Alamat</label><input type="text" id="e-alamat" placeholder="Jl. / Gg. No. ..."></div>
         <div class="field">
           <label>Pendidikan Terakhir</label>
           <select id="e-pendidikan">
@@ -789,90 +851,92 @@
         </div>
         <div class="field">
           <label>Status Pernikahan</label>
-          <div class="radio-group" id="erg-nikah">
-            <label class="rb-item"><input type="radio" name="e-nikah" value="Menikah" onchange="eUpdateNikah()"> Menikah</label>
-            <label class="rb-item"><input type="radio" name="e-nikah" value="Belum Menikah" onchange="eUpdateNikah()"> Belum Menikah</label>
-            <label class="rb-item" id="e-rb-janda" style="display:none"><input type="radio" name="e-nikah" value="Janda" onchange="eUpdateNikah()"> Janda</label>
-            <label class="rb-item" id="e-rb-duda" style="display:none"><input type="radio" name="e-nikah" value="Duda" onchange="eUpdateNikah()"> Duda</label>
+          <div class="pill-group" id="erg-nikah">
+            <label class="pill"><input type="radio" name="e-nikah" value="Menikah" onchange="eUpdateNikah()"> Menikah</label>
+            <label class="pill"><input type="radio" name="e-nikah" value="Belum Menikah" onchange="eUpdateNikah()"> Belum Menikah</label>
+            <label class="pill" id="e-rb-janda" style="display:none"><input type="radio" name="e-nikah" value="Janda" onchange="eUpdateNikah()"> Janda</label>
+            <label class="pill" id="e-rb-duda" style="display:none"><input type="radio" name="e-nikah" value="Duda" onchange="eUpdateNikah()"> Duda</label>
+          </div>
+        </div>
+        <div class="field"><label>Nomor Kontak</label><input type="tel" id="e-kontak" inputmode="tel" placeholder="08xx..."></div>
+      </div>
+
+      <!-- Card 3: Pekerjaan -->
+      <div class="edit-card">
+        <div class="edit-card-title"><span>💼</span> Pekerjaan</div>
+        <div class="pill-group" id="erg-kerja">
+          <label class="pill"><input type="radio" name="e-kerja" value="Bekerja"> ✅ Bekerja</label>
+          <label class="pill"><input type="radio" name="e-kerja" value="Tidak Bekerja"> ❌ Tidak Bekerja</label>
+        </div>
+      </div>
+
+      <!-- Card 4: Disabilitas -->
+      <div class="edit-card card-disabilitas">
+        <div class="edit-card-title"><span>♿</span> Status Disabilitas</div>
+        <div class="pill-group" id="erg-disabilitas">
+          <label class="pill"><input type="radio" name="e-disabilitas" value="Ya"> Ya</label>
+          <label class="pill"><input type="radio" name="e-disabilitas" value="Tidak"> Tidak</label>
+        </div>
+      </div>
+
+      <!-- Card 5: Status Anak — muncul jika usia <= 19 -->
+      <div class="edit-cond" id="e-sec-status-anak">
+        <div class="edit-card card-anak">
+          <div class="edit-card-title"><span>👶</span> Status Anak</div>
+          <div class="anak-usia-badge" id="e-anak-usia-badge">🎂 Usia <span id="e-anak-usia-val">—</span> tahun</div>
+          <p style="font-size:13px;color:#6d28d9;margin-bottom:12px;font-weight:500;">Pilih status yang sesuai (boleh lebih dari satu)</p>
+          <div class="pill-group">
+            <label class="pill"><input type="checkbox" class="e-status-anak" value="Yatim"> 🕊️ Yatim<br><small style="font-size:10px;opacity:0.7">Ayah meninggal</small></label>
+            <label class="pill"><input type="checkbox" class="e-status-anak" value="Piatu"> 🕊️ Piatu<br><small style="font-size:10px;opacity:0.7">Ibu meninggal</small></label>
+            <label class="pill"><input type="checkbox" class="e-status-anak" value="Yatim Piatu"> 🕊️ Yatim Piatu<br><small style="font-size:10px;opacity:0.7">Keduanya meninggal</small></label>
           </div>
         </div>
       </div>
 
-      <div class="section">
-        <div class="section-title">Status Pekerjaan</div>
-        <div class="radio-group" id="erg-kerja">
-          <label class="rb-item"><input type="radio" name="e-kerja" value="Bekerja"> Bekerja</label>
-          <label class="rb-item"><input type="radio" name="e-kerja" value="Tidak Bekerja"> Tidak Bekerja</label>
-        </div>
-      </div>
-
-      <!-- STATUS DISABILITAS EDIT -->
-      <div class="section">
-        <div class="disabilitas-section">
-          <div class="section-title">♿ Status Disabilitas</div>
-          <div class="radio-group" id="erg-disabilitas">
-            <label class="rb-item disabilitas-section"><input type="radio" name="e-disabilitas" value="Ya"> Ya</label>
-            <label class="rb-item disabilitas-section"><input type="radio" name="e-disabilitas" value="Tidak"> Tidak</label>
+      <!-- Card 6: Kondisi Lansia — muncul jika usia >= 60 -->
+      <div class="edit-cond" id="e-sec-kondisi-wrap">
+        <div class="edit-card card-lansia">
+          <div class="edit-card-title"><span>🧓</span> Kondisi Lansia</div>
+          <div class="lansia-usia-badge">👴 Usia <span id="e-lansia-usia-badge">—</span> tahun</div>
+          <div class="pill-group">
+            <label class="pill"><input type="checkbox" class="e-kondisi-lansia" value="Miskin dan Terlantar"> Miskin &amp; Terlantar</label>
+            <label class="pill"><input type="checkbox" class="e-kondisi-lansia" value="Tidak Ada Pendamping"> Tidak Ada Pendamping</label>
           </div>
         </div>
       </div>
 
-      <!-- STATUS ANAK EDIT — hanya muncul jika usia <= 19 -->
-      <div class="conditional-section" id="e-sec-status-anak">
-        <div class="section">
-          <div class="anak-section">
-            <div class="section-title">👶 Status Anak</div>
-            <p style="font-size:12px;color:#7b1fa2;margin-bottom:10px;">Pilih jika berlaku (boleh lebih dari satu)</p>
-            <div class="checkbox-group">
-              <label class="cb-item anak-section"><input type="checkbox" class="e-status-anak" value="Yatim"> Yatim</label>
-              <label class="cb-item anak-section"><input type="checkbox" class="e-status-anak" value="Piatu"> Piatu</label>
-              <label class="cb-item anak-section"><input type="checkbox" class="e-status-anak" value="Yatim Piatu"> Yatim Piatu</label>
-            </div>
-          </div>
+      <!-- Card 7: Bansos -->
+      <div class="edit-card card-bansos">
+        <div class="edit-card-title"><span>🏦</span> Penerima Bansos</div>
+        <div class="pill-group" id="erg-bansos">
+          <label class="pill"><input type="radio" name="e-bansos" value="Ya" onchange="eToggleBansos(true)"> ✅ Ya</label>
+          <label class="pill"><input type="radio" name="e-bansos" value="Tidak" onchange="eToggleBansos(false)"> ❌ Tidak</label>
         </div>
-      </div>
-        <div class="section-title" style="color:#e65100">🧓 Kondisi Lansia</div>
-        <div class="checkbox-group">
-          <label class="cb-item" style="background:#fff3e0;border-color:#ffcc80"><input type="checkbox" class="e-kondisi-lansia" value="Miskin dan Terlantar"> Miskin dan Terlantar</label>
-          <label class="cb-item" style="background:#fff3e0;border-color:#ffcc80"><input type="checkbox" class="e-kondisi-lansia" value="Tidak Ada Pendamping"> Tidak Ada Pendamping</label>
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="section-title">Penerima Bansos</div>
-        <div class="radio-group" id="erg-bansos">
-          <label class="rb-item"><input type="radio" name="e-bansos" value="Ya" onchange="eToggleBansos(true)"> Ya</label>
-          <label class="rb-item"><input type="radio" name="e-bansos" value="Tidak" onchange="eToggleBansos(false)"> Tidak</label>
-        </div>
-        <div class="conditional-section" id="e-sec-bansos">
-          <div class="sub-section">
-            <div class="sub-section-title">Jenis Bansos</div>
-            <div class="checkbox-group">
-              <label class="cb-item"><input type="checkbox" class="e-jenis-bansos" value="Tunai"> Tunai</label>
-              <label class="cb-item"><input type="checkbox" class="e-jenis-bansos" value="Non Tunai"> Non Tunai</label>
-            </div>
+        <div class="conditional-section" id="e-sec-bansos" style="margin-top:10px">
+          <div style="font-size:11px;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Jenis Bansos</div>
+          <div class="pill-group">
+            <label class="pill"><input type="checkbox" class="e-jenis-bansos" value="Tunai"> Tunai</label>
+            <label class="pill"><input type="checkbox" class="e-jenis-bansos" value="Non Tunai"> Non Tunai</label>
           </div>
         </div>
       </div>
 
-      <div class="section">
-        <div class="section-title">Kepemilikan Asuransi Kesehatan</div>
-        <div class="checkbox-group">
-          <label class="cb-item"><input type="checkbox" class="e-asuransi" value="BPJS"> BPJS</label>
-          <label class="cb-item"><input type="checkbox" class="e-asuransi" value="Lainnya"> Lainnya</label>
-          <label class="cb-item"><input type="checkbox" class="e-asuransi" value="Tidak Punya"> Tidak Punya</label>
+      <!-- Card 8: Asuransi -->
+      <div class="edit-card">
+        <div class="edit-card-title"><span>🏥</span> Asuransi Kesehatan</div>
+        <div class="pill-group">
+          <label class="pill"><input type="checkbox" class="e-asuransi" value="BPJS"> BPJS</label>
+          <label class="pill"><input type="checkbox" class="e-asuransi" value="Lainnya"> Lainnya</label>
+          <label class="pill"><input type="checkbox" class="e-asuransi" value="Tidak Punya"> Tidak Punya</label>
         </div>
       </div>
 
-      <div class="section">
-        <div class="section-title">Kontak</div>
-        <div class="field"><label>Nomor Kontak</label><input type="tel" id="e-kontak" inputmode="tel"></div>
-      </div>
-
+      <div style="height:4px"></div>
     </div><!-- end modal-body -->
+
     <div class="modal-footer">
       <button class="btn btn-clear" onclick="tutupModal()">Batal</button>
-      <button class="btn btn-add" onclick="simpanEdit()">✓ Simpan Perubahan</button>
+      <button class="btn btn-add" onclick="simpanEdit()">✓ Simpan</button>
     </div>
   </div>
 </div>
@@ -1431,12 +1495,10 @@ function eOnDateChange() {
 function eCheckLansia() {
   const usia = hitungUsia(eTglLahir);
   const isLansia = usia !== null && usia >= 60;
-  const banner = document.getElementById('e-lansia-banner');
-  const lansiaUsia = document.getElementById('e-lansia-usia');
   const kondisiWrap = document.getElementById('e-sec-kondisi-wrap');
-  if (banner) banner.classList.toggle('show', isLansia);
-  if (isLansia && lansiaUsia) lansiaUsia.textContent = usia;
-  if (kondisiWrap) kondisiWrap.style.display = isLansia ? 'block' : 'none';
+  const badgeEl = document.getElementById('e-lansia-usia-badge');
+  if (kondisiWrap) kondisiWrap.classList.toggle('show', isLansia);
+  if (badgeEl && isLansia) badgeEl.textContent = usia;
   if (!isLansia) {
     document.querySelectorAll('.e-kondisi-lansia').forEach(c => {
       c.checked = false;
@@ -1451,6 +1513,8 @@ function eCheckStatusAnak() {
   const isAnak = usia !== null && usia <= 19;
   const sec = document.getElementById('e-sec-status-anak');
   if (sec) sec.classList.toggle('show', isAnak);
+  const badgeEl = document.getElementById('e-anak-usia-val');
+  if (badgeEl && isAnak) badgeEl.textContent = usia;
   if (!isAnak) {
     document.querySelectorAll('.e-status-anak').forEach(c => {
       c.checked = false;
@@ -1497,14 +1561,16 @@ function eToggleBansos(show) {
 function eSetRadio(name, value) {
   document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
     r.checked = (r.value === value);
-    if (r.parentElement) r.parentElement.classList.toggle('selected', r.checked);
+    const par = r.parentElement;
+    if (par) par.classList.toggle('selected', r.checked);
   });
 }
 
 function eSetChecks(cls, values) {
   document.querySelectorAll('.' + cls).forEach(c => {
     c.checked = values.includes(c.value);
-    if (c.parentElement) c.parentElement.classList.toggle('selected', c.checked);
+    const par = c.parentElement;
+    if (par) par.classList.toggle('selected', c.checked);
   });
 }
 
@@ -1513,6 +1579,10 @@ function bukaEdit(id) {
   if (!w) return;
   editId = id;
   eBuildDates();
+
+  // Tampilkan nama di header modal
+  const nameEl = document.getElementById('modal-person-name');
+  if (nameEl) nameEl.textContent = w.namaLengkap || '—';
 
   // Helper getter dengan fallback
   function sid(id) { return document.getElementById(id) || {value:''}; }
@@ -1564,6 +1634,20 @@ function bukaEdit(id) {
 
   // Asuransi
   eSetChecks('e-asuransi', w.asuransi||[]);
+
+  // Setup pill interactions untuk modal (hanya modal pills)
+  document.querySelectorAll('.modal-box .pill input[type=radio]').forEach(r => {
+    r.addEventListener('change', function() {
+      const grp = this.closest('.pill-group');
+      if (grp) grp.querySelectorAll('.pill').forEach(p => p.classList.remove('selected'));
+      if (this.parentElement) this.parentElement.classList.add('selected');
+    });
+  });
+  document.querySelectorAll('.modal-box .pill input[type=checkbox]').forEach(c => {
+    c.addEventListener('change', function() {
+      if (this.parentElement) this.parentElement.classList.toggle('selected', this.checked);
+    });
+  });
 
   // Lansia & anak (setelah eTglLahir di-set)
   eCheckLansia();
