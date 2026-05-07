@@ -2124,6 +2124,159 @@ function exportExcel() {
     XLSX.utils.book_append_sheet(wb, wsR, 'Rekap_Usia');
   }
 
+  // ── SHEET Rekap_Usia per RT — rekap usia seperti master untuk setiap RT ─────
+  {
+    const rtListU = [...new Set(wargaData.map(w=>w.rt||'').filter(Boolean))]
+      .sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+
+    rtListU.forEach(rtNo => {
+      const dataRT = wargaData.filter(w=>(w.rt||'')===rtNo);
+      if (!dataRT.length) return;
+
+      const NC_RU = 7;
+      const uMap={}, uLL={}, uLK={}, uKerja={}, uTdk={};
+      dataRT.forEach(w=>{
+        const u=hitungUsia(w.tanggalLahir); if(u===null||u<0) return;
+        uMap[u]=(uMap[u]||0)+1;
+        if(w.jk==='Laki-Laki') uLL[u]=(uLL[u]||0)+1;
+        if(w.jk==='Perempuan') uLK[u]=(uLK[u]||0)+1;
+        if(w.pekerjaan==='Bekerja')       uKerja[u]=(uKerja[u]||0)+1;
+        if(w.pekerjaan==='Tidak Bekerja') uTdk[u]=(uTdk[u]||0)+1;
+      });
+      const usiaTertua=Object.keys(uMap).length>0?Math.max(...Object.keys(uMap).map(Number)):0;
+      const totLL_ru=dataRT.filter(w=>w.jk==='Laki-Laki').length;
+      const totLK_ru=dataRT.filter(w=>w.jk==='Perempuan').length;
+      const totKrj_ru=dataRT.filter(w=>w.pekerjaan==='Bekerja').length;
+      const totTdk_ru=dataRT.filter(w=>w.pekerjaan==='Tidak Bekerja').length;
+
+      // ── Blok ringkasan kelompok usia ──────────────────────────────────────
+      const anakRU   = dataRT.filter(w=>{ const u=hitungUsia(w.tanggalLahir); return u!==null&&u<=17; });
+      const remajRU  = dataRT.filter(w=>{ const u=hitungUsia(w.tanggalLahir); return u!==null&&u>=18&&u<=25; });
+      const dewasaRU = dataRT.filter(w=>{ const u=hitungUsia(w.tanggalLahir); return u!==null&&u>=26&&u<=59; });
+      const lansiaRU = dataRT.filter(w=>{ const u=hitungUsia(w.tanggalLahir); return u!==null&&u>=60; });
+      const prodRU   = dataRT.filter(w=>{ const u=hitungUsia(w.tanggalLahir); return u!==null&&u>=18&&u<=65; });
+      const bansosRU = dataRT.filter(w=>w.bansos==='Ya').length;
+      const disabRU  = dataRT.filter(w=>w.disabilitas==='Ya').length;
+      const yatimRU  = dataRT.filter(w=>(w.statusAnak||[]).includes('Yatim')).length;
+      const piatu_RU = dataRT.filter(w=>(w.statusAnak||[]).includes('Piatu')).length;
+      const ypRU     = dataRT.filter(w=>(w.statusAnak||[]).includes('Yatim Piatu')).length;
+      const pctRU=(n)=>dataRT.length>0?Math.round(n/dataRT.length*100)+'%':'0%';
+
+      const aoaRU=[
+        [`REKAPITULASI JUMLAH WARGA PER USIA — RT ${rtNo} / RW ${rw} — KEL. ${kel.toUpperCase()} — ${thn}`],
+        [`Kecamatan: ${kec}`, '', `Kota/Kab: ${kota}`],
+        [],
+        // Blok 1: tabel usia detail
+        ['REKAPITULASI USIA WARGA RT '+rtNo],
+        ['No','Usia (Thn)','Laki-Laki','Perempuan','Jumlah','Bekerja','Tidak Bekerja'],
+      ];
+      const hdrRow=3; // row index judul blok
+      const hdrHRow=4; // row index header kolom
+      const dataStartRow=5;
+      for(let u=0;u<=usiaTertua;u++)
+        aoaRU.push([u+1, u, uLL[u]||0, uLK[u]||0, uMap[u]||0, uKerja[u]||0, uTdk[u]||0]);
+      const totalRow=aoaRU.length;
+      aoaRU.push(['TOTAL','',totLL_ru,totLK_ru,dataRT.length,totKrj_ru,totTdk_ru]);
+
+      // ── Blok 2: Ringkasan Kelompok Usia ──────────────────────────────────
+      aoaRU.push([],[]);
+      const b2TitleRow=aoaRU.length;
+      aoaRU.push(['RINGKASAN KELOMPOK USIA']);
+      const b2HdrRow=aoaRU.length;
+      aoaRU.push(['Kelompok','Laki-Laki','Perempuan','Jumlah','%']);
+      const b2DataStart=aoaRU.length;
+      [
+        ['Anak-Anak (0–17 thn)', anakRU.filter(w=>w.jk==='Laki-Laki').length, anakRU.filter(w=>w.jk==='Perempuan').length, anakRU.length, pctRU(anakRU.length)],
+        ['Remaja (18–25 thn)',   remajRU.filter(w=>w.jk==='Laki-Laki').length, remajRU.filter(w=>w.jk==='Perempuan').length, remajRU.length, pctRU(remajRU.length)],
+        ['Dewasa (26–59 thn)',   dewasaRU.filter(w=>w.jk==='Laki-Laki').length, dewasaRU.filter(w=>w.jk==='Perempuan').length, dewasaRU.length, pctRU(dewasaRU.length)],
+        ['Lansia (≥60 thn)',     lansiaRU.filter(w=>w.jk==='Laki-Laki').length, lansiaRU.filter(w=>w.jk==='Perempuan').length, lansiaRU.length, pctRU(lansiaRU.length)],
+        ['Usia Produktif (18–65)', prodRU.filter(w=>w.jk==='Laki-Laki').length, prodRU.filter(w=>w.jk==='Perempuan').length, prodRU.length, pctRU(prodRU.length)],
+      ].forEach(r=>aoaRU.push(r));
+      const b2TotRow=aoaRU.length;
+      aoaRU.push(['TOTAL','',totLL_ru,totLK_ru,dataRT.length,'']);
+
+      // ── Blok 3: Bansos, Disabilitas & Yatim Piatu ────────────────────────
+      aoaRU.push([],[]);
+      const b3TitleRow=aoaRU.length;
+      aoaRU.push(['BANSOS, DISABILITAS & YATIM PIATU']);
+      const b3HdrRow=aoaRU.length;
+      aoaRU.push(['Kategori','Jumlah','%']);
+      const b3DataStart=aoaRU.length;
+      [
+        ['Penerima Bansos',         bansosRU, pctRU(bansosRU)],
+        ['Penyandang Disabilitas',  disabRU,  pctRU(disabRU)],
+        ['Yatim',                   yatimRU,  pctRU(yatimRU)],
+        ['Piatu',                   piatu_RU, pctRU(piatu_RU)],
+        ['Yatim Piatu',             ypRU,     pctRU(ypRU)],
+      ].forEach(r=>aoaRU.push(r));
+      const b3DataEnd=aoaRU.length-1;
+
+      // ── TTD ──────────────────────────────────────────────────────────────
+      aoaRU.push([],[],[]);
+      const td1=new Array(NC_RU).fill(''); td1[1]='Mengetahui,'; td1[5]='Pengumpul Data,'; aoaRU.push(td1);
+      const td2=new Array(NC_RU).fill(''); td2[1]=`Ketua RW ${rw}`; td2[5]=`Ketua RT ${rtNo}`; aoaRU.push(td2);
+      for(let i=0;i<3;i++) aoaRU.push(new Array(NC_RU).fill(''));
+      const td3=new Array(NC_RU).fill(''); td3[1]=`( ${ketuaRW} )`; td3[5]=`( ${ketuaRT} )`; aoaRU.push(td3);
+
+      const wsRU=XLSX.utils.aoa_to_sheet(sanitizeAoa(aoaRU));
+      wsRU['!cols']=[{wch:6},{wch:12},{wch:13},{wch:13},{wch:10},{wch:10},{wch:15}];
+
+      // ── Styling ──────────────────────────────────────────────────────────
+      const tbRU={top:{style:'thin',color:{rgb:'AAAAAA'}},bottom:{style:'thin',color:{rgb:'AAAAAA'}},left:{style:'thin',color:{rgb:'AAAAAA'}},right:{style:'thin',color:{rgb:'AAAAAA'}}};
+      function mbRU(hex){return{top:{style:'medium',color:{rgb:hex}},bottom:{style:'medium',color:{rgb:hex}},left:{style:'medium',color:{rgb:hex}},right:{style:'medium',color:{rgb:hex}}};}
+
+      function scRU(r,c,s){const a=XLSX.utils.encode_cell({r,c});if(!wsRU[a])wsRU[a]={t:'s',v:''};wsRU[a].s=s;}
+      function srRU(r,cS,cE,s){for(let c=cS;c<=cE;c++)scRU(r,c,s);}
+
+      // Judul utama — hijau tua
+      srRU(0,0,NC_RU-1,{fill:{patternType:'solid',fgColor:{rgb:'1B5E20'}},font:{bold:true,sz:13,color:{rgb:'FFFFFF'}},alignment:{horizontal:'center',vertical:'center'}});
+
+      // Blok 1: tabel usia detail — hijau
+      srRU(hdrRow,0,NC_RU-1,{fill:{patternType:'solid',fgColor:{rgb:'2E7D32'}},font:{bold:true,sz:11,color:{rgb:'FFFFFF'}},alignment:{horizontal:'left',vertical:'center'},border:mbRU('2E7D32')});
+      srRU(hdrHRow,0,NC_RU-1,{fill:{patternType:'solid',fgColor:{rgb:'C8E6C9'}},font:{bold:true,sz:10,color:{rgb:'1B5E20'}},alignment:{horizontal:'center',vertical:'center'},border:mbRU('2E7D32')});
+      for(let r=dataStartRow;r<totalRow;r++) srRU(r,0,NC_RU-1,{border:tbRU,alignment:{horizontal:'center',vertical:'center'}});
+      srRU(totalRow,0,NC_RU-1,{fill:{patternType:'solid',fgColor:{rgb:'E8F5E9'}},font:{bold:true,sz:10,color:{rgb:'1B5E20'}},alignment:{horizontal:'center',vertical:'center'},border:mbRU('2E7D32')});
+
+      // Blok 2: kelompok usia — biru
+      srRU(b2TitleRow,0,NC_RU-1,{fill:{patternType:'solid',fgColor:{rgb:'1565C0'}},font:{bold:true,sz:11,color:{rgb:'FFFFFF'}},alignment:{horizontal:'left',vertical:'center'},border:mbRU('1565C0')});
+      srRU(b2HdrRow,0,4,{fill:{patternType:'solid',fgColor:{rgb:'BBDEFB'}},font:{bold:true,sz:10,color:{rgb:'0D47A1'}},alignment:{horizontal:'center',vertical:'center'},border:mbRU('1565C0')});
+      for(let r=b2DataStart;r<b2TotRow;r++){
+        scRU(r,0,{border:tbRU,alignment:{horizontal:'left',vertical:'center'}});
+        for(let c=1;c<=4;c++) scRU(r,c,{border:tbRU,alignment:{horizontal:'center',vertical:'center'}});
+      }
+      srRU(b2TotRow,0,4,{fill:{patternType:'solid',fgColor:{rgb:'BBDEFB'}},font:{bold:true,sz:10,color:{rgb:'0D47A1'}},alignment:{horizontal:'center',vertical:'center'},border:mbRU('1565C0')});
+
+      // Blok 3: bansos/disabilitas/yatim piatu — ungu
+      srRU(b3TitleRow,0,NC_RU-1,{fill:{patternType:'solid',fgColor:{rgb:'6A1B9A'}},font:{bold:true,sz:11,color:{rgb:'FFFFFF'}},alignment:{horizontal:'left',vertical:'center'},border:mbRU('6A1B9A')});
+      srRU(b3HdrRow,0,2,{fill:{patternType:'solid',fgColor:{rgb:'EDE7F6'}},font:{bold:true,sz:10,color:{rgb:'4A148C'}},alignment:{horizontal:'center',vertical:'center'},border:mbRU('7B1FA2')});
+      for(let r=b3DataStart;r<=b3DataEnd;r++){
+        scRU(r,0,{border:tbRU,alignment:{horizontal:'left',vertical:'center'}});
+        scRU(r,1,{border:tbRU,alignment:{horizontal:'center',vertical:'center'}});
+        scRU(r,2,{border:tbRU,alignment:{horizontal:'center',vertical:'center'}});
+      }
+
+      // Merges
+      wsRU['!merges']=[
+        {s:{r:0,c:0},e:{r:0,c:NC_RU-1}},
+        {s:{r:hdrRow,c:0},e:{r:hdrRow,c:NC_RU-1}},
+        {s:{r:b2TitleRow,c:0},e:{r:b2TitleRow,c:NC_RU-1}},
+        {s:{r:b3TitleRow,c:0},e:{r:b3TitleRow,c:NC_RU-1}},
+      ];
+
+      // Row heights
+      wsRU['!rows']=[];
+      for(let r=0;r<aoaRU.length;r++){
+        if(r===0) wsRU['!rows'][r]={hpt:24};
+        else if(r===hdrRow||r===b2TitleRow||r===b3TitleRow) wsRU['!rows'][r]={hpt:22};
+        else if(r===hdrHRow||r===b2HdrRow||r===b3HdrRow) wsRU['!rows'][r]={hpt:24};
+        else wsRU['!rows'][r]={hpt:18};
+      }
+
+      const sheetNameRU=`Rekap_Usia_RT_${rtNo.padStart(2,'0')}`;
+      XLSX.utils.book_append_sheet(wb, wsRU, sheetNameRU);
+    });
+  }
+
   // ── SHEET Rekap_Ringkasan — semua rekap dalam satu sheet vertikal ──────────
   {
     const NC_RK = 11; // kolom terlebar = gadis per RT (RT + 9 usia + Total)
