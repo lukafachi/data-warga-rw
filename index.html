@@ -337,6 +337,32 @@
   .modal-body .conditional-section.show { display: block; }
   .modal-lansia-banner { display: none; }
   .modal-lansia-banner.show { display: block; }
+
+  /* ═══ PILIHAN LEBIH JELAS: opsi terpilih berwarna penuh + tanda ✓ ═══ */
+  .rb-item.selected, .cb-item.selected { background:#1a5f3f; border-color:#1a5f3f; color:#fff; font-weight:700; box-shadow:0 0 0 3px rgba(26,95,63,.22); }
+  .rb-item.selected::before, .cb-item.selected::before { content:'✓'; font-weight:800; }
+  .rb-item.selected input, .cb-item.selected input { display:none; }
+  .kondisi-section .cb-item.selected { background:#e65100; border-color:#e65100; color:#fff; box-shadow:0 0 0 3px rgba(230,81,0,.22); }
+  .disabilitas-section .rb-item.selected { background:#1565c0; border-color:#1565c0; color:#fff; box-shadow:0 0 0 3px rgba(21,101,192,.22); }
+  .anak-section .cb-item.selected { background:#7b1fa2; border-color:#7b1fa2; color:#fff; box-shadow:0 0 0 3px rgba(123,31,162,.22); }
+  .edit-card .pill.selected { background:#1a5f3f; border-color:#1a5f3f; color:#fff; font-weight:700; box-shadow:0 0 0 3px rgba(26,95,63,.22); }
+  .edit-card .pill.selected::before { content:'✓ '; font-weight:800; }
+  .edit-card.card-anak .pill.selected { background:#7c3aed; border-color:#7c3aed; color:#fff; box-shadow:0 0 0 3px rgba(124,58,237,.22); }
+  .edit-card.card-lansia .pill.selected { background:#ea580c; border-color:#ea580c; color:#fff; box-shadow:0 0 0 3px rgba(234,88,12,.22); }
+  .edit-card.card-disabilitas .pill.selected { background:#2563eb; border-color:#2563eb; color:#fff; box-shadow:0 0 0 3px rgba(37,99,235,.22); }
+  .edit-card.card-bansos .pill.selected { background:#d97706; border-color:#d97706; color:#fff; box-shadow:0 0 0 3px rgba(217,119,6,.22); }
+
+  /* ═══ DATA BALITA / STUNTING ═══ */
+  .balita-info { background:#e0f7fa; border:1.5px solid #4dd0e1; color:#006064; border-radius:10px; padding:10px 12px; font-size:13px; font-weight:600; margin-bottom:14px; line-height:1.4; }
+  .q-label { font-size:15px; font-weight:700; color:#222; margin-bottom:3px; }
+  .q-help { font-size:12px; color:#777; margin-bottom:10px; line-height:1.45; }
+  .step-label { font-size:13px; font-weight:700; color:#444; margin:12px 0 6px; }
+  .stunting-box { background:#fff5f5; border:2px solid #ef9a9a; border-radius:12px; padding:12px; margin-bottom:14px; }
+  .stunting-box .box-title { font-size:13px; font-weight:800; color:#b71c1c; margin-bottom:10px; }
+  .big-choice { display:flex; gap:10px; flex-wrap:nowrap; }
+  .big-choice .rb-item, .big-choice .pill { flex:1; justify-content:center; text-align:center; padding:14px 10px; font-size:15px; font-weight:700; border-radius:12px; }
+  .rb-item.stunt-ya.selected, .edit-card .pill.stunt-ya.selected { background:#c62828; border-color:#c62828; color:#fff; box-shadow:0 0 0 3px rgba(198,40,40,.25); }
+  .rb-item.stunt-tidak.selected, .edit-card .pill.stunt-tidak.selected { background:#2e7d32; border-color:#2e7d32; color:#fff; box-shadow:0 0 0 3px rgba(46,125,50,.25); }
 </style>
 </head>
 <body>
@@ -354,6 +380,7 @@
   <div class="tab-bar">
     <div class="tab active" onclick="showPage('form')">✏️ Input</div>
     <div class="tab" onclick="showPage('list')">📋 Daftar</div>
+    <div class="tab" onclick="showPage('usaha')">🏪 Usaha</div>
     <div class="tab" onclick="showPage('info')">📊 Info</div>
     <div class="tab" onclick="showPage('duplikat')">⚠️ Duplikat</div>
     <div class="tab" onclick="showPage('settings')">⚙️ Pengaturan</div>
@@ -494,28 +521,34 @@
       <!-- DATA BALITA — stunting, nama ortu & posyandu (balita ≤ 59 bulan) -->
       <div class="conditional-section" id="sec-balita">
         <div class="section">
-          <div class="section-title" style="color:#00796b">🍼 Data Balita / Anak</div>
-          <div class="sub-section-title" style="margin-bottom:6px">Stunting <small style="font-weight:400;color:#888">(balita, usia ≤ 59 bulan)</small></div>
-          <div class="radio-group" style="margin-bottom:12px">
-            <label class="rb-item"><input type="radio" name="stunting" value="Ya" onchange="checkBalita()"> Ya</label>
-            <label class="rb-item"><input type="radio" name="stunting" value="Tidak" onchange="checkBalita()"> Tidak</label>
+          <div class="section-title" style="color:#00796b">🍼 Data Balita (usia ≤ 59 bulan)</div>
+          <div class="balita-info" id="balita-info"></div>
+
+          <div class="q-label">Apakah balita ini stunting?</div>
+          <div class="q-help">Pilih <b>Ya</b> jika sudah dinyatakan stunting oleh petugas kesehatan / posyandu (tinggi badan di bawah standar usianya).</div>
+          <div class="radio-group big-choice" style="margin-bottom:14px">
+            <label class="rb-item stunt-ya"><input type="radio" name="stunting" value="Ya" onchange="checkBalita()"> Ya, stunting</label>
+            <label class="rb-item stunt-tidak"><input type="radio" name="stunting" value="Tidak" onchange="checkBalita()"> Tidak</label>
           </div>
-          <div id="wrap-stunting-detail" style="display:none; margin-bottom:12px">
-            <div class="field"><label>Tinggi Badan (cm)</label><input type="number" id="f-tb" step="0.1" min="0" inputmode="decimal" placeholder="Contoh: 85.5"></div>
-            <div class="field"><label>Berat Badan (kg)</label><input type="number" id="f-bb" step="0.1" min="0" inputmode="decimal" placeholder="Contoh: 11.2"></div>
-            <div class="sub-section-title" style="margin-bottom:6px">Rumah dengan Septictank</div>
-            <div class="radio-group" style="margin-bottom:12px">
-              <label class="rb-item"><input type="radio" name="septictank" value="Ya"> Ya</label>
-              <label class="rb-item"><input type="radio" name="septictank" value="Tidak"> Tidak</label>
+
+          <div id="wrap-stunting-detail" class="stunting-box" style="display:none">
+            <div class="box-title">⚠ Data Anak Stunting — lengkapi isian di bawah</div>
+            <div class="field"><label>1. Tinggi Badan (cm)</label><input type="number" id="f-tb" step="0.1" min="0" inputmode="decimal" placeholder="Contoh: 85.5"></div>
+            <div class="field"><label>2. Berat Badan (kg)</label><input type="number" id="f-bb" step="0.1" min="0" inputmode="decimal" placeholder="Contoh: 11.2"></div>
+            <div class="step-label">3. Apakah rumahnya punya septictank?</div>
+            <div class="radio-group">
+              <label class="rb-item"><input type="radio" name="septictank" value="Ya"> Ya, ada</label>
+              <label class="rb-item"><input type="radio" name="septictank" value="Tidak"> Tidak ada</label>
             </div>
-            <div class="sub-section-title" style="margin-bottom:6px">Ekonomi Keluarga</div>
+            <div class="step-label">4. Bagaimana ekonomi keluarganya?</div>
             <div class="radio-group">
               <label class="rb-item"><input type="radio" name="ekonomi" value="Kurang Mampu"> Kurang Mampu</label>
               <label class="rb-item"><input type="radio" name="ekonomi" value="Mampu"> Mampu</label>
             </div>
           </div>
+
           <div class="field"><label>Nama Orang Tua</label><input type="text" id="f-ortu" placeholder="Nama ayah / ibu"></div>
-          <div class="field" id="wrap-posyandu" style="display:none"><label>Nama Posyandu <small style="font-weight:400;color:#888">(balita, usia ≤ 59 bulan)</small></label><input type="text" id="f-posyandu" placeholder="Contoh: Posyandu Melati 1"></div>
+          <div class="field" id="wrap-posyandu" style="display:none"><label>Nama Posyandu</label><input type="text" id="f-posyandu" placeholder="Contoh: Posyandu Melati 1"></div>
         </div>
       </div>
       <!-- HAMIL — muncul jika Perempuan (bukan balita); posyandu muncul jika Hamil = Ya -->
@@ -580,6 +613,11 @@
 
     <!-- ══════════════ LIST PAGE ══════════════ -->
     <div id="page-list" class="page">
+      <div class="filter-row" style="padding:12px 16px 0; margin-top:0">
+        <button class="filter-btn active" id="dt-warga" onclick="setDaftarTab('warga')">👥 Warga</button>
+        <button class="filter-btn" id="dt-usaha" onclick="setDaftarTab('usaha')">🏪 Usaha</button>
+      </div>
+      <div id="daftar-warga">
       <div class="list-top">
         <div class="list-header">
           <h2>Daftar Warga</h2>
@@ -623,6 +661,19 @@
         <div class="empty-state"><div class="ei">📋</div><p>Belum ada data warga.</p></div>
       </div>
       <div style="height:80px"></div>
+      </div><!-- end daftar-warga -->
+
+      <div id="daftar-usaha" style="display:none">
+        <div class="list-top">
+          <div class="list-header"><h2>Daftar Usaha</h2></div>
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="usaha-search" placeholder="Cari nama usaha, pemilik, NIK, NIB..." oninput="renderUsaha()">
+          </div>
+        </div>
+        <div class="warga-list-inner" id="usaha-list"></div>
+        <div style="height:80px"></div>
+      </div><!-- end daftar-usaha -->
     </div>
 
     <!-- ══════════════ INFO PAGE ══════════════ -->
@@ -765,6 +816,42 @@
       <div style="height:20px"></div>
     </div>
 
+    <!-- ══════════════ USAHA PAGE ══════════════ -->
+    <div id="page-usaha" class="page">
+      <div class="section">
+        <div class="section-title" id="usaha-form-title">🏪 Data Usaha</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
+          <div class="field"><label>RT</label><input type="text" id="u-rt" placeholder="01" inputmode="numeric" maxlength="3"></div>
+          <div class="field"><label>RW</label><input type="text" id="u-rw" placeholder="01" inputmode="numeric" maxlength="3"></div>
+        </div>
+        <div class="field"><label>NIK</label><input type="text" id="u-nik" placeholder="327301..." inputmode="numeric" maxlength="16"></div>
+        <div class="field"><label>NIB (Nomor Induk Berusaha)</label><input type="text" id="u-nib" placeholder="13 digit" inputmode="numeric" maxlength="13"></div>
+        <div class="field"><label>Nama Toko / Warung *</label><input type="text" id="u-nama" placeholder="Contoh: Warung Bu Ani"></div>
+        <div class="field"><label>Nama Pemilik *</label><input type="text" id="u-pemilik" placeholder="Nama pemilik usaha"></div>
+        <div class="field">
+          <label>Jenis Usaha *</label>
+          <div class="radio-group">
+            <label class="rb-item"><input type="radio" name="usahaJenis" value="Kuliner"> Kuliner</label>
+            <label class="rb-item"><input type="radio" name="usahaJenis" value="Non Kuliner"> Non Kuliner</label>
+          </div>
+        </div>
+        <div class="field"><label>Jenis Produk</label><input type="text" id="u-produk" placeholder="Contoh: Nasi uduk, gorengan / Pakaian, sembako"></div>
+        <div class="field">
+          <label>Status Kependudukan</label>
+          <div class="radio-group">
+            <label class="rb-item"><input type="radio" name="usahaStatus" value="Permanen"> Permanen</label>
+            <label class="rb-item"><input type="radio" name="usahaStatus" value="Non Permanen"> Non Permanen</label>
+            <label class="rb-item"><input type="radio" name="usahaStatus" value="WNA"> WNA</label>
+          </div>
+        </div>
+        <div class="field"><label>Alamat</label><input type="text" id="u-alamat" placeholder="Alamat usaha / pemilik"></div>
+        <div class="field"><label>Nomor Kontak</label><input type="tel" id="u-kontak" placeholder="08xxxxxxxxxx" inputmode="tel"></div>
+      </div>
+
+      <p style="font-size:12px;color:#888;text-align:center;padding:4px 16px">Daftar usaha ada di tab <b>📋 Daftar</b> → pilih <b>🏪 Usaha</b>.</p>
+      <div style="height:20px"></div>
+    </div>
+
     <!-- ══════════════ SETTINGS PAGE ══════════════ -->
     <div id="page-settings" class="page">
       <div class="section">
@@ -811,9 +898,14 @@
     <button class="btn btn-clear" onclick="clearForm()">Bersihkan</button>
     <button class="btn btn-add" onclick="tambahWarga()">+ Simpan Data</button>
   </div>
+  <div class="action-bar" id="action-bar-usaha" style="display:none">
+    <button class="btn btn-clear" onclick="clearUsaha()">Bersihkan</button>
+    <button class="btn btn-add" id="btn-simpan-usaha" onclick="simpanUsaha()">+ Simpan Usaha</button>
+  </div>
   <div class="action-bar" id="action-bar-list" style="display:none; flex-wrap:wrap; gap:8px">
-    <button class="export-btn" style="min-width:150px" onclick="exportExcel()">⬇ Export ke Excel (.xlsx)</button>
-    <button class="export-btn" style="min-width:150px; background:#1565c0; font-size:13px" onclick="exportTemplateExcel()">⬇ Export Bumil · Balita · Stunting · Disabilitas</button>
+    <button class="export-btn" id="btn-export-w1" style="min-width:150px" onclick="exportExcel()">⬇ Export ke Excel (.xlsx)</button>
+    <button class="export-btn" id="btn-export-w2" style="min-width:150px; background:#1565c0; font-size:13px" onclick="exportTemplateExcel()">⬇ Export Bumil · Balita · Stunting · Disabilitas</button>
+    <button class="export-btn" id="btn-export-usaha" style="min-width:150px; display:none" onclick="exportUsahaExcel()">⬇ Export Usaha ke Excel (Kelontong · Kuliner · Non Kuliner)</button>
   </div>
   <div class="action-bar" id="action-bar-info" style="display:none; border:none; padding:0; height:0"></div>
   <div class="action-bar" id="action-bar-duplikat" style="display:none; border:none; padding:0; height:0"></div>
@@ -950,28 +1042,34 @@
       <!-- Card 5b: Data Balita — stunting, ortu & posyandu (balita ≤ 59 bulan) -->
       <div class="edit-cond" id="e-sec-balita">
         <div class="edit-card card-anak">
-          <div class="edit-card-title"><span>🍼</span> Data Balita / Anak</div>
-          <p style="font-size:13px;color:#6d28d9;margin-bottom:8px;font-weight:500;">Stunting (balita, usia ≤ 59 bulan)</p>
-          <div class="pill-group" style="margin-bottom:12px">
-            <label class="pill"><input type="radio" name="e-stunting" value="Ya" onchange="eCheckBalita()"> Ya</label>
-            <label class="pill"><input type="radio" name="e-stunting" value="Tidak" onchange="eCheckBalita()"> Tidak</label>
+          <div class="edit-card-title"><span>🍼</span> Data Balita (usia ≤ 59 bulan)</div>
+          <div class="balita-info" id="e-balita-info"></div>
+
+          <p class="q-label">Apakah balita ini stunting?</p>
+          <p class="q-help">Pilih <b>Ya</b> jika sudah dinyatakan stunting oleh petugas kesehatan / posyandu.</p>
+          <div class="pill-group big-choice" style="margin-bottom:14px">
+            <label class="pill stunt-ya"><input type="radio" name="e-stunting" value="Ya" onchange="eCheckBalita()"> Ya, stunting</label>
+            <label class="pill stunt-tidak"><input type="radio" name="e-stunting" value="Tidak" onchange="eCheckBalita()"> Tidak</label>
           </div>
-          <div id="e-wrap-stunting-detail" style="display:none; margin-bottom:12px">
-            <div class="field"><label>Tinggi Badan (cm)</label><input type="number" id="e-tb" step="0.1" min="0" inputmode="decimal" placeholder="Contoh: 85.5"></div>
-            <div class="field"><label>Berat Badan (kg)</label><input type="number" id="e-bb" step="0.1" min="0" inputmode="decimal" placeholder="Contoh: 11.2"></div>
-            <p style="font-size:13px;color:#6d28d9;margin-bottom:8px;font-weight:500;">Rumah dengan Septictank</p>
-            <div class="pill-group" style="margin-bottom:12px">
-              <label class="pill"><input type="radio" name="e-septictank" value="Ya"> Ya</label>
-              <label class="pill"><input type="radio" name="e-septictank" value="Tidak"> Tidak</label>
+
+          <div id="e-wrap-stunting-detail" class="stunting-box" style="display:none">
+            <div class="box-title">⚠ Data Anak Stunting — lengkapi isian di bawah</div>
+            <div class="field"><label>1. Tinggi Badan (cm)</label><input type="number" id="e-tb" step="0.1" min="0" inputmode="decimal" placeholder="Contoh: 85.5"></div>
+            <div class="field"><label>2. Berat Badan (kg)</label><input type="number" id="e-bb" step="0.1" min="0" inputmode="decimal" placeholder="Contoh: 11.2"></div>
+            <div class="step-label">3. Apakah rumahnya punya septictank?</div>
+            <div class="pill-group">
+              <label class="pill"><input type="radio" name="e-septictank" value="Ya"> Ya, ada</label>
+              <label class="pill"><input type="radio" name="e-septictank" value="Tidak"> Tidak ada</label>
             </div>
-            <p style="font-size:13px;color:#6d28d9;margin-bottom:8px;font-weight:500;">Ekonomi Keluarga</p>
+            <div class="step-label">4. Bagaimana ekonomi keluarganya?</div>
             <div class="pill-group">
               <label class="pill"><input type="radio" name="e-ekonomi" value="Kurang Mampu"> Kurang Mampu</label>
               <label class="pill"><input type="radio" name="e-ekonomi" value="Mampu"> Mampu</label>
             </div>
           </div>
+
           <div class="field"><label>Nama Orang Tua</label><input type="text" id="e-ortu" placeholder="Nama ayah / ibu"></div>
-          <div class="field" id="e-wrap-posyandu" style="display:none"><label>Nama Posyandu (balita, usia ≤ 59 bulan)</label><input type="text" id="e-posyandu" placeholder="Contoh: Posyandu Melati 1"></div>
+          <div class="field" id="e-wrap-posyandu" style="display:none"><label>Nama Posyandu</label><input type="text" id="e-posyandu" placeholder="Contoh: Posyandu Melati 1"></div>
         </div>
       </div>
 
@@ -1085,6 +1183,7 @@ let filterRT      = 'all'; // 'all' atau nomor RT spesifik
 window.addEventListener('load', () => {
   buildDates();
   loadData();
+  loadUsaha();
   loadSettings();
   applySettings();
   updateAutoNo();
@@ -1168,6 +1267,12 @@ function hitungUsiaBulan(tglStr) {
   if (ref.getDate() < lahir.getDate()) m--;
   return m;
 }
+// Teks usia balita: "2 th 3 bln (27 bulan)"
+function teksUsiaBalita(tglStr) {
+  const b = hitungUsiaBulan(tglStr); if (b === null) return '';
+  const th = Math.floor(b / 12), bl = b % 12;
+  return `${th ? th + ' th ' : ''}${bl} bln (${b} bulan)`;
+}
 // Balita = usia 0 s/d 59 bulan
 function isBalita(tglStr) {
   const b = hitungUsiaBulan(tglStr);
@@ -1200,6 +1305,8 @@ function checkBalita() {
   const usia = hitungUsia(tglLahir);
   const under7 = isBalita(tglLahir);
   const under5 = under7;
+  const bi = document.getElementById('balita-info');
+  if (bi) bi.textContent = under7 ? '🍼 Termasuk balita — usia ' + teksUsiaBalita(tglLahir) + '. Lengkapi data di bawah.' : '';
   const sec = document.getElementById('sec-balita');
   if (sec) sec.classList.toggle('show', under7);
   const wp = document.getElementById('wrap-posyandu');
@@ -1330,19 +1437,140 @@ function applySettings() {
   document.getElementById('stat-lansia').textContent = jl;
 }
 
+// ─── SUB-TAB DAFTAR: Warga | Usaha ────────────────────────────────────────────
+let daftarTab = 'warga';
+function setDaftarTab(t) {
+  daftarTab = t;
+  document.getElementById('daftar-warga').style.display = t==='warga' ? '' : 'none';
+  document.getElementById('daftar-usaha').style.display = t==='usaha' ? '' : 'none';
+  document.getElementById('dt-warga').classList.toggle('active', t==='warga');
+  document.getElementById('dt-usaha').classList.toggle('active', t==='usaha');
+  // tombol export menyesuaikan sub-tab
+  document.getElementById('btn-export-w1').style.display = t==='warga' ? '' : 'none';
+  document.getElementById('btn-export-w2').style.display = t==='warga' ? '' : 'none';
+  document.getElementById('btn-export-usaha').style.display = t==='usaha' ? '' : 'none';
+  if (t==='usaha') renderUsaha(); else renderList();
+}
+
+// ─── USAHA (toko / warung) ────────────────────────────────────────────────────
+let usahaData = [];
+let usahaEditId = null;
+
+function loadUsaha() {
+  try { usahaData = JSON.parse(localStorage.getItem('usahaData') || '[]'); } catch (e) { usahaData = []; }
+}
+function saveUsaha() { localStorage.setItem('usahaData', JSON.stringify(usahaData)); }
+function uEsc(v) {
+  return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function setUsahaRadio(name, val) {
+  document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
+    r.checked = (r.value === val);
+    if (r.parentElement) r.parentElement.classList.toggle('selected', r.checked);
+  });
+}
+
+function clearUsaha() {
+  ['u-rt','u-rw','u-nik','u-nib','u-nama','u-pemilik','u-produk','u-alamat','u-kontak'].forEach(id => { document.getElementById(id).value = ''; });
+  setUsahaRadio('usahaJenis', ''); setUsahaRadio('usahaStatus', '');
+  usahaEditId = null;
+  document.getElementById('btn-simpan-usaha').textContent = '+ Simpan Usaha';
+  document.getElementById('usaha-form-title').textContent = '🏪 Data Usaha';
+}
+
+function simpanUsaha() {
+  const v = id => document.getElementById(id).value.trim();
+  const nik = v('u-nik'), nib = v('u-nib');
+  if (!v('u-nama'))    { showToast('⚠ Nama toko / warung wajib diisi','error'); return; }
+  if (!v('u-pemilik')) { showToast('⚠ Nama pemilik wajib diisi','error'); return; }
+  if (!getRadio('usahaJenis')) { showToast('⚠ Pilih jenis usaha (Kuliner / Non Kuliner)','error'); return; }
+  if (nik && !/^\d{16}$/.test(nik)) { showToast('⚠ NIK harus 16 digit angka','error'); return; }
+  if (nib && !/^\d{13}$/.test(nib)) { showToast('⚠ NIB harus 13 digit angka','error'); return; }
+  const rec = {
+    id: usahaEditId || Date.now(),
+    rt: v('u-rt'), rw: v('u-rw') || (settings.rw || ''),
+    nik, nib,
+    namaUsaha: v('u-nama'), pemilik: v('u-pemilik'),
+    jenisUsaha: getRadio('usahaJenis'),
+    produk: v('u-produk'),
+    status: getRadio('usahaStatus'),
+    alamat: v('u-alamat'), kontak: v('u-kontak'),
+  };
+  if (usahaEditId) {
+    const i = usahaData.findIndex(u => u.id === usahaEditId);
+    if (i >= 0) usahaData[i] = rec; else usahaData.push(rec);
+    showToast('✓ Perubahan usaha disimpan', 'success');
+  } else {
+    usahaData.push(rec);
+    showToast('✓ Usaha disimpan', 'success');
+  }
+  saveUsaha(); clearUsaha(); renderUsaha();
+}
+
+function editUsaha(id) {
+  const u = usahaData.find(x => x.id === id); if (!u) return;
+  showPage('usaha');
+  const set = (k, val) => { document.getElementById(k).value = val || ''; };
+  set('u-rt', u.rt); set('u-rw', u.rw); set('u-nik', u.nik); set('u-nib', u.nib);
+  set('u-nama', u.namaUsaha); set('u-pemilik', u.pemilik); set('u-produk', u.produk);
+  set('u-alamat', u.alamat); set('u-kontak', u.kontak);
+  setUsahaRadio('usahaJenis', u.jenisUsaha || ''); setUsahaRadio('usahaStatus', u.status || '');
+  usahaEditId = id;
+  document.getElementById('btn-simpan-usaha').textContent = '✓ Simpan Perubahan';
+  document.getElementById('usaha-form-title').textContent = '✏️ Edit Data Usaha';
+  document.querySelector('.page-content').scrollTop = 0;
+}
+
+function hapusUsaha(id) {
+  if (!confirm('Hapus data usaha ini?')) return;
+  usahaData = usahaData.filter(u => u.id !== id);
+  if (usahaEditId === id) clearUsaha();
+  saveUsaha(); renderUsaha();
+  showToast('Data usaha dihapus');
+}
+
+function renderUsaha() {
+  const q = (document.getElementById('usaha-search').value || '').toLowerCase().trim();
+  const rows = usahaData.filter(u => !q || [u.namaUsaha,u.pemilik,u.nik,u.nib,u.produk].some(x => (x||'').toLowerCase().includes(q)));
+  document.getElementById('dt-usaha').textContent = `🏪 Usaha (${usahaData.length})`;
+  const box = document.getElementById('usaha-list');
+  if (!rows.length) {
+    box.innerHTML = `<div class="empty-state"><div class="ei">🏪</div><p>${usahaData.length ? 'Tidak ada usaha yang cocok.' : 'Belum ada data usaha.<br>Isi form di atas lalu tekan Simpan Usaha.'}</p></div>`;
+    return;
+  }
+  box.innerHTML = rows.map((u, i) => {
+    const tags = [];
+    if (u.jenisUsaha) tags.push(`<span class="w-tag ${u.jenisUsaha==='Kuliner'?'orange':'teal'}">${uEsc(u.jenisUsaha)}</span>`);
+    if (u.status) tags.push(`<span class="w-tag">${uEsc(u.status)}</span>`);
+    if (u.produk) tags.push(`<span class="w-tag purple">${uEsc(u.produk)}</span>`);
+    const meta = [u.rt||u.rw ? `RT ${uEsc(u.rt||'-')} / RW ${uEsc(u.rw||'-')}` : '', uEsc(u.alamat), uEsc(u.kontak)].filter(Boolean).join(' · ');
+    return `<div class="warga-card">
+      <button class="edit-btn" onclick="editUsaha(${u.id})" title="Edit">✏</button>
+      <button class="del-btn" onclick="hapusUsaha(${u.id})" title="Hapus">✕</button>
+      <div class="w-no">#${i+1}</div>
+      <div class="w-name">${uEsc(u.namaUsaha)}</div>
+      <div class="w-nik">Pemilik: ${uEsc(u.pemilik)}</div>
+      ${u.nik||u.nib ? `<div class="w-meta">${u.nik?'NIK '+uEsc(u.nik):''}${u.nik&&u.nib?' · ':''}${u.nib?'NIB '+uEsc(u.nib):''}</div>` : ''}
+      ${meta ? `<div class="w-meta">${meta}</div>` : ''}
+      <div class="w-tags">${tags.join('')}</div>
+    </div>`;
+  }).join('');
+}
+
 // ─── NAVIGATION ───────────────────────────────────────────────────────────────
 function showPage(p) {
   document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-  ['form','list','info','duplikat','settings'].forEach(n=>{
+  ['form','list','usaha','info','duplikat','settings'].forEach(n=>{
     const ab=document.getElementById('action-bar-'+n);
     if(ab) ab.style.display='none';
   });
   document.getElementById('page-'+p).classList.add('active');
-  document.querySelectorAll('.tab')[['form','list','info','duplikat','settings'].indexOf(p)].classList.add('active');
+  document.querySelectorAll('.tab')[['form','list','usaha','info','duplikat','settings'].indexOf(p)].classList.add('active');
   const ab=document.getElementById('action-bar-'+p);
   if(ab) ab.style.display='flex';
-  if (p==='list')     renderList();
+  if (p==='list')     setDaftarTab(daftarTab);
+  if (p==='usaha')    renderUsaha();
   if (p==='info')     renderInfo();
   if (p==='duplikat') renderDuplikat();
   document.querySelector('.page-content').scrollTop=0;
@@ -1609,7 +1837,12 @@ function renderList() {
     if((w.statusAnak||[]).includes('Yatim')) tags.push(`<span class="w-tag purple">Yatim</span>`);
     if((w.statusAnak||[]).includes('Piatu')) tags.push(`<span class="w-tag purple">Piatu</span>`);
     if((w.statusAnak||[]).includes('Yatim Piatu')) tags.push(`<span class="w-tag purple">Yatim Piatu</span>`);
+    if(isBalita(w.tanggalLahir)) tags.push(`<span class="w-tag teal">🍼 Balita · ${hitungUsiaBulan(w.tanggalLahir)} bln</span>`);
     if(w.stunting==='Ya') tags.push(`<span class="w-tag red">⚠ Stunting</span>`);
+    if(w.stunting==='Tidak') tags.push(`<span class="w-tag">✓ Tidak stunting</span>`);
+    if(w.stunting==='Ya' && (w.tinggiBadan||w.beratBadan)) tags.push(`<span class="w-tag purple">📏 TB ${w.tinggiBadan||'-'} cm · BB ${w.beratBadan||'-'} kg</span>`);
+    if(w.stunting==='Ya' && w.septictank) tags.push(`<span class="w-tag purple">Septictank: ${w.septictank}</span>`);
+    if(w.stunting==='Ya' && w.ekonomi) tags.push(`<span class="w-tag purple">Ekonomi: ${w.ekonomi}</span>`);
     if(w.hamil==='Ya') tags.push(`<span class="w-tag red">🤰 Hamil</span>`);
     if(w.namaOrtu) tags.push(`<span class="w-tag purple">Ortu: ${w.namaOrtu}</span>`);
     if(w.posyandu) tags.push(`<span class="w-tag teal">${w.posyandu}</span>`);
@@ -1717,6 +1950,8 @@ function eCheckBalita() {
   const usia = hitungUsia(eTglLahir);
   const under7 = isBalita(eTglLahir);
   const under5 = under7;
+  const ebi = document.getElementById('e-balita-info');
+  if (ebi) ebi.textContent = under7 ? '🍼 Termasuk balita — usia ' + teksUsiaBalita(eTglLahir) + '. Lengkapi data di bawah.' : '';
   const sec = document.getElementById('e-sec-balita');
   if (sec) sec.classList.toggle('show', under7);
   const wp = document.getElementById('e-wrap-posyandu');
@@ -3460,6 +3695,57 @@ async function exportTemplateExcel() {
     showToast(`✓ Excel diunduh (${hamilRows.length} bumil | ${balitaRows.length} balita | ${stuntingRows.length} stunting | ${disRows.length} disabilitas)`, 'success');
   } catch (err) {
     console.error('Export template gagal:', err);
+    showToast('⚠ Export gagal: ' + (err && err.message ? err.message : err), 'error');
+  }
+}
+
+// ─── EXPORT USAHA: Warung Kelontong (semua) · Kuliner · Non Kuliner ───────────
+async function exportUsahaExcel() {
+  try {
+    if (typeof XLSX === 'undefined') { showToast('⚠ Library Excel gagal dimuat, refresh halaman','error'); return; }
+    if (!usahaData.length) { showToast('⚠ Belum ada data usaha','error'); return; }
+    const kel = settings.kelurahan || '', kec = settings.kecamatan || '', rwS = settings.rw || '';
+    const thn = settings.tahun || '2026';
+    const ya = '✓';
+    const byRT = (a, b) => (a.rt||'').localeCompare(b.rt||'', undefined, {numeric:true});
+    const semua = [...usahaData].sort(byRT);
+    const kuliner = semua.filter(u => u.jenisUsaha === 'Kuliner');
+    const nonKuliner = semua.filter(u => u.jenisUsaha === 'Non Kuliner');
+
+    const head = [
+      { t:'No', w:5, c:1, v:(u,i)=>i },
+      { t:'Kecamatan', w:14, v:()=>kec },
+      { t:'Kelurahan', w:14, v:()=>kel },
+      { t:'RT', w:5, c:1, v:u=>u.rt||'' },
+      { t:'RW', w:5, c:1, v:u=>u.rw||rwS },
+      { t:'NIK*', w:19, v:u=>u.nik||'' },
+      { t:'NIB*', w:16, v:u=>u.nib||'' },
+      { t:'Nama Toko/Warung', w:26, v:u=>u.namaUsaha||'' },
+      { t:'Nama Pemilik', w:24, v:u=>u.pemilik||'' },
+      { g:'Status Kependudukan', s:'Permanen', w:11, c:1, v:u=>u.status==='Permanen'?ya:'' },
+      { g:'Status Kependudukan', s:'Non Permanen', w:13, c:1, v:u=>u.status==='Non Permanen'?ya:'' },
+      { g:'Status Kependudukan', s:'WNA', w:7, c:1, v:u=>u.status==='WNA'?ya:'' },
+      { t:'Alamat', w:30, v:u=>u.alamat||'' },
+    ];
+    const produk = { t:'Jenis Produk', w:24, v:u=>u.produk||'' };
+    const kontak = { t:'Nomor Kontak', w:16, v:u=>u.kontak||'' };
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, buatSheetTemplate({
+      title:'DATA WARUNG KELONTONG', rows:semua, minRows:14, sigL:7, sigR:12, cols:[...head, kontak]
+    }), 'Data_Warung_Kelontong');
+    XLSX.utils.book_append_sheet(wb, buatSheetTemplate({
+      title:'DATA SEKTOR USAHA KULINER', rows:kuliner, minRows:14, sigL:7, sigR:12, cols:[...head, produk, kontak]
+    }), 'Data_Sektor_Usaha_Kuliner');
+    XLSX.utils.book_append_sheet(wb, buatSheetTemplate({
+      title:'DATA SEKTOR USAHA NON KULINER', rows:nonKuliner, minRows:14, sigL:7, sigR:12, cols:[...head, produk, kontak]
+    }), 'Data_Sektor_Usaha_Non_Kuliner');
+
+    const nama = `Data_Usaha_RW${rwS||'-'}_${kel||'-'}_${thn}.xlsx`.replace(/[\\/:*?"<>|\s]+/g, '_');
+    await saveWorkbook(wb, nama);
+    showToast(`✓ Excel diunduh (${semua.length} usaha | ${kuliner.length} kuliner | ${nonKuliner.length} non kuliner)`, 'success');
+  } catch (err) {
+    console.error('Export usaha gagal:', err);
     showToast('⚠ Export gagal: ' + (err && err.message ? err.message : err), 'error');
   }
 }
